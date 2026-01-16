@@ -9,6 +9,7 @@
 ## Communications
 - Discord
 - Rules:
+  - TODO
 
 # Project Description
 ## Abstract
