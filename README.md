@@ -7,16 +7,27 @@
 [Git repo](https://github.com/Doubleshot12349/Spellcode)
 
 ## Communications
-- Discord
-- Rules:
-  - TODO
+We will primarily use Discord for day-to-day coordination, quick questions, and informal check-ins. All major decisions, technical discussions, and progress updates will be recorded in the Discord channels.
+
+For structured documentation, planning, and issue tracking, we will use the project’s Git repository on GitHub/GitLab. Each member is expected to:
+- Commit regularly with clear messages
+- Use issues and project boards for task management
+- Review pull requests collaboratively
+
+
 
 # Project Description
 ## Abstract
 This is a top down battle game in which the player controls a wizard to fight against other wizards and fantasy creatures. The main gimmick of the game is that the player will create their spells in a simple magic-themed scripting language. This provides a deeper level of learning programming beyond what other games are able to do. This includes advanced topics, like theory, algorithms (especially graph), and functional programming.
 
 ## Goal
-TODO (not just "make a game")
+To create a wizard battle game where players can write their own spells using simple code to move, attack, and outsmart enemies.
+- Players use a magic-themed coding language to create spells.
+- Spells are compiled and run during battles against other wizards and creatures.
+- The game makes learning to code fun and hands-on.
+- Provide visual feedback and effects so spells feel magical and responsive.
+- Design levels and challenges that encourage players to improve and iterate on their spell code.
+
 
 ## Current Practice
 A few other wizard/spell casting games to look into:
