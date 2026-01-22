@@ -2,7 +2,8 @@
 ## Team Info
 - Brett Thompson, programmer, music producer
 - Kaitlyn McLaughlin, programmer, asset developer
-- Max Leibowitz
+- Max Leibowitz, system integration, testing
+- Aman Nurmukhanbetov, gameplay systems, networks
 
 [Git repo](https://github.com/Doubleshot12349/Spellcode)
 
@@ -144,22 +145,89 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
 
   # XR-iv Online Play
   If online play stretch goal is implemented:
-  - INSTALLATION.md has detailed instructions for setting up online play including
+  - INSTALLATION.md has detailed instructions for setting up online play, including
       - links to instructions for getting IPv6 addresses, port numbers, and setting up port forwarding on a router
   - Desktop version of the game has prompts for inputting IPv6 addresses and port numbers to allow for online multiplayer
 
 ## Team Process Description
 
   # Software Toolset
-
+  Our team will use a combination of industry-standard development tools to ensure effective collaboration and stable       development
+  - Unity - Primary game engine for rendering, physics, input handling, and deployment
+  - C# - Core programming language for game logic and systems
+  - GitHub - Version control, issue tracking, and project management
+  - Visual Studio / VS Code - Integrated development environments for C# and scripting
+  - Discord - daily communication, quick feedback, and coordination
+  - Unity Test Framework - Automated tests for spell parsing, combat logic, and edge cases
+  
+  This toolset is justified by its accessibility, maturity, and compatibility. Unity and C# provide quick iteration for game systems, while GitHub and Discord support asynchronous collaboration and accountability. Automated testing reduces regressions in the spell system, which is central to the project.
   # Team Roles
+  - Brett Thompson - Core Systems Programmer and Audio Lead
 
+    Brett focuses on implementing the spell language interpreter, combat resolution, and core game logic. This role is critical because the project's novelty depends on a robust and expressive magic scripting system.
+- Kaitlyn McLaughlin - Gameplay Programmer and Asset Developer
+
+  Kaitlyn is responsible for player controls, UI elements, level layouts, and visual assets. This role ensures that comples programming mechanics are presented ina  clear and approchable way.
+- Max Leibowitz - Systems Integration and Testing Lead
+
+  Max oversees system integration, testing infrastructure, and gameplay balance. This role is necessary to ensure that independently developed components work together reliably.
+- Aman Nurmukhanbetov - Gameplay Systems and Networking Support
+
+  Aman focuses on turn management, match flow, and support for multiplayer or simulated multiplayer systems. This role is essential for coordinating player actions, enforcing rules, and preparing the project for online play as a stretch goal.
   # Task Schedule
-
+  Week 1
+  - Brett: Implement basic spell language grammar and parser (accepts hard-coded sample spells)
+  - Kaitlyn: Create battlefield grid, player movement, and placeholder sprites
+  - Max: Set up GitHub workflow, branching rules, and initial test harness
+  - Aman: Implement turn manager skeleton and basic match state model
+    
+  Week 2
+    - Brett: Spell execution engine supports movement and damage spells
+    - Kaitlyn: UI for spell selection and turn display works in a sandbox scene
+    - Max: Unit tests for parser and spell execution with valid inputs
+    - Aman: Turn order enforcement and action queueing functional
+    
+  Week 3
+    - Brett: Add error reporting for invalid spell code
+    - Kaitlyn: Implement health, mana, and visual feedback for damage and movement
+    - Max: test cases for invalid spells and boundary conditions
+    - Aman: Match setup and reset logic complete
+    
+  Week 4
+    - Brett: Defensive spells and conditional logic supported
+    - Kaitlyn: Title screen and match setup flow functional
+    - Max: End-to-end test: two players can complete a full local match
+    - Aman: Local PvP loop stable (start -> turns -> win condition -> reset)
+    
+  Week 5
+    - Brett: Environmental interactions supported in spell execution
+    - Kaitlyn: Tutorial level demonstrating spell creation and casting
+    - Max: Balance tests and structured bug tracking from playtests
+    - Aman: Prototype hooks for online play or simulated remote turns
+    
+  Week 6
+    - All: Polish, bug fixes, documentation, and external playtesting integration
   # Risks
-  1.
-  2.
-  3.
+  1. Spell System Complexity
+  
+     The custom scripting language may become too complex or unstable to implement within the timeline
+  2. System Integration Failures
+   
+     UI, turn logic, and spell execution may not align cleanly
+     
+  3. Scope Creep from Multiplayer Goals
+  
+     Online play could exceed the project's time budget
 
   # External Feedback Elicitation
+    External feedback is most valuble one a complete local PvP match can be played (Week 4 of development). At this stage, core systems exist, but design decisions are still flexible. We will:
+
+   - Distribute a playable build to classmates and friends
+   -  Observe first-time users writing and casting spells
+   -  Collect structured feedback on:
+       -  Clarity of spell syntax
+       -  Ease of learning
+       -  Perceived fun and fairness
+  
+    This feedback will directly inform revisions to the spell language, tutorials, and UI before final polish
 
