@@ -74,5 +74,71 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
 ## Stretch Goals:
   - Online multiplayer
   - Single-player Challenge levels
-  - Easter eggs (i.e “segfault” has special effect, ACE exploits in some spells) 
+  - Easter eggs (i.e “segfault” has special effect, ACE exploits in some spells)
+
+## Functional Requirements
+
+  # FR-01 Player vs Player Match
+  - Actors: Player1 and Player2
+  - Triggers: "Start Game" is pressed and a map is selected
+  - Preconditions:
+      1. 3 spells selected for each player
+      2. Each player is placed on opposite sides of the map with full health and mana
+  - Postconditions:
+      1. One player is left standing and declared the winner
+      2. The other player's health has been reduced to 0
+      3. Map is cleared and a rematch is offered
+  - List of Steps:
+      1. Player 1 moves to a different square
+      2. Player 1 selects a spell to cast in a desired direction
+      3. Player 2 suffers damage if hit with Player 1's spell
+      4. Player 2 moves to a different square
+      5. Player 2 selects a spell to cast in a desired direction
+      6. Player 1 suffers damage if hit with Player 2's spell
+      7. Play continues from step 1 until a player is defeated
+
+## Non-Functional Requirements
+
+  # NFR-A User Interface
+  - The game window is clear and easy to read
+  - Keyboard controls are easy to use
+  # NFR-B Magic System
+  - Spell creation is well documented and intuitive
+  - Invalid spell code is caught by the program and not allowed to be used in a match
+    
+## External Requirements
+
+  # XR-i Error Detection
+  - Invalid user input is caught and handled gracefully
+  - Memory requirements are stress tested so the game doesn't crash under all but the most extreme cases
+    
+  # XR-ii Access
+  - INSTALLATION.md has clear, working instructions for installing the game
+  - Game is web-hosted on itch.io and/or another platform
+  
+    
+  # XR-iii Dev-Access
+  - Github repo is public
+  - INSTALLATION.md has clear, working instructions for downloading and opening the Unity project for other developers
+
+  # XR-iv Online Play
+  If online play stretch goal is implemented:
+  - INSTALLATION.md has detailed instructions for setting up online play including
+      - links to instructions for getting IPv6 addresses, port numbers, and setting up port forwarding on a router
+  - Desktop version of the game has prompts for inputting IPv6 addresses and port numbers to allow for online multiplayer
+
+## Team Process Description
+
+  # Software Toolset
+
+  # Team Roles
+
+  # Task Schedule
+
+  # Risks
+  1.
+  2.
+  3.
+
+  # External Feedback Elicitation
 
