@@ -1,7 +1,7 @@
 # Wizard’s Spell-Code
 ## Team Info
 - Brett Thompson, programmer, music producer
-- Kaitlyn McLaughlin
+- Kaitlyn McLaughlin, programmer, asset developer
 - Max Leibowitz
 
 [Git repo](https://github.com/Doubleshot12349/Spellcode)
@@ -96,6 +96,27 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
       5. Player 2 selects a spell to cast in a desired direction
       6. Player 1 suffers damage if hit with Player 2's spell
       7. Play continues from step 1 until a player is defeated
+  - Extensions/variations of the success scenario
+      1. A player chooses to skip movement and only cast a spell on their turn.
+      2. A spell misses its target due to range, direction, or obstacle interference
+      3. A defensive spell is cast, reducing or negating incoming damage
+      4. A spell affects multiple tiles, damaging both the opponent and the environment
+      5. A player runs out of mana and must wait a turn or use a low-cost spell
+      6. Environmental hazards on the map influence movement and spell outcomes
+      7. A player's custom spell behaves differently based on parameters defined in their code
+   - Exceptions: failure conditions and scenarios
+       1. A player selects an invalid or uncompilable spell
+         - The system rejects the spell and prompts the player to fix their code
+       2. A player attempts to move to an occupied or blocked square
+          - The move is denied, and the player is prompted to choose another square 
+       3. A spell is cast without sufficient mana
+          - The spell fails, and the player loses their turn
+       4. The game state becomes desynchronized
+          - The match is paused and either resynchronized or safely terminated
+       5. A runtime error occurs in a custom spell during execution
+          - The spell is canceled, the error is reported, and the player is forced to slect a different spell
+       6. A player disconnects or quits mid-match
+          - The remaining player is declared the winner, and the match ends.
 
 ## Non-Functional Requirements
 
