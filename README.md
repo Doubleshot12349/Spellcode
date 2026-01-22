@@ -31,76 +31,48 @@ To create a wizard battle game where players can write their own spells using si
 
 ## Current Practice
 A few other wizard/spell casting games to look into:
-- Mage Arena - Voice control
-- YAPYAP - Voice control
-- Magika/Magika 2 - Element combination
-- Noita - Complex item combination
-- Blade and Sorcery - VR
+  - Mage Arena - Voice control
+  - YAPYAP - Voice control
+  - Magika/Magika 2 - Element combination
+  - Noita - Complex item combination
+  - Blade and Sorcery - VR
 
 Programming-based games:
-- The Farmer Was Replaced
-- SHENZHEN I/O
-- Bitburner
+  - The Farmer Was Replaced
+  - SHENZHEN I/O
+  - Bitburner
+  
 Most wizard and spell-casting games emphasize player expression through interactive systems rather than true programmability. Titles such as Magika, Notia, and Mage Arena allow players to combine elements or use novel input methods to produce a variety of effects, but the underlying spell behaviors remain fully predefined by the developer. Players explore a fixed design, discovering combinations rather than authoring their own logic. These systems can feel complex and creative, yet they do not engage their players in genuine computational thinking, as concepts such as variables, control flow, or iteration are absent.
-In contrast, programming-centered games such as SHENZHEN I/O, Butburner, and The Farmer Was Replaced place real code at the core of their gameplay, teaching algorithmic reasoning and problem solving. However, these experiences are typically slow, puzzle-driven, and detached from real-time action, along with being targeted at people new to programming. Our project aims to address these gaps by creating a fully iterative and creative combination of the wizard game and the programming game genres that can appeal to programmers of any level.
 
+In contrast, programming-centered games such as SHENZHEN I/O, Butburner, and The Farmer Was Replaced place real code at the core of their gameplay, teaching algorithmic reasoning and problem solving. However, these experiences are typically slow, puzzle-driven, and detached from real-time action, along with being targeted at people new to programming.
 
-- Novelty
-- Effects
-- Technical Approach
-  - Unity, C#
+## Novelty
+Our project aims to address these gaps by creating a fully iterative and creative combination of the wizard game and the programming game genres that can appeal to programmers of any level. Making it a multiplayer game will encourage players to continue with our game through competition, being able to show off and help their friends play the game.
+
+## Effects
+Most programming games nowadays are targeted towards simple, beginner coding, which leaves experienced coders bored, and with no "fun" way to practice and develop their skills. It being multiplayer will also help players introduce others to coding, which is becoming more important in all careers, not just Computer Science.
+
+## Technical Approach
+  - Unity
+  - C# scripting
+  - JSON for save data
+  - Unity Test Framework for test cases
 
 
 ## Risks
-Wizard battle, code your own spells, 2D
-Features: 
-- Battlefield grid with enemies and allies
-- Both enemies and allies can cast spells to move/damage each other
-- Player’s can write their own spells
-Stretch Goals:
-- Online multiplayer
-- Easter eggs (i.e “segfault” has special effect) 
+  - Unity deprecates current version
+    -> We would need to update all our scripts to match the new version of Unity
+  - Unable to find/make sufficient Audio/Visual assets
+    -> There are many free assets available for game development, especially in 2D,so if this becomes an issue we will have to rely more heavily on these, which could make the game a hodgepodge of various art styles.
 
-# Magic System
-- internally each “spell” will be stored as a C# object with variables followed by a main program loop
-- will be compiled when the player saves their spell
-- objects deleted when they move out-of bounds (players aren’t allowed to move out of bounds)
-
-Keywords:
-- Spell (declare function)
-- Start (open scope/function)
-- Stop (end scope/function)
-- Cast (execute  function)
-- Conjure (create variable)
-- Summon (place object)
-- Enchant (assign value to a variable)
-- Divine (compare 2 values)
-- Weal (then block)
-- Woe (else block)
-- Wait
-
-Types:
-- Number (needs math implemented)
-- String (name of objects?)
-- Object (places an object on the map)
-
-
-## Example programs
-```
-Spell FIRE Direction //fire’s default behaviour
-Start //init code block
-Move Self Direction //moves spell object (fireball sprite) 
-Stop //end code block
-```
-
-```
-Spell Ray-of-Fire //makes a persistent, growing line of fires for 5 turns
-Start //init code block
-Loop 5 //runs the following code 5 times
-Start
-Summon FIRE Right //creates a FIRE spell object 1 square to the right
-Wait //Code will wait till next turn before continuing execution
-Stop
-Stop //end code block
-```
+## Features: 
+  - Battlefield grid with enemies, allies, and obstacles
+  - Both enemies and allies can cast spells to move/damage each other
+  - Players can write their own spells
+  - 4 offensive and 2 defensive "Base spells"
+  - 3 Tutorial levels to teach the magic system
+## Stretch Goals:
+  - Online multiplayer
+  - Single-player Challenge levels
+  - Easter eggs (i.e “segfault” has special effect, ACE exploits in some spells) 
 
