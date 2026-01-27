@@ -115,9 +115,50 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
        4. The game state becomes desynchronized
           - The match is paused and either resynchronized or safely terminated
        5. A runtime error occurs in a custom spell during execution
-          - The spell is canceled, the error is reported, and the player is forced to slect a different spell
+          - The spell is canceled, the error is reported, and the player is forced to select a different spell
        6. A player disconnects or quits mid-match
           - The remaining player is declared the winner, and the match ends.
+         
+  # FR-02 Custom Spell Creation and Validation
+  - Actors: Player
+  - Triggers: Player selects "Create/Edit Spell" from the main menu or loadout screen
+  - Preconditions:
+      1. Player is at the main menu or spell loadout screen
+      2. Player has at least one available spell slot
+  - Postconditions:
+      1. A spell is saved to the player's loadout
+      2. The spell is either marked as valid or usable or invalid and locked
+      3. The player is returned to the spell loadout screen
+  - List of Steps:
+      1. Player selects an empty or existing spell slot
+      2. The spell editor interface opens
+      3. Player writes or modifies spell code
+      4. Player presses "Compile" or "Validate"
+      5. The system parses the spell code
+      6. If valid, the system displays a success message and enables "Save"
+      7. Player saves the spell
+      8. The spell becomes available for selection in matches
+  - Extension/variations of the success scenario:
+      1. Player loads a template base spell and modifies it
+      2. Player tests the spell in a sandbox preview mode
+      3. The editor highlights syntax in different colors for readability
+      4. The system suggests corrections for minor syntax errors
+      5. A spell includes parameters that alter its behavior at runtime
+      6. The player renames and categorizes spells (e.g., "Offence," "Defence," "Utility")
+      7. The player duplicates an existing spell to create a variant
+  - Exceptions: failure conditions and scenarios:
+      1. The player enters malformed syntax
+          - The system highlights the error and provides a descriptive message
+      2. The spell exceeds complexity or resource limits
+         - The system rejects the spell and explains which limits were violated
+      3. The player attempts to save without validating
+         - The system blocks saving and prompts validation
+      4. The parser encounters an internal error
+         - The editor displays a generic error and prevents saving
+      5. The player closes the editor with unsaved changes
+         - The system prompts the player to save, discard, or cancel
+      6. The spell compiles but contains unsafe runtime behavior
+         - The system flags the spell as invalid and prevents match use
 
 ## Non-Functional Requirements
 
