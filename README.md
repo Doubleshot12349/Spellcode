@@ -77,9 +77,9 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   - Single-player Challenge levels
   - Easter eggs (i.e “segfault” has special effect, ACE exploits in some spells)
 
-## Functional Requirements
+# Functional Requirements
 
-  # FR-01 Player vs Player Match
+  ## FR-01 Player vs Player Match
   - Actors: Player1 and Player2
   - Triggers: "Start Game" is pressed and a map is selected
   - Preconditions:
@@ -119,7 +119,7 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
        6. A player disconnects or quits mid-match
           - The remaining player is declared the winner, and the match ends.
          
-  # FR-02 Custom Spell Creation and Validation
+  ## FR-02 Custom Spell Creation and Validation
   - Actors: Player
   - Triggers: Player selects "Create/Edit Spell" from the main menu or loadout screen
   - Preconditions:
@@ -160,39 +160,83 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
       6. The spell compiles but contains unsafe runtime behavior
          - The system flags the spell as invalid and prevents match use
 
-## Non-Functional Requirements
+  ## FR-03 Health, Mana, and Special Effects System
+    - Actors: Player 1, Player 2, Field Controller
+    - Triggers: After either player has finished taking their turn during a match
+    - Preconditions:
+      1. A match has been started between the 2 players
+      2. It is Player 1's turn
+      3. Each Players' mana has been refreshed
+      4. The match is on a water-affinity field
+      5. There are no other ongoing effects active on the field like:
+        - Fire balls
+        - Acid pools
+        - Summoned Creatures
+        - Poison or regeneration applied to either player
+    - Postconditions:
+      1. Each player's health has been adjusted accordingly
+      2. Battlefield controller has added the appropriate effects to the field (see above for examples)
+      3. Each player has lost mana according to which spell they cast
+    - List of Steps:
+      1. Player 1 casts a non-fire "quick spell" (one with no ongoing effects)
+      2. Battlefield controller animates the correct sprite on the screen
+      3. If a collision occurs between the spell sprite and the other player:
+        i. The other player's health is decreased by the appropriate amount for the spell
+        ii. The spell sprite is removed from the field
+      4. Otherwise the spell missed:
+        i. The other player's health has not been changed
+        ii. The spell sprite is removed from the field when it reaches the boundary or has a collision with a non-player obstacle
 
-  # NFR-A User Interface
+      
+    - Extension/variations of the success scenario:
+      1. A "quick" fire spell is selected by the player resulting in reduced damage if it hits
+      2. A "long" spell is cast resulting in:
+        - its sprite remains on the field for 1 or more turns
+        - collisions can happen if either player moves onto the spell, or if a spell hits another spell
+        - a spells iterative/recursive behavior is evoked
+      3. A poison or regen spell is cast and contacts either player resulting in:
+        - Health increase/decrease at the start of each of their turns
+      
+    - Exceptions: failure conditions and scenarios:
+      1. Spells fail to trigger collisions with a player, obstacle, or the boundary of the field
+      2. A player's health is not adjusted properly when they are hit with a spell
+      3. A player's mana is not adjusted properly when they are hit with a spell
+      4. A spell is not removed from the field at appropriate times
+
+
+# Non-Functional Requirements
+
+  ## NFR-A User Interface
   - The game window is clear and easy to read
   - Keyboard controls are easy to use
-  # NFR-B Magic System
+  ## NFR-B Magic System
   - Spell creation is well documented and intuitive
   - Invalid spell code is caught by the program and not allowed to be used in a match
     
-## External Requirements
+# External Requirements
 
-  # XR-i Error Detection
+  ## XR-i Error Detection
   - Invalid user input is caught and handled gracefully
   - Memory requirements are stress tested so the game doesn't crash under all but the most extreme cases
     
-  # XR-ii Access
+  ## XR-ii Access
   - INSTALLATION.md has clear, working instructions for installing the game
   - Game is web-hosted on itch.io and/or another platform
   
     
-  # XR-iii Dev-Access
+  ## XR-iii Dev-Access
   - Github repo is public
   - INSTALLATION.md has clear, working instructions for downloading and opening the Unity project for other developers
 
-  # XR-iv Online Play
+  ## XR-iv Online Play
   If online play stretch goal is implemented:
   - INSTALLATION.md has detailed instructions for setting up online play, including
       - links to instructions for getting IPv6 addresses, port numbers, and setting up port forwarding on a router
   - Desktop version of the game has prompts for inputting IPv6 addresses and port numbers to allow for online multiplayer
 
-## Team Process Description
+# Team Process Description
 
-  # Software Toolset
+  ## Software Toolset
   Our team will use a combination of industry-standard development tools to ensure effective collaboration and stable       development
   - Unity - Primary game engine for rendering, physics, input handling, and deployment
   - C# - Core programming language for game logic and systems
@@ -202,10 +246,11 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   - Unity Test Framework - Automated tests for spell parsing, combat logic, and edge cases
   
   This toolset is justified by its accessibility, maturity, and compatibility. Unity and C# provide quick iteration for game systems, while GitHub and Discord support asynchronous collaboration and accountability. Automated testing reduces regressions in the spell system, which is central to the project.
-  # Team Roles
+  ## Team Roles
   - Brett Thompson - Core Systems Programmer and Audio Lead
 
     Brett focuses on implementing the spell language interpreter, combat resolution, and core game logic. This role is critical because the project's novelty depends on a robust and expressive magic scripting system.
+
 - Kaitlyn McLaughlin - Gameplay Programmer and Asset Developer
 
   Kaitlyn is responsible for player controls, UI elements, level layouts, and visual assets. This role ensures that comples programming mechanics are presented ina  clear and approchable way.
@@ -215,7 +260,8 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
 - Aman Nurmukhanbetov - Gameplay Systems and Networking Support
 
   Aman focuses on turn management, match flow, and support for multiplayer or simulated multiplayer systems. This role is essential for coordinating player actions, enforcing rules, and preparing the project for online play as a stretch goal.
-  # Task Schedule
+
+  ## Task Schedule
   Week 1
   - Brett: Implement basic spell language grammar and parser (accepts hard-coded sample spells)
   - Kaitlyn: Create battlefield grid, player movement, and placeholder sprites
@@ -248,7 +294,7 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
     
   Week 6
     - All: Polish, bug fixes, documentation, and external playtesting integration
-  # Risks
+  ## Risks
   1. Spell System Complexity
   
      The custom scripting language may become too complex or unstable to implement within the timeline
@@ -260,7 +306,7 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   
      Online play could exceed the project's time budget
 
-  # External Feedback Elicitation
+  ## External Feedback Elicitation
     External feedback is most valuble one a complete local PvP match can be played (Week 4 of development). At this stage, core systems exist, but design decisions are still flexible. We will:
 
    - Distribute a playable build to classmates and friends
