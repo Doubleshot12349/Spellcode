@@ -276,11 +276,11 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   ## Team Roles
   - Brett Thompson - Core Systems Programmer and Audio Lead
 
-    Brett focuses on implementing the spell language interpreter, combat resolution, and core game logic. This role is critical because the project's novelty depends on a robust and expressive magic scripting system.
+    Brett focuses on executing custom player spells, environment interactions, and audio assets. This role is important for integrating the customized programming language with Unity's game mechanics. 
 
 - Kaitlyn McLaughlin - Gameplay Programmer and Asset Developer
 
-  Kaitlyn is responsible for player controls, UI elements, level layouts, and visual assets. This role ensures that comples programming mechanics are presented ina  clear and approchable way.
+  Kaitlyn is responsible for player controls, UI elements, level layouts, and visual assets. This role ensures that comples programming mechanics are presented i na  clear and approchable way.
 - Max Leibowitz - Systems Integration and Testing Lead
 
   Max oversees system integration, testing infrastructure, and gameplay balance. This role is necessary to ensure that independently developed components work together reliably.
@@ -290,9 +290,9 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
 
   ## Task Schedule
   Week 1
-  - Brett: Implement basic spell language grammar and parser (accepts hard-coded sample spells)
+  - Brett:Set up GitHub workflow, 
   - Kaitlyn: Create battlefield grid, player movement, and placeholder sprites
-  - Max: Set up GitHub workflow, branching rules, and initial test harness
+  - Max: Implement basic spell language grammar and parser (accepts hard-coded sample spells) harness
   - Aman: Implement turn manager skeleton and basic match state model
     
   Week 2
