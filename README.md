@@ -161,47 +161,74 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
          - The system flags the spell as invalid and prevents match use
 
   ## FR-03 Health, Mana, and Special Effects System
-    - Actors: Player 1, Player 2, Field Controller
-    - Triggers: After either player has finished taking their turn during a match
-    - Preconditions:
-      1. A match has been started between the 2 players
-      2. It is Player 1's turn
-      3. Each Players' mana has been refreshed
-      4. The match is on a water-affinity field
-      5. There are no other ongoing effects active on the field like:
-        - Fire balls
-        - Acid pools
-        - Summoned Creatures
-        - Poison or regeneration applied to either player
-    - Postconditions:
-      1. Each player's health has been adjusted accordingly
-      2. Battlefield controller has added the appropriate effects to the field (see above for examples)
-      3. Each player has lost mana according to which spell they cast
-    - List of Steps:
-      1. Player 1 casts a non-fire "quick spell" (one with no ongoing effects)
-      2. Battlefield controller animates the correct sprite on the screen
-      3. If a collision occurs between the spell sprite and the other player:
-        i. The other player's health is decreased by the appropriate amount for the spell
-        ii. The spell sprite is removed from the field
-      4. Otherwise the spell missed:
-        i. The other player's health has not been changed
-        ii. The spell sprite is removed from the field when it reaches the boundary or has a collision with a non-player obstacle
+  - Actors: Player 1, Player 2, Field Controller
+  - Triggers: After either player has finished taking their turn during a match
+  - Preconditions:
+    1. A match has been started between the 2 players
+    2. It is Player 1's turn
+    3. Each Players' mana has been refreshed
+    4. The match is on a water-affinity field
+    5. There are no other ongoing effects active on the field like:
+      - Fire balls
+      - Acid pools
+      - Summoned Creatures
+      - Poison or regeneration applied to either player
+  - Postconditions:
+    1. Each player's health has been adjusted accordingly
+    2. Battlefield controller has added the appropriate effects to the field (see above for examples)
+    3. Each player has lost mana according to which spell they cast
+  - List of Steps:
+    1. Player 1 casts a non-fire "quick spell" (one with no ongoing effects)
+    2. Battlefield controller animates the correct sprite on the screen
+    3. If a collision occurs between the spell sprite and the other player:
+      i. The other player's health is decreased by the appropriate amount for the spell
+      ii. The spell sprite is removed from the field
+    4. Otherwise the spell missed:
+      i. The other player's health has not been changed
+      ii. The spell sprite is removed from the field when it reaches the boundary or has a collision with a non-player obstacle
 
-      
-    - Extension/variations of the success scenario:
-      1. A "quick" fire spell is selected by the player resulting in reduced damage if it hits
-      2. A "long" spell is cast resulting in:
-        - its sprite remains on the field for 1 or more turns
-        - collisions can happen if either player moves onto the spell, or if a spell hits another spell
-        - a spells iterative/recursive behavior is evoked
-      3. A poison or regen spell is cast and contacts either player resulting in:
-        - Health increase/decrease at the start of each of their turns
-      
-    - Exceptions: failure conditions and scenarios:
-      1. Spells fail to trigger collisions with a player, obstacle, or the boundary of the field
-      2. A player's health is not adjusted properly when they are hit with a spell
-      3. A player's mana is not adjusted properly when they are hit with a spell
-      4. A spell is not removed from the field at appropriate times
+    
+  - Extension/variations of the success scenario:
+    1. A "quick" fire spell is selected by the player resulting in reduced damage if it hits
+    2. A "long" spell is cast resulting in:
+      - its sprite remains on the field for 1 or more turns
+      - collisions can happen if either player moves onto the spell, or if a spell hits another spell
+      - a spells iterative/recursive behavior is evoked
+    3. A poison or regen spell is cast and contacts either player resulting in:
+      - Health increase/decrease at the start of each of their turns
+    
+  - Exceptions: failure conditions and scenarios:
+    1. Spells fail to trigger collisions with a player, obstacle, or the boundary of the field
+    2. A player's health is not adjusted properly when they are hit with a spell
+    3. A player's mana is not adjusted properly when they are hit with a spell
+    4. A spell is not removed from the field at appropriate times
+
+  ## FR-04
+  - Actors: Effects, Players
+  - Triggers: Just after an effect was cast
+  - Preconditions:
+    1. There is an active match
+    1. One player has cast a spell against the other
+    1. The spell created an effect (i.e. fireball)
+    1. An environment is selected
+  - Postconditions:
+    1. The effect's damage is changed according to the environment
+    1. If the effect runs into an obstacle, it will be blocked
+    1. If the effect is incompatible with the environment, it will be randomly steered
+  - List of steps:
+    1. Player 1 casts a spell
+    1. The spell creates an effect targeted towards player 2
+    1. The effect's damage is modified appropriately
+    1. The effect is randomly steered as needed
+  - Extension/variations of the success scenario:
+    1. A player casts a spell
+    1. The spell creates an ice effect
+    1. The effect checks the environment (volcano) and determines that it should deal less damage
+    1. The effect hits the other player and deals reduced damage
+  - Exceptions:
+    1. An effect passes through an obstacle
+    1. A spell fails to be randomly steered when it was supposed to
+    1. A spell doesn't properly change its damage
 
 
 # Non-Functional Requirements
