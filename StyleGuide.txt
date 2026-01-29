@@ -33,6 +33,7 @@
 
 // CASING AND PREFIXES:
 // | Use Pascal case (e.g. ExamplePlayerController, MaxHealth, etc.) unless noted otherwise.
+// | Use Camel case for variable names
 // | Avoid snake case, kebab case, Hungarian notation.
 // | If you have a Monobehaviour in a file, the source file name must match.
 // | Alternatively, some guides suggest adding a prefix to private member variables
