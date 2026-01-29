@@ -75,7 +75,7 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
 ## Stretch Goals:
   - Online multiplayer
   - Single-player Challenge levels
-  - Easter eggs (i.e “segfault” has special effect, ACE exploits in some spells)
+  - Easter eggs (i.e “segfault” has special effect)
 
 # Functional Requirements
 
@@ -289,37 +289,37 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   Aman focuses on turn management, match flow, and support for multiplayer or simulated multiplayer systems. This role is essential for coordinating player actions, enforcing rules, and preparing the project for online play as a stretch goal.
 
   ## Task Schedule
-  Week 1
-  - Brett:Set up GitHub workflow, 
+  Week 5
+  - Brett:Set up GitHub workflow, make audio files
   - Kaitlyn: Create battlefield grid, player movement, and placeholder sprites
-  - Max: Implement basic spell language grammar and parser (accepts hard-coded sample spells) harness
+  - Max: Implement basic spell language grammar and output format(bytecode)
   - Aman: Implement turn manager skeleton and basic match state model
     
-  Week 2
+  Week 6
     - Brett: Spell execution engine supports movement and damage spells
     - Kaitlyn: UI for spell selection and turn display works in a sandbox scene
-    - Max: Unit tests for parser and spell execution with valid inputs
+    - Max: Parser, finish bytecode
     - Aman: Turn order enforcement and action queueing functional
     
-  Week 3
-    - Brett: Add error reporting for invalid spell code
-    - Kaitlyn: Implement health, mana, and visual feedback for damage and movement
-    - Max: test cases for invalid spells and boundary conditions
+  Week 7
+    - Brett: Implement health, mana, and visual feedback for damage and movement
+    - Kaitlyn: Implement Spell edit UI, syntax highlighting etc.
+    - Max: compiler and spell validation, Add error reporting for invalid spell code
     - Aman: Match setup and reset logic complete
     
-  Week 4
-    - Brett: Defensive spells and conditional logic supported
-    - Kaitlyn: Title screen and match setup flow functional
-    - Max: End-to-end test: two players can complete a full local match
+  Week 8
+    - Brett: Defensive spells and conditional logic supported, test for spell interactions,End-to-end test: two players can complete a full local match
+    - Kaitlyn: Title screen and match setup flow functional, UI and animation tests
+    - Max: Tests to validate that the spell language works and compiles properly
     - Aman: Local PvP loop stable (start -> turns -> win condition -> reset)
     
-  Week 5
-    - Brett: Environmental interactions supported in spell execution
+  Week 9
+    - Brett: Environmental interactions supported in spell execution, save loading
     - Kaitlyn: Tutorial level demonstrating spell creation and casting
-    - Max: Balance tests and structured bug tracking from playtests
-    - Aman: Prototype hooks for online play or simulated remote turns
+    - Max: bug fixing, lambda functions?
+    - Aman: Balance tests and structured bug tracking from playtests
     
-  Week 6
+  Week 10
     - All: Polish, bug fixes, documentation, and external playtesting integration
   ## Risks
   1. Spell System Complexity
