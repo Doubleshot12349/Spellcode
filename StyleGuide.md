@@ -1,0 +1,290 @@
+// Author: thomasjacobsen-unity
+// Edited by: Brett Thompson
+// UNITY C# STYLE GUIDE:
+// | The '// |'-style comments denote documentation markup.
+
+// KEY PRINCIPLES
+// | Favor readability over brevity. Clarity is more important than any time saved from omitting a few vowels.
+// | The goal is to make your code more readable, maintainable, and consistent.
+// | Doing things like naming right from the beginning will save you time and effort later. 
+// | Particularly when debugging, and extending functionality.
+// | As much as possible stick to industry standards and conventions. However, be pragmatic. 
+// | Building on above, a code style standard is a living document. 
+// | It should be updated as the project evolves and the team grows.
+// | However, as a beginner, keep your guidelines light. 
+// | The most important thing is to write code that works before making it "clean". 
+// | Code style is a personal preference. The most important thing is to be consistent. 
+// | If you have a team, agree on a style guide and stick to it.
+// | Favor what can be pronounced naturally and readability 
+// | e.g. HorizontalAlignment instead of AlignmentHorizontal (more English-readable)
+
+// NAMING
+// | This one deserves a repeat: Favor readability over brevity. 
+// | Clarity is more important than any time saved from omitting a few vowels.
+// | Pick meaningful names from the beginning to minimize refactoring later.
+// | Variable names should be descriptive, clear, and unambiguous because they represent a thing or state.
+// | Use a noun when naming them except when the variable is of the type bool.
+// | Prefix Booleans with a verb to make their meaning more apparent. e.g. isDead, isWalking, hasDamageMultiplier.
+// | Use meaningful names. Don’t abbreviate (unless it’s math or commonly accepted). Your variable names should reveal their intent. 
+// | Choose identifier names that are easily readable. 
+// | For example, a property named HorizontalAlignment is more readable than AlignmentHorizontal.
+// | Make type names unambiguous across namespaces and problem domains by avoiding common terms 
+// | or adding a prefix or a suffix. (ex. use 'PhysicsSolver', not 'Solver')
+
+// CASING AND PREFIXES:
+// | Use Pascal case (e.g. ExamplePlayerController, MaxHealth, etc.) unless noted otherwise.
+// | Avoid snake case, kebab case, Hungarian notation.
+// | If you have a Monobehaviour in a file, the source file name must match.
+// | Alternatively, some guides suggest adding a prefix to private member variables
+// | with an underscore (_) to differentiate them from local variables.
+// | Specify access level modifiers consistently. 
+// | Private/Public/Static
+// | Avoid redundant names: If your class is called Player, you don’t need to create member variables called PlayerScore or PlayerTarget. 
+// | Trim them down to Score or Target.
+
+// FORMATTING:
+// | Allman (opening curly braces on a new line) style braces.
+// | Readability is key. Try to keep lines short. Consider horizontal whitespace. 
+// | Break a long line into smaller statements rather than letting it overflow.
+// | Avoid spaces inside brackets, e.g. x = dataArray[index].
+
+// SPACING:
+// | Use a single space after a comma between function arguments, e.g. CollectItem(myObject, 0, 1);
+// | Don’t add a space after the parenthesis and function arguments, e.g. CollectItem(myObject, 0, 1);
+// | Don’t use spaces between a function name and parenthesis, e.g. DropPowerUp(myPrefab, 0, 1);
+// | Use vertical spacing (extra blank line) for visual separation, e.g. for (int i = 0; i < 100; i++) { DoSomething(i); }
+// | Use one variable declaration per line unless the variables are related or equivalent, e.g.  int x, y = 10;
+// | Don’t use spaces between a function name and parenthesis, e.g. DropPowerUp(myPrefab, 0, 1);
+
+// COMMENTS:
+// | Comment when needed. That is when the code isn’t self-explanatory and needs clarification beyond good naming revealing the intent.
+// | However, if you need to add a comment to explain a convoluted tangle of logic, consider restructuring your code to be more obvious. 
+// | Good naming can take out the guesswork. Consider renaming before commenting.  
+// | Rather than simply answering "what" or "how," comments can fill in the gaps and tell us "why."
+// | Use the // comment to keep the explanation next to the logic.
+// | Use a Tooltip instead of a comment for serialized fields if your fields in the Inspector need explanation. 
+// | Avoid attributions, e.g. // Created by, // Modified by, etc. Use version control to track changes.
+// | Documenting the 'why' is far more important than the 'what' or 'how'.
+
+// | CLASS ORGANIZATION:
+// | Organize your class in the following order: Fields, Properties, Events, 
+// | Monobehaviour methods (Awake, Start, OnEnable, OnDisable, OnDestroy, etc.), public methods, private, methods, other Classes.
+
+// USING LINES:
+// | Keep using lines at the top of your file.
+// | Don't remove unused using lines, VS code will often mistakingly tell you they're unneccessary.
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System;
+
+// NAMESPACES:
+// | Use namespaces to ensure that your classes, interfaces, enums, etc. 
+// | won’t conflict with existing ones from other namespaces or the global namespace.
+// | Use Pascal case, without special symbols or underscores.
+// | Add using line at the top to avoid typing namespace repeatedly.
+// | Some recommend namespaces that reflect the folder structure of the project so it's logically grouped.
+
+namespace UnityCSharpStyleSheetExample
+{
+    // ENUMS:
+    // | Use enums when an object or action can only have one value at a time.
+    // | Use Pascal case for enum names and values.
+    // | Use a singular noun for the enum name as it represents a single value from a set of possible values. 
+    // | They should have no prefix or suffix.
+    // | You can place public enums outside of a class to make them global.
+    public enum Direction
+    {
+        North,
+        South,
+        East,
+        West,
+    }
+}
+
+// CLASSES or STRUCTS:
+// | Use Pascal case 
+// | Name them with nouns or noun phrases. This distinguishes type names from methods, which are named with verb phrases.
+// | Avoid prefixes.
+// | One Monobehaviour per file. If you have a Monobehaviour in a file, the source file name must match. 
+    public class StyleExample : MonoBehaviour
+    {
+    }
+
+        // FIELDS: 
+        // | Avoid special characters (backslashes, symbols, Unicode characters); these can interfere with command line tools.
+        // | Use nouns for names, but prefix booleans with a verb.
+        // | Use meaningful names. Make names searchable and pronounceable. Don’t abbreviate (unless it’s math).
+        // | Use Pascal case for public fields. Use camel case for private variables.
+        // | Specify (or omit) the default private access modifier but do it consistently. 
+        // | We recommend to leave out things that are implicit and thus redundant (such as private) for simplicity 
+        // | if you agree that it doesn't negatively affect ambiguity or readability for you.
+
+        // Some prefer to leave out using any prefix for private fields and specifying the access modifier as below 
+        private int elapsedTimeInHours;
+
+        // Use [SerializeField] attribute if you want to display a private field in Inspector.
+        // Booleans ask a question that can be answered true or false.
+        [SerializeField] private bool isPlayerDead;
+
+        // Static fields are static
+        static int sharedCount; 
+
+        // Constants are const
+        const int maxCount = 100;
+
+        // Use the Range attribute to set minimum and maximum values. 
+        // This limits the values to a Range and creates a slider in the Inspector.
+        [Range(0f, 1f)] [SerializeField] float rangedStat;
+
+        // A tooltip can replace a comment on a serialized field and do double duty.
+        [Tooltip("This is another statistic for the player.")]
+        [SerializeField] float anotherStat;
+
+        // PROPERTIES:
+        // | Pascal case, without special characters.
+        // | Use the expression-bodied properties to shorten, but choose your preferrred format.
+        // | E.g. use expression-bodied for read-only properties but { get; set; } for everything else.
+        // | Use the Auto-Implementated Property for a public property without a backing field.
+        // | While you can also use functions to expose private data properties are generally recommended.
+        // | For get or set operations involving complex logic or computation, use methods instead of properties.
+
+        // explicitly implement getter and setter if field should not be public
+        public int MaxHealth
+        {
+            get => m_maxHealth;
+            set => m_maxHealth = value;
+        }
+        // EVENTS:
+        // | Name with a verb phrase.
+        // | Present participle means "before" and past participle means "after."
+        // | Use System.Action delegate for most events (can take 0 to 16 parameters).
+        // | Use the System.EventHandler;
+        // | Choose a naming scheme for events, event handling methods (listener/trigger), 
+        // | and event raising methods (trigger/object)
+        // | e.g. event/action = "OpeningDoor", event raising method = "OnDoorOpened", event handling method = "MySubject_DoorOpened"
+   
+        // Event before
+        public event Action OpeningDoor;
+
+        // Event after
+        public event Action DoorOpened;     
+
+        // Event with int parameter
+        public event Action<int> PointsScored;
+        
+        // Custom event with custom EventArgs
+        public event Action<CustomEventArgs> ThingHappened;
+
+        // These are event raising methods, e.g. OnDoorOpened, OnPointsScored, etc.
+        // Prefix the event raising method (in the subject) with “On”.
+        
+        public void OnDoorOpened()
+        {
+            DoorOpened?.Invoke();
+        }
+
+        // METHODS:
+        // | While “function” and “method” are often used interchangeably, method is the right term in Unity development
+        // | because you can’t write a function without incorporating it into a class in C#.
+        // | Start a method name with a verb or verb phrases to show an action. Add context if necessary. e.g. GetDirection, FindTarget, etc.
+        // | Methods returning bool should ask questions: Much like Boolean variables themselves.
+        // | Prefix methods with a verb if they return a true-false condition. 
+        // | This phrases them in the form of a question, e.g. IsGameOver, HasStartedTurn
+        // | Use camel case for parameters. Format parameters passed into the method like local variables.
+
+        // | SOME GENERAL TIPS FOR METHODS:
+        // | Avoid long methods. If a method is too long, consider breaking it into smaller methods.
+        // | Avoid methods with too many parameters. If a method has more than three parameters, 
+        // | consider using a class or struct to group them.
+        // | Avoid excessive overloading: You can generate an endless permutation of method overloads.
+        // | Avoid side effects: A method only needs to do what its name advertises.
+        // | A good name for a method reflects what it does.
+        // | Avoid setting up methods to work in multiple different modes based on a flag. 
+        // | Make two methods with distinct names instead, e.g. GetAngleInDegrees and GetAngleInRadians. 
+
+        // Methods start with a verb.
+        public void SetInitialPosition(float x, float y, float z)
+        {
+            transform.position = new Vector3(x, y, z);
+        }
+
+        // Methods ask a question when they return bool.
+        public bool IsNewPosition(Vector3 newPosition)
+        {
+            return (transform.position == newPosition);
+        }
+
+        void FormatExamples(int someExpression)
+        {
+            // VAR:
+            // | While avoiding ambiguity and always looking for ways to improve readability, 
+            // | you can use var  when the type is clear from the context,
+            // | With good naming ambiguity should be less of an issue because variable names already convey the intent.  
+            // | Refactoring is simpler with var since it abstracts away the specific type, 
+            // | reducing the number of places where code needs to be updated when types change.  
+            // | In foreach loops, var ensures that the iteration variable matches the type provided by the enumerator. 
+            // | If you explicitly declare a mismatched type, the compiler may allow it, leading to runtime errors.
+
+            var powerUps = new List<PlayerStats>();
+            var dict = new Dictionary<string, List<GameObject>>();
+
+            // SWITCH STATEMENTS:
+            // | It’s generally advisable to replace longer if-else chains with a switch statement for better readability.
+            // | The formatting can vary. Select one for your style guide and follow it.
+            // | This example indents each case and the break underneath.
+            switch (someExpression)
+            {
+                case 0:
+                    // ..
+                    break;
+                case 1:
+                    // ..
+                    break;
+                case 2:
+                    // ..
+                    break;
+            }
+
+            // BRACES: 
+            // | Where possible, don’t omit braces, even for single-line statements. 
+            // | Or avoid single-line statements entirely for debuggability.
+            // | Keep braces in nested multi-line statements.
+
+            // This single-line statement keeps the braces...
+            for (int i = 0; i < 100; i++) { DoSomething(i); }
+
+            // ... but this is more reable and often more debuggable. 
+            for (int i = 0; i < 100; i++)
+            {
+                DoSomething(i);
+            }
+
+            // Separate the statements for readability.
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    DoSomething(j);
+                }
+            }
+        }
+
+        void DoSomething(int x)
+        {
+            // .. 
+        }
+    }
+
+    // OTHER CLASSES:
+    // | Define as many other helper/non-Monobehaviour classes in your file as needed.
+    // | This is a serializable class that groups fields in the Inspector.
+    [Serializable]
+    public struct PlayerStats
+    {
+        public int MovementSpeed;
+        public int HitPoints;
+        public bool HasHealthPotion;
+    }
+
+}
