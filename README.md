@@ -322,16 +322,49 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   Week 10
     - All: Polish, bug fixes, documentation, and external playtesting integration
   ## Risks
-  1. Spell System Complexity
-  
-     The custom scripting language may become too complex or unstable to implement within the timeline
-  2. System Integration Failures
-   
-     UI, turn logic, and spell execution may not align cleanly
-     
-  3. Scope Creep from Multiplayer Goals
-  
-     Online play could exceed the project's time budget
+  1. Spell language Implementation Exceeds Time Budget
+     - Likelihood: Medium
+     - Impact: High
+     - Evidence: The spell system now includes parsing, bytecode generation, validation, runtime execution, environment interaction, and safety checks (FR-02, FR-03, FR-04). These are scheduled across multiple weeks with dependencies
+     - Reduction: Grammar is intentionally minimal; features are added incrementally only after end-to-end execution works
+     - Detection: Compiler/runtime tests fail, or spell execution blocks match completion
+     - Mitigation: Cut advanced features (e.g., recursion depth, complex effects) and rely on base spell templates
+     - Change Since Requirements: Risk increased in scope awareness; mitigation strengthened via staged compiler milestones (Weeks 6-8)
+
+    2. Integration Failures Between Spell Execution, Turn System, and Effects
+       - Likelihood: Medium
+       - Impact: High
+       - Evidence: FR-01 through FR-04 introduce tight coupling between turns, spell collisions, effects, and environments. These systems are owned by different team members
+       - Reduction: Weekly integration targets and a "local PvP must complete" success condition by Week 8
+       - Detection: A full local match cannot be completed without manual intervention
+       - Mitigation: Freeze new features and refactor interfaces between systems
+       - Change Since Requirements: Integration risk increased due to FR-03 and FR-04 being added
+    3. Environmental and Effect Logic Causes Unpredictable Gameplay Bugs
+       - Likelihood: Medium
+       - Impact: Medium-High
+       - Evidence: FR-03 and FR-04 include long-lasting effects, collisions, environment modifiers, and random steering, which are common sources of edge-case bugs
+       - Reduction: Limit number of simultaneous effects and explicitly define effect lifetimes
+       - Detection: Effects persist incorrectly, fail to despawn, or bypass obstacles
+       - Mitigation: Disable multi-tirn effects or environment modifiers if unstable
+       - Change Since Requirements: New risk introduced due to expanding environment mechanics
+
+    4. Spell Editor UX is Too Confusing for Players
+       - Likelihood: Medium
+       - Impact: High
+       - Evidence: Players must write valid code to progress; syntax errors or unclear feedback could block gameplay entierly
+       - Reduction: Templates, syntax highlighting, validation feedback, and sandbox testing are explicitly planned (FR-02)
+       - Detection: Playtesters cannot create a usable spell without assistance
+       - Mitigation: Simplify syntax rules and expand tutorial guidance
+       - Change Since Requirements: Risk reduced due to explicit UX features added to FR-02
+      
+    5. Multiplayer Scope Pulls Time from Core Systems
+       - Likelihood: Medium
+       - Impact: Medium
+       - Evidence: Networking support is listed in roles and requirements but not scheduled until after PvP stabilization
+       - Reduction: Multiplayer work deferred until Week 9+ and treated strictly as a stretch goal
+       - Detection: Networking tasks begin before local PvP is stable
+       - Mitigation: Drop online play entirely and finalize a local-only experience
+       - Change Since Requirements: Risk clarified and better controlled via scheduling changes
 
   ## External Feedback Elicitation
     External feedback is most valuble one a complete local PvP match can be played (Week 4 of development). At this stage, core systems exist, but design decisions are still flexible. We will:
