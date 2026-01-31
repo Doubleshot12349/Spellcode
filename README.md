@@ -77,6 +77,41 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   - Single-player Challenge levels
   - Easter eggs (i.e “segfault” has special effect)
 
+# Software Architecture:
+## Software Components
+  1. Spell Language Manager
+    - This component is responsible for the creation, validation, and execution of player-created spells.
+  2. Battle Manager
+    - This component is responsible for running the battles which will be most of the gameplay, including player controls and handling objects.
+  3. Data Manager
+     - This component is responsible for loading maps and saving player-created spells to disk.
+## Interfaces
+  1. Spell Language -> Battle
+     - The spell language manager will parse and compile the user's spells into bytecode, which the battle manager is able to interpret and run.
+  2. Spell Language -> Data
+     - The Data manager will write the Spell objects (including text and bytecode) into a JSON file to be stored on disk
+  3. Data -> Spell Language
+     - The Data manager will read json file spells and return spell objects to the spell language manager
+## Data Storage
+  1. Sprites, Tilesets
+     - These will be stored as image files within the project folder (Assets/Images/img1.jpg|img2.png)
+  2. Maps, Levels
+     - These will be stored as Unity scenes within the project folder (Assets/Scenes/Map1.scene)
+  3. Music, SFX
+     - These will be stored as audio files within the project folder (Assets/Music/audio1.mp3|sfx1.ogg)
+  4. Spells
+     - These will be stored as JSON text files on the users device (user/~/SpellcodeSaves/mySpell.json)
+  Unity will handle the 1-3 natively
+  Data manager will be used to handle 4.
+
+  ## Decisions Made
+    1. Using Event-driven architecture
+      - While layered could work, C# and Unity are conductive to event driven programming, making it simpler to implement.
+    2. No support for players importing their own images to use for spells
+      - This would encourage further creativity for the players, but it imposes balance and implementation problems. If the base spells have basic predefined behavior for players to build off of
+        we can avoid egregious unbalancing and maintain a simple, easy to understand implementation.
+  
+
 # Functional Requirements
 
   ## FR-01 Player vs Player Match
