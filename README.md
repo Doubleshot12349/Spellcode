@@ -110,7 +110,10 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
     2. No support for players importing their own images to use for spells
       - This would encourage further creativity for the players, but it imposes balance and implementation problems. If the base spells have basic predefined behavior for players to build off of
         we can avoid egregious unbalancing and maintain a simple, easy to understand implementation.
-  
+# Software Design
+  <img src="https://github.com/Doubleshot12349/Spellcode/blob/main/Diagrams/FR-01-03ClassDiagram.jpg">
+
+  <img src="https://github.com/Doubleshot12349/Spellcode/blob/main/Diagrams/FR-02_ClassDiagram.png">
 
 # Functional Requirements
 
