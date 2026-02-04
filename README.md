@@ -359,6 +359,51 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
     
   Week 10
     - All: Polish, bug fixes, documentation, and external playtesting integration
+ 
+  ## Test Plan & Bugs
+
+Testing ensures Wizard’s Spell-Code works correctly, especially for player-written spells and turn-based combat. We focus on correctness, integration, and usability.
+
+### Unit Testing
+We use the **Unity Test Framework** to test components in isolation:
+
+- Spell parser accepts valid syntax and rejects invalid code.
+- Bytecode generation is consistent.
+- Turn Manager enforces legal actions and turn order.
+- Spell execution correctly applies damage, movement, and mana cost.
+- Effects expire and despawn correctly.
+
+Tests run before merging into `main` to prevent regressions in the spell system.
+
+### System (Integration) Testing
+We verify full gameplay flows:
+
+- Start → play → win → reset match loop.
+- Spell editor → compile → save → load → cast pipeline.
+- Collision, environment, and effect interactions.
+- Health and mana updates across turns.
+
+Each sprint includes at least one **full local PvP match test** to ensure all systems work together.
+
+### Usability Testing
+We test whether players can understand and use the spell system:
+
+- Observe first-time players creating spells.
+- Check clarity of error messages and syntax highlighting.
+- Collect feedback on difficulty and confusion.
+
+Results guide improvements to tutorials and UI.
+
+### Bug Tracking (GitHub Issues)
+All bugs are tracked using **GitHub Issues**. Each issue includes:
+
+- Steps to reproduce.
+- Expected vs actual behavior.
+- Labels (`bug`, `spell`, `ui`, `balance`).
+- Priority level.
+
+Workflow: discover → create issue → assign → fix in branch → PR → verify → close.
+
   ## Risks
   1. Spell language Implementation Exceeds Time Budget
      - Likelihood: Medium
