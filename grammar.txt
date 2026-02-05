@@ -1,0 +1,38 @@
+expression = literal | math | function_call | property_access | ternary | array_access | ( expression )
+
+statement = expression | variable_decl | assignment | if_statement | for_loop | while_loop | return | function_def
+
+type_name = int | double | string | type_name[]
+
+
+
+literal = integer | float | string | list
+
+math = expression op expression | - expression | ~ expression
+
+function_call = name ( argument,* )
+
+property_access = expression.name
+
+ternary = IF expression { expression } ELSE { expression }
+
+array_access = expression [ expression ]
+
+
+
+variable_decl = VAR name = expression
+
+assignment = name = expression | property_access = expression | array_access = expression
+
+if_statement = IF expression block | IF expression block ELSE block
+
+for_loop = FOR (statement expression statement) block | FOR name IN expression block
+
+while_loop = WHILE expression block
+
+return = RETURN expression
+
+function_def = DEFINE name ( (name: type_name),* ) (-> type_name)?  block
+
+block = { statement;* }
+
