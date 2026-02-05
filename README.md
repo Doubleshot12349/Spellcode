@@ -105,15 +105,18 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   Data manager will be used to handle 4.
 
   ## Decisions Made
-    1. Using Event-driven architecture
-      - While layered could work, C# and Unity are conductive to event driven programming, making it simpler to implement.
-    2. No support for players importing their own images to use for spells
-      - This would encourage further creativity for the players, but it imposes balance and implementation problems. If the base spells have basic predefined behavior for players to build off of
+  1. Using Event-driven architecture
+    - While layered could work, C# and Unity are conductive to event driven programming, making it simpler to implement.
+  2. No support for players importing their own images to use for spells
+    - This would encourage further creativity for the players, but it imposes balance and implementation problems. If the base spells have basic predefined behavior for players to build off of
         we can avoid egregious unbalancing and maintain a simple, easy to understand implementation.
 # Software Design
   <img src="https://github.com/Doubleshot12349/Spellcode/blob/main/Diagrams/FR-01-03ClassDiagram.jpg">
 
   <img src="https://github.com/Doubleshot12349/Spellcode/blob/main/Diagrams/FR-02_ClassDiagram.png">
+
+  # Style Guide
+  <a href="https://github.com/Doubleshot12349/Spellcode/blob/main/StyleGuide.txt">Modified Style guide</a>
 
 # Functional Requirements
 
