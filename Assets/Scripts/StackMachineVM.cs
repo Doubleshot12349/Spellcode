@@ -13,8 +13,15 @@ public class StackMachineVM : MonoBehaviour
     public List<Instruction> Program = new List<Instruction>();
     public bool RunOnStart = false;
     public int GcInterval = 256;
+    public Spell spell;
 
-    public Action<int, StackMachineVM> SyscallHandler = (code, VM) =>
+    public void Start()
+    {
+        spell = GetComponent<Spell>();
+        if (RunOnStart)
+            Execute();
+    }
+    public void SyscallHandler(int code, StackMachineVM VM)
     {
         switch (code)
         {
@@ -23,36 +30,45 @@ public class StackMachineVM : MonoBehaviour
                 break;
             case 1:
                 //push mana
+                VM.stack.Add(Value.FromInt(spell.GetPlayerMana()));
                 break;
             case 2:
                 //push env ID (water,fire, field, space, etc.)
+                VM.stack.Add(Value.FromInt(spell.GetEnv()));
                 break;
             case 3:
                 //spawn effect (fireball, lightning, etc.)
+                spell.Effect(Convert.ToInt32(VM.Pop()));
                 break;
             case 4:
-                //get player location (r,s,t)
+                //get player location (q,r)
+                int q,r;
+                (q,r) = spell.GetPlayerLocation();
+                VM.stack.Add(Value.FromInt(r));
+                VM.stack.Add(Value.FromInt(q));
                 break;
             case 5:
                 //get opponent location
+                int x, y;
+                (x, y) = spell.GetEnemyLocation();
+                VM.stack.Add(Value.FromInt(y));
+                VM.stack.Add(Value.FromInt(x));
                 break;
             case 6:
                 //sleep a turn
+                spell.Pause();
                 break;
             case 7:
                 //print ascii character
+                spell.Print(Convert.ToString(VM.Pop()));
                 break;
             default:
                 Console.WriteLine("Invalid opcode\n");
                 break;
         }
-    };
-
-    public void Start()
-    {
-        if (RunOnStart)
-            Execute();
     }
+
+    
 
     public void Execute()
     {
@@ -282,7 +298,7 @@ public class StackMachineVM : MonoBehaviour
                 break;
 
             case OpCode.Syscall:
-                SyscallHandler?.Invoke(inst.A, this);
+                SyscallHandler(inst.A, this);
                 break;
 
             // -------- Arrays --------
