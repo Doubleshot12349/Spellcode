@@ -1,10 +1,9 @@
 grammar Spellcode;
-//options { tokenVocab=ExprLexer; }
 
 WS: [ \t\r\n\u000C]+ -> skip;
 
 INTEGER: [0-9]+;
-STRING: '"' [^"] '"';
+STRING: '"' ~["\\\r\n]* '"';
 FLOAT: [0-9]+ '.' [0-9]+;
 OP: [*+-/%^&];
 NAME: [a-zA-Z_][a-zA-Z_0-9]*;
