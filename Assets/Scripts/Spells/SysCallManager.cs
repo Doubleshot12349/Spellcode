@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Numerics;
+using System.Collections;
+//using System.Numerics;
 
-public class Spell : MonoBehaviour
+public class SysCallManager : MonoBehaviour
 {
     public new string name;
     public GameObject fireball;
@@ -13,13 +14,16 @@ public class Spell : MonoBehaviour
     private Renderer iceSprite;
     public GameObject portal;
     private Renderer portalSprite;
-    public GameObject map;
-    private HexGridManager navigator;
+    private static GameObject map;
 
     private StackMachineVM weaver;
     //weaver contains the spell code instructions and is responsible for executing them
     public ActiveSpells activeSpells;
-    
+    public GameObject player;
+    private PlayerController playerStats;
+
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -29,7 +33,8 @@ public class Spell : MonoBehaviour
         (iceSprite = iceSpike.GetComponent<Renderer>()).enabled = false;
         (portalSprite = portal.GetComponent<Renderer>()).enabled = false;
         weaver = this.GetComponent<StackMachineVM>();
-        navigator = map.GetComponent<HexGridManager>();
+        playerStats = player.GetComponent<PlayerController>();
+        map = GameObject.Find("HexGrid");
     }
 
     void OnTurn()
@@ -44,7 +49,7 @@ public class Spell : MonoBehaviour
 
     public int GetPlayerMana()
     {
-        return 0;
+        return playerStats.mana;
     }
 
     public int GetEnv()
@@ -52,19 +57,29 @@ public class Spell : MonoBehaviour
         return 0;
     }
 
+
     public void Effect(int type)
     {
         //TODO: need to define syscall to pull q,r,s coord to place in right spot
-        var pos = new HexCoords(0, 0);
-        float size = navigator.hexSize;
+
+        GameObject target = GetHex(1, 0);
+
+        if (playerStats.mana < 5)
+        {
+            Debug.Log("Insufficient Mana");
+            return;
+        }
+
+        playerStats.mana -= 5;
+
         switch (type)
         {
-            
+
             case 0:
                 //fireball
                 Debug.Log("Fireball");
                 fireSprite.enabled = true;
-                GameObject summonedFireball = fireball.GetComponent<Fire>().ConjureFireball(pos, UnityEngine.Quaternion.identity, size);
+                GameObject summonedFireball = fireball.GetComponent<ISpell>().Conjure(target);
                 activeSpells.AddSpell(summonedFireball);
                 fireSprite.enabled = false;
                 break;
@@ -72,8 +87,7 @@ public class Spell : MonoBehaviour
                 //lightning
                 Debug.Log("Lightning");
                 lightSprite.enabled = true;
-                GameObject summonedLightning = lightning.GetComponent<Lightning>().ConjureLightning
-                    (lightning, pos, UnityEngine.Quaternion.identity, size);
+                GameObject summonedLightning = lightning.GetComponent<ISpell>().Conjure(target);
                 activeSpells.AddSpell(summonedLightning);
                 lightSprite.enabled = false;
                 break;
@@ -81,7 +95,7 @@ public class Spell : MonoBehaviour
                 //ice_spike
                 Debug.Log("Ice Spike");
                 iceSprite.enabled = true;
-                GameObject summonedIceSpike = iceSpike.GetComponent<Ice>().ConjureIceSpike(pos, UnityEngine.Quaternion.identity, size);
+                GameObject summonedIceSpike = iceSpike.GetComponent<ISpell>().Conjure(target);
                 activeSpells.AddSpell(summonedIceSpike);
                 iceSprite.enabled = false;
                 break;
@@ -89,11 +103,11 @@ public class Spell : MonoBehaviour
                 //portal
                 Debug.Log("Portal");
                 portalSprite.enabled = true;
-                var pos2 = new HexCoords(3,3);
-                var portals = portal.GetComponent<Portal>().ConjurePortals(portal,pos,pos2, UnityEngine.Quaternion.identity, size);
+                /*var pos2 = new HexCoords(3, 3);
+                var portals = portal.GetComponent<Portal>().ConjurePortals(portal, pos, pos2, UnityEngine.Quaternion.identity, size);
                 activeSpells.AddSpell(portals.Item1);
                 activeSpells.AddSpell(portals.Item2);
-                portalSprite.enabled = false;
+                portalSprite.enabled = false;*/
                 break;
             default:
                 break;
@@ -102,15 +116,46 @@ public class Spell : MonoBehaviour
         return;
     }
     
-    public (int, int) MoveSpell()
+    public static GameObject GetHex(int r,int s)
+    {
+        string hexName = string.Format($"Hex ({r},{s})");
+        GameObject target = null;
+        //no wildcards exist in C#, and find doesn't support partial string matching
+        foreach (Transform child in GameObject.Find("HexGrid").transform)
+        {
+            if (child.name.Contains(hexName))
+            {
+                target = child.gameObject;
+            }
+
+        }
+        
+        if (target == null)
+        {
+            Debug.Log($"Failed to find targetted hex");
+            return null;
+        }
+        return target;
+    }
+
+    public void MoveSpell()
     {
         //using placeholder inputs for now
         int effectInstance = 0;
-        HexCoords pos = new HexCoords(2, 0);
-        GameObject selected = activeSpells.GetSpellByID(0);
-        selected.transform.position = HexGridManager.AxialToWorld(pos, navigator.hexSize);
+        GameObject target = GetHex(6,6);
+        
+        
+        ISpell selected = activeSpells.GetSpellByID(0).GetComponent<ISpell>();
+        if (selected == null)
+        {
+            Debug.Log("Unable to find spell to move");
+            return;
+        }
+
+        
+        StartCoroutine(selected.MoveRoutine(target));
         //new position
-        return (2, 0);
+        return;
     }
 
     public (int, int) GetPlayerLocation()
@@ -127,7 +172,7 @@ public class Spell : MonoBehaviour
     {
         return;
     }
-    
+
     public void Print(string s)
     {
         return;

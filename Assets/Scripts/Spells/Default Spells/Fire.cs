@@ -1,26 +1,20 @@
 using UnityEngine;
 
-public class Fire : MonoBehaviour
+public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 {
-    public void OnCollisionEnter()
+    public GameObject CurrentTile { get; set; }
+    public float moveSpeed;
+    public float MoveSpeed { get; set; }
+    
+    public void Awake()
+    {
+        //read fields from inspector
+        MoveSpeed = moveSpeed;
+    }
+    public void OnCollisionEnter2D()
     {
         //deal damage
         //dissapate
-    }
-
-    public GameObject ConjureFireball(HexCoords pos, UnityEngine.Quaternion rot, float hexSize)
-    {
-        GameObject newFire = Instantiate(this.gameObject, HexGridManager.AxialToWorld(pos, hexSize),
-                    rot, GetComponent<Transform>()) as GameObject;
-        if (newFire == null)
-        {
-            Debug.Log("Error making fireball");
-            return null;
-        }
-        else
-        {
-            return newFire;
-        }
     }
 
     public void Move(int x,int y)

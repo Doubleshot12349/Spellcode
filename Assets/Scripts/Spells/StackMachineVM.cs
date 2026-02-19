@@ -13,11 +13,12 @@ public class StackMachineVM : MonoBehaviour
     public List<Instruction> Program = new List<Instruction>();
     public bool RunOnStart = false;
     public int GcInterval = 256;
-    public Spell spell;
+    private SysCallManager spellMachine;
+    
 
     public void Start()
     {
-        spell = GetComponent<Spell>();
+        spellMachine = GetComponent<SysCallManager>();
         if (RunOnStart)
             Execute();
     }
@@ -30,42 +31,43 @@ public class StackMachineVM : MonoBehaviour
                 //TODO
                 // temporarily using as move instruction
                 // taking an instance ID and an array of coords
-                spell.MoveSpell();
+                spellMachine.MoveSpell();
+                
                 break;
             case 1:
                 //push mana
-                VM.stack.Add(Value.FromInt(spell.GetPlayerMana()));
+                VM.stack.Add(Value.FromInt(spellMachine.GetPlayerMana()));
                 break;
             case 2:
                 //push env ID (water,fire, field, space, etc.)
-                VM.stack.Add(Value.FromInt(spell.GetEnv()));
+                VM.stack.Add(Value.FromInt(spellMachine.GetEnv()));
                 break;
             case 3:
                 //spawn effect (fireball, lightning, etc.)
-                spell.Effect((int)VM.Pop());
+                spellMachine.Effect((int)VM.Pop());
                 //need to put instance ID on stack
                 break;
             case 4:
                 //get player location (q,r)
                 int q,r;
-                (q,r) = spell.GetPlayerLocation();
+                (q,r) = spellMachine.GetPlayerLocation();
                 VM.stack.Add(Value.FromInt(r));
                 VM.stack.Add(Value.FromInt(q));
                 break;
             case 5:
                 //get opponent location
                 int x, y;
-                (x, y) = spell.GetEnemyLocation();
+                (x, y) = spellMachine.GetEnemyLocation();
                 VM.stack.Add(Value.FromInt(y));
                 VM.stack.Add(Value.FromInt(x));
                 break;
             case 6:
                 //sleep a turn
-                spell.Pause();
+                spellMachine.Pause();
                 break;
             case 7:
                 //print ascii character
-                spell.Print(Convert.ToString(VM.Pop()));
+                spellMachine.Print(Convert.ToString(VM.Pop()));
                 break;
             default:
                 Console.WriteLine("Invalid opcode\n");
@@ -125,6 +127,8 @@ public class StackMachineVM : MonoBehaviour
         Int,
         Double
     }
+
+    
 
     public class Value
     {

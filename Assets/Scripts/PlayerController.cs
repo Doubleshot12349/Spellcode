@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PlayerController : MonoBehaviour
 {
     public int health;
-    private int mana;
+    public int mana;
 
     public GameObject spell1;
     public GameObject spell2;
