@@ -1,60 +1,43 @@
-using System.Collections;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
+
+using Op = StackMachineVM.OpCode;
+using Ins = StackMachineVM.Instruction;
+using Val = StackMachineVM.Value;
 
 public class StackMachineTests
 {
     [Test]
     public void TestPushIntImmediate()
     {
-        GameObject game = new GameObject();
-        Assert.NotNull(game);
-        StackMachineVM vm = game.AddComponent<StackMachineVM>();
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateInt, 5));
-        vm.Execute();
-        Assert.That(vm.stack.Count, Is.EqualTo(1));
-        Assert.That(vm.stack[0].IntValue, Is.EqualTo(5));
+        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 5) }, new List<Val> { Val.FromInt(5) });
     }
 
     [Test]
     public void TestPushDoubleImmediate()
     {
-        GameObject game = new GameObject();
-        Assert.NotNull(game);
-        StackMachineVM vm = game.AddComponent<StackMachineVM>();
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateDouble, 5.0));
-        vm.Execute();
-        Assert.That(vm.stack.Count, Is.EqualTo(1));
-        Assert.That(vm.stack[0].DoubleValue, Is.EqualTo(5.0));
+        TestStack(new List<Ins> { new Ins(Op.ImmediateDouble, 5.1) }, new List<Val> { Val.FromDouble(5.1) });
     }
 
     [Test]
     public void TestIntAddition()
     {
-        GameObject game = new GameObject();
-        Assert.NotNull(game);
-        StackMachineVM vm = game.AddComponent<StackMachineVM>();
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateInt, 5));
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateInt, 6));
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.AddI));
-        vm.Execute();
-        Assert.That(vm.stack.Count, Is.EqualTo(1));
-        Assert.That(vm.stack[0].IntValue, Is.EqualTo(11));
+        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 5), new Ins(Op.ImmediateInt, 6), new Ins(Op.AddI) }, new List<Val> { Val.FromInt(11) });
     }
 
     [Test]
     public void TestIntDivision()
     {
+        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 20), new Ins(Op.ImmediateInt, 5), new Ins(Op.DivI) }, new List<Val> { Val.FromInt(4) });
+    }
+
+    private void TestStack(List<StackMachineVM.Instruction> program, List<StackMachineVM.Value> expected) {
         GameObject game = new GameObject();
-        Assert.NotNull(game);
         StackMachineVM vm = game.AddComponent<StackMachineVM>();
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateInt, 20));
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.ImmediateInt, 5));
-        vm.Program.Add(new StackMachineVM.Instruction(StackMachineVM.OpCode.DivI));
+        vm.Program = program;
         vm.Execute();
-        Assert.That(vm.stack.Count, Is.EqualTo(1));
-        Assert.That(vm.stack[0].IntValue, Is.EqualTo(4));
+        Assert.That(vm.stack, Is.EquivalentTo(expected));
     }
 
 
