@@ -11,26 +11,144 @@ public class StackMachineTests
     [Test]
     public void TestPushIntImmediate()
     {
-        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 5) }, new List<Val> { Val.FromInt(5) });
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 5)
+            }, new List<Val> {
+                Val.FromInt(5)
+            });
     }
 
     [Test]
     public void TestPushDoubleImmediate()
     {
-        TestStack(new List<Ins> { new Ins(Op.ImmediateDouble, 5.1) }, new List<Val> { Val.FromDouble(5.1) });
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateDouble, 5.1)
+            }, new List<Val> {
+                Val.FromDouble(5.1)
+        });
     }
 
     [Test]
     public void TestIntAddition()
     {
-        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 5), new Ins(Op.ImmediateInt, 6), new Ins(Op.AddI) }, new List<Val> { Val.FromInt(11) });
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 5),
+                new Ins(Op.ImmediateInt, 6),
+                new Ins(Op.AddI)
+            }, new List<Val> {
+                Val.FromInt(11)
+        });
     }
 
     [Test]
     public void TestIntDivision()
     {
-        TestStack(new List<Ins> { new Ins(Op.ImmediateInt, 20), new Ins(Op.ImmediateInt, 5), new Ins(Op.DivI) }, new List<Val> { Val.FromInt(4) });
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 20),
+                new Ins(Op.ImmediateInt, 5),
+                new Ins(Op.DivI)
+            }, new List<Val> {
+                Val.FromInt(4)
+        });
     }
+
+    [Test]
+    public void TestPop()
+    {
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3) ,
+                new Ins(Op.Pop, 2)
+            }, new List<Val> { 
+                Val.FromInt(1) 
+        });
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.Pop, 1)
+        }, new List<Val>());
+    }
+
+    [Test]
+    public void TestCopy()
+    {
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.Copy, 2)
+            }, new List<Val> { 
+                Val.FromInt(1),
+                Val.FromInt(2),
+                Val.FromInt(3),
+                Val.FromInt(1) 
+        });
+
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.Copy, 1)
+            }, new List<Val> { 
+                Val.FromInt(1),
+                Val.FromInt(2),
+                Val.FromInt(3),
+                Val.FromInt(2) 
+        });
+
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.Copy, 0)
+            }, new List<Val> { 
+                Val.FromInt(1),
+                Val.FromInt(2),
+                Val.FromInt(3),
+                Val.FromInt(3) 
+        });
+    }
+
+    [Test]
+    public void TestSet()
+    {
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.ImmediateInt, 0),
+                new Ins(Op.Set, 2)
+            }, new List<Val> { 
+                Val.FromInt(0),
+                Val.FromInt(2),
+                Val.FromInt(3),
+        });
+
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.ImmediateInt, 0),
+                new Ins(Op.Set, 1)
+            }, new List<Val> { 
+                Val.FromInt(1),
+                Val.FromInt(0),
+                Val.FromInt(3),
+        });
+
+        TestStack(new List<Ins> {
+                new Ins(Op.ImmediateInt, 1),
+                new Ins(Op.ImmediateInt, 2),
+                new Ins(Op.ImmediateInt, 3),
+                new Ins(Op.ImmediateInt, 0),
+                new Ins(Op.Set, 0)
+            }, new List<Val> { 
+                Val.FromInt(1),
+                Val.FromInt(2),
+                Val.FromInt(0),
+        });
+    }
+
 
     private void TestStack(List<StackMachineVM.Instruction> program, List<StackMachineVM.Value> expected) {
         GameObject game = new GameObject();
