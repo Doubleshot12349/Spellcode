@@ -90,7 +90,7 @@ public class StackMachineVM : MonoBehaviour
     // ===== Internal Runtime =======
     // ==============================
 
-    private List<Value> stack = new List<Value>();
+    public List<Value> stack = new List<Value>();
     private int ip = 0;
     private int steps = 0;
 
@@ -213,6 +213,25 @@ public class StackMachineVM : MonoBehaviour
         {
             Op = op;
         }
+
+        public Instruction(OpCode op, int v)
+        {
+            Op = op;
+            A = v;
+        }
+
+        public Instruction(OpCode op, double v)
+        {
+            Op = op;
+            D = v;
+        }
+
+        public Instruction(OpCode op, ElementType v)
+        {
+            Op = op;
+            ElementType = v;
+        }
+
     }
 
     // ==============================
