@@ -196,6 +196,21 @@ public class StackMachineVM : MonoBehaviour
 
         public static bool operator !=(Value lhs, Value rhs) => !(lhs == rhs);
 
+        public override string ToString()
+        {
+            switch (Type) {
+                case ValueType.Int:
+                    return $"Value(Int, {IntValue})";
+                case ValueType.Double:
+                    return $"Value(Double, {DoubleValue})";
+                case ValueType.ReturnAddress:
+                    return $"Value(ReturnAddress, {ReturnAddress})";
+                case ValueType.Array:
+                    return $"Value(Array, {ArrayValue})";
+                default:
+                    return "unreachable state";
+            }
+        }
     }
 
     // FIXME: implement equality operators
