@@ -8,7 +8,8 @@ pub enum Syscall {
     PlayerLocation = 4,
     OpponentLocation = 5,
     Sleep = 6,
-    PrintChar = 7
+    PrintChar = 7,
+    Halt = 8
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -42,7 +43,7 @@ pub enum Instruction {
     GetA, SetA, LenA
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum StackItem {
     Int(i32), Double(f64), Array(Tpe, usize), ReturnAddr(usize)
 }
@@ -108,7 +109,7 @@ pub struct VM {
 
 // Only present in this debugging runtime, not in the real one
 // The compiled code must never raise any of these, save Halt
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ExecutionException {
     Halt,
     EmptyStack,
@@ -238,7 +239,8 @@ impl VM {
                     Syscall::PlayerLocation => todo!(),
                     Syscall::OpponentLocation => todo!(),
                     Syscall::Sleep => todo!(),
-                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap()) }
+                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap()) },
+                    Syscall::Halt => return Err(ExecutionException::Halt)
                 }
             }
             Instruction::AllocA(tpe) => {
@@ -304,6 +306,72 @@ impl VM {
 
         self.program_counter = next_addr;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use super::Instruction::*;
+    use super::StackItem::*;
+    use super::ExecutionException::*;
+
+    fn do_test(instructions: Vec<Instruction>, stack: Vec<StackItem>, exception: ExecutionException) {
+        let mut vm = VM::new(instructions);
+        let mut res = None;
+        for _ in 0..10000 {
+            if let Err(e) = vm.tick() {
+                res = Some(e);
+                break;
+            }
+        };
+
+        match res {
+            Some(v) => {
+                assert_eq!(v, exception);
+                assert_eq!(vm.stack, stack);
+            }
+            None => {
+                panic!("VM hang");
+            }
+        }
+    }
+
+    macro_rules! test {
+        ($name:ident: $($ins:expr),* => $($res:expr),* => $result:expr) => {
+            do_test(vec![$($ins),*], vec![$($res),*], $result)
+        };
+
+        ($name:ident: $($ins:expr),* => $($res:expr),*) => {
+            test!($name: $($ins),*, Syscall(crate::stack_machine::Syscall::Halt) => $($res),* => Halt)
+        };
+
+        ($name:ident: $($($ins:expr),* => $($res:expr),* $(=> $result:expr)?);+ $(;)?) => {
+            #[test]
+            fn $name() {
+                $(test!($name: $($ins),* => $($res),* $(=> $result)?));+
+            }
+        };
+    }
+
+    test! { test_int_immediate:
+        ImmediateInt(5) => Int(5);
+        ImmediateInt(7) => Int(7);
+        ImmediateInt(7), ImmediateInt(8) => Int(7), Int(8);
+    }
+    test! { test_double_immediate:
+        ImmediateDouble(5.0) => Double(5.0);
+        ImmediateDouble(5.0), ImmediateDouble(6.0) => Double(5.0), Double(6.0);
+    }
+
+    test! { test_pop:
+        ImmediateInt(5), Pop(1) => ;
+        ImmediateInt(5), ImmediateInt(6), Pop(1) => Int(5);
+        ImmediateInt(5), ImmediateInt(6), Pop(2) => ;
+    }
+
+    test! { test_pop_error:
+        ImmediateInt(5), ImmediateInt(6), Pop(3) => Int(5), Int(6) => EmptyStack;
     }
 }
 
