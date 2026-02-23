@@ -158,17 +158,17 @@ impl VM {
                     self.pop()?;
                 }
             }
-            Instruction::Copy(n) => self.stack.push(self.stack.get(self.stack.len() - *n).ok_or(ExecutionException::EmptyStack)?.clone()),
+            Instruction::Copy(n) => self.stack.push(self.stack.get(self.stack.len().wrapping_sub(*n)).ok_or(ExecutionException::EmptyStack)?.clone()),
             Instruction::Set(n) => {
-                let pos = self.stack.len() - *n;
+                let pos = self.stack.len().wrapping_sub(n.wrapping_add(1));
                 let v = self.pop()?;
                 *self.stack.get_mut(pos).ok_or(ExecutionException::EmptyStack)? = v;
             }
-            Instruction::AddI  => self.bi_op(|a: i32, b| a + b)?,
-            Instruction::SubI  => self.bi_op(|a: i32, b| a - b)?,
-            Instruction::MulI  => self.bi_op(|a: i32, b| a * b)?,
-            Instruction::DivI  => self.bi_op(|a: i32, b| if b == 0 { -1 } else { a / b })?,
-            Instruction::ModI  => self.bi_op(|a: i32, b| if b == 0 { -1 } else { a % b })?,
+            Instruction::AddI  => self.bi_op(|a: i32, b| a.wrapping_add(b))?,
+            Instruction::SubI  => self.bi_op(|a: i32, b| a.wrapping_sub(b))?,
+            Instruction::MulI  => self.bi_op(|a: i32, b| a.wrapping_mul(b))?,
+            Instruction::DivI  => self.bi_op(|a: i32, b| if b == 0 { -1 } else { a.wrapping_div(b) })?,
+            Instruction::ModI  => self.bi_op(|a: i32, b| if b == 0 { -1 } else { a.wrapping_rem(b) })?,
             Instruction::AndI  => self.bi_op(|a: i32, b| a & b)?,
             Instruction::OrI   => self.bi_op(|a: i32, b| a | b)?,
             Instruction::XorI  => self.bi_op(|a: i32, b| a ^ b)?,
@@ -338,18 +338,28 @@ mod tests {
     }
 
     macro_rules! test {
-        ($name:ident: $($ins:expr),* => $($res:expr),* => $result:expr) => {
+        (s $name:ident: $($ins:expr),* => $($res:expr),* => $result:expr) => {
             do_test(vec![$($ins),*], vec![$($res),*], $result)
         };
 
-        ($name:ident: $($ins:expr),* => $($res:expr),*) => {
-            test!($name: $($ins),*, Syscall(crate::stack_machine::Syscall::Halt) => $($res),* => Halt)
+        (s $name:ident: $($ins:expr),* => $($res:expr),*) => {
+            test!(s $name: $($ins),*, Syscall(crate::stack_machine::Syscall::Halt) => $($res),* => Halt)
         };
 
         ($name:ident: $($($ins:expr),* => $($res:expr),* $(=> $result:expr)?);+ $(;)?) => {
             #[test]
             fn $name() {
-                $(test!($name: $($ins),* => $($res),* $(=> $result)?));+
+                $(test!(s $name: $($ins),* => $($res),* $(=> $result)?));+
+            }
+        };
+    }
+
+    macro_rules! test_op {
+        ($name:ident int: $($left:literal $op:ident $right:literal => $res:literal),+ $(,)?) => {
+            test! { $name:
+                $(
+                    ImmediateInt($left), ImmediateInt($right), $op => Int($res)
+                );+
             }
         };
     }
@@ -368,10 +378,62 @@ mod tests {
         ImmediateInt(5), Pop(1) => ;
         ImmediateInt(5), ImmediateInt(6), Pop(1) => Int(5);
         ImmediateInt(5), ImmediateInt(6), Pop(2) => ;
+
+        Pop(1) => => EmptyStack;
+        ImmediateInt(5), ImmediateInt(6), Pop(3) => => EmptyStack;
     }
 
-    test! { test_pop_error:
-        ImmediateInt(5), ImmediateInt(6), Pop(3) => Int(5), Int(6) => EmptyStack;
+    test! { test_copy:
+        ImmediateInt(5), Copy(1) => Int(5), Int(5);
+        ImmediateInt(5), ImmediateInt(6), Copy(1) => Int(5), Int(6), Int(6);
+        ImmediateInt(5), ImmediateInt(6), Copy(2) => Int(5), Int(6), Int(5);
+        ImmediateInt(5), ImmediateInt(6), Copy(3) => Int(5), Int(6) => EmptyStack;
+        Copy(1) => => EmptyStack;
+    }
+
+    test! { test_set:
+        ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(1) => Int(5), Int(7);
+        ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(2) => Int(7), Int(6);
+        ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(3) => Int(5), Int(6) => EmptyStack;
+    }
+
+    test_op! { test_addi int:
+        5 AddI 6 => 11,
+        5 AddI 7 => 12,
+        2147483647 AddI 1 => -2147483648,
+        2147483647 AddI 2147483647 => -2,
+        5 AddI -5 => 0,
+        -2147483647 AddI -5 => 2147483644,
+    }
+
+    test_op! { test_subi int:
+        5 SubI 6 => -1,
+        2147483647 SubI 6 => 2147483641,
+        -2147483648 SubI 1 => 2147483647,
+    }
+
+    test_op! { test_muli int:
+        5 MulI 6 => 30,
+        0 MulI 6 => 0,
+        0 MulI 6 => 0,
+        919348 MulI 3298 => -1262957592,
+        -919348 MulI 3298 => 1262957592,
+        919348 MulI 32983 => 258084012,
+        -2147483648 MulI -1 => -2147483648
+    }
+
+    test_op! { test_divi int:
+        5 DivI 6 => 0,
+        30 DivI 5 => 6,
+        31 DivI 5 => 6,
+        31 DivI 0 => -1,
+        0 DivI 0 => -1,
+        -2147483648 DivI -1 => -2147483648
+    }
+
+    test_op! { test_modi int:
+        6 ModI 5 => 1,
+        6 ModI 0 => -1,
     }
 }
 
