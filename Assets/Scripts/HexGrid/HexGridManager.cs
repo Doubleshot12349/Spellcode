@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using static UnityEngine.Mathf;
 
 public class HexGridManager : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class HexGridManager : MonoBehaviour
 
     public float hexSize = 1f; // "radius" in word units
 
-    private readonly Dictionary<HexCoords, HexTile> tiles = 
+    private readonly Dictionary<HexCoords, HexTile> tiles =
         new Dictionary<HexCoords, HexTile>();
 
     // Axial neighbor directions for pointy-top layout
@@ -28,7 +29,7 @@ public class HexGridManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        GenerateGrid(); 
+        GenerateGrid();
     }
 
     public void GenerateGrid()
@@ -157,6 +158,79 @@ public class HexGridManager : MonoBehaviour
             cam.orthographicSize = Mathf.Max(sizeByHeight, sizeByWidth);
         }
     }
+
+
+    public static float HexDistance(HexCoords a,HexCoords b)
+    {
+        return Sqrt(Pow((float)(b.q - a.q), 2f)+Pow((float)(b.r-a.r),2f)+Pow((float)(-1f*b.q-b.r)-(float)(-1f*a.q-a.r),2f));
+    }
+    //AI gen
+    public static List<GameObject> GetLine(HexCoords a, HexCoords b)
+    {
+        int N = FloorToInt(HexDistance(a, b));
+        var results = new List<GameObject>();
+
+        for (int i = 0; i <= N; i++)
+        {
+            float t = N == 0 ? 0 : (1f / N) * i;
+            results.Add(HexRound(HexLerp(a, b, t)));
+        }
+
+        return results;
+    }
+
+    public static GameObject GetHex(int q,int r)
+    {
+        string hexName = string.Format($"Hex ({q},{r})");
+        GameObject target = null;
+        //no wildcards exist in C#, and find doesn't support partial string matching
+        foreach (Transform child in GameObject.Find("HexGrid").transform)
+        {
+            if (child.name.Contains(hexName))
+            {
+                target = child.gameObject;
+            }
+
+        }
+        
+        if (target == null)
+        {
+            Debug.Log($"Failed to find targetted hex");
+            return null;
+        }
+        return target;
+    }
+
+    //AI gen
+    private static HexCoords HexLerp(HexCoords a, HexCoords b, float t)
+    {
+        return new HexCoords(
+            FloorToInt(Mathf.Lerp((float)a.q, (float)b.q, t)),
+            FloorToInt(Mathf.Lerp((float)a.r, (float)b.r, t))
+        );
+    }
+
+    //AI gen
+    static GameObject HexRound(HexCoords h)
+    {
+        int rq = Mathf.RoundToInt(h.q);
+        int rr = Mathf.RoundToInt(h.r);
+        int rs = Mathf.RoundToInt(0-h.r-h.q);
+
+        float qDiff = Mathf.Abs(rq - h.q);
+        float rDiff = Mathf.Abs(rr - h.r);
+        float sDiff = Mathf.Abs(rs - 0-h.r-h.q);
+
+        if (qDiff > rDiff && qDiff > sDiff)
+            rq = -rr - rs;
+        else if (rDiff > sDiff)
+            rr = -rq - rs;
+        else
+            rs = -rq - rr;
+
+        return GetHex(rq, rr);
+    }
+
 
 
 }

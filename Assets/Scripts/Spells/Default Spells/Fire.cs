@@ -3,6 +3,8 @@ using UnityEngine;
 public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 {
     public GameObject CurrentTile { get; set; }
+     public GameObject Prefab { get; set; }
+     public GameObject prefab;
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     
@@ -10,6 +12,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
+        Prefab = prefab;
     }
     public void OnCollisionEnter2D()
     {

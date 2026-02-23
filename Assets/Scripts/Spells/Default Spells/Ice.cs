@@ -1,25 +1,29 @@
 using UnityEngine;
+using System.Collections;
 
-public class Ice : MonoBehaviour
+public class Ice : MonoBehaviour, ISpell, IGameObjectSource
 {
+    public GameObject CurrentTile { get; set; }
+    public float moveSpeed;
+    public float MoveSpeed { get; set; }
+     public GameObject Prefab { get; set; }
+     public GameObject prefab;
+
+    public void Awake()
+    {
+        //read fields from inspector
+        MoveSpeed = moveSpeed;
+        Prefab = prefab;
+    }
     public void OnCollisionEnter()
     {
         //deal damage
         //dissapate
     }
 
-    public GameObject ConjureIceSpike(HexCoords pos, UnityEngine.Quaternion rot, float hexSize)
+    public bool OverrideMoveSpell(GameObject target)
     {
-        GameObject newIce = Instantiate(this.gameObject, HexGridManager.AxialToWorld(pos, hexSize),
-                    rot, GetComponent<Transform>()) as GameObject;
-        if (newIce == null)
-        {
-            Debug.Log("Error making ice spike");
-            return null;
-        }
-        else
-        {
-            return newIce;
-        }
+        gameObject.transform.position = target.transform.position;
+        return false;
     }
 }

@@ -11,8 +11,17 @@ public interface ISpell : IGameObjectSource
 {
     float MoveSpeed { get; set; }
     GameObject CurrentTile { get; set; }
+    GameObject Prefab { get; set; }
 
 
+
+    
+
+
+    public bool OverrideMoveSpell(GameObject target)
+    {
+        return true;
+    }
     public IEnumerator MoveRoutine(GameObject target)
     {
         Vector3 start = transform.position;
@@ -37,7 +46,7 @@ public interface ISpell : IGameObjectSource
     public GameObject Conjure(GameObject target)
     {
         gameObject.transform.position = new Vector3(0, 0, 0);
-        GameObject newSpell = GameObject.Instantiate(gameObject, target.transform);
+        GameObject newSpell = GameObject.Instantiate(Prefab, target.transform);
         if (newSpell == null)
         {
             Debug.Log("Error conjuring spell");
@@ -45,6 +54,7 @@ public interface ISpell : IGameObjectSource
         }
         else
         {
+            newSpell.GetComponent<ISpell>().CurrentTile = target;
             return newSpell;
         }
     }

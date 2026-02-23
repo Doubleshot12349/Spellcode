@@ -1,8 +1,20 @@
 using UnityEngine;
 using System;
 
-public class Portal : MonoBehaviour
+public class Portal : MonoBehaviour,ISpell,IGameObjectSource
 {
+    public GameObject CurrentTile { get; set; }
+     public GameObject Prefab { get; set; }
+     public GameObject prefab;
+    public float moveSpeed;
+    public float MoveSpeed { get; set; }
+    
+    public void Awake()
+    {
+        //read fields from inspector
+        MoveSpeed = moveSpeed;
+        Prefab = prefab;
+    }
     public GameObject linkedPortal;
     public void OnCollisionEnter()
     {

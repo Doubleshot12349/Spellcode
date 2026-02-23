@@ -62,7 +62,7 @@ public class SysCallManager : MonoBehaviour
     {
         //TODO: need to define syscall to pull q,r,s coord to place in right spot
 
-        GameObject target = GetHex(1, 0);
+        GameObject target = HexGridManager.GetHex(1, 0);
 
         if (playerStats.mana < 5)
         {
@@ -103,11 +103,10 @@ public class SysCallManager : MonoBehaviour
                 //portal
                 Debug.Log("Portal");
                 portalSprite.enabled = true;
-                /*var pos2 = new HexCoords(3, 3);
-                var portals = portal.GetComponent<Portal>().ConjurePortals(portal, pos, pos2, UnityEngine.Quaternion.identity, size);
-                activeSpells.AddSpell(portals.Item1);
-                activeSpells.AddSpell(portals.Item2);
-                portalSprite.enabled = false;*/
+                var portals = portal.GetComponent<ISpell>().Conjure(target);
+                activeSpells.AddSpell(portals);
+                //activeSpells.AddSpell(portals.Item2);
+                portalSprite.enabled = false;
                 break;
             default:
                 break;
@@ -115,34 +114,12 @@ public class SysCallManager : MonoBehaviour
         }
         return;
     }
-    
-    public static GameObject GetHex(int r,int s)
-    {
-        string hexName = string.Format($"Hex ({r},{s})");
-        GameObject target = null;
-        //no wildcards exist in C#, and find doesn't support partial string matching
-        foreach (Transform child in GameObject.Find("HexGrid").transform)
-        {
-            if (child.name.Contains(hexName))
-            {
-                target = child.gameObject;
-            }
-
-        }
-        
-        if (target == null)
-        {
-            Debug.Log($"Failed to find targetted hex");
-            return null;
-        }
-        return target;
-    }
 
     public void MoveSpell()
     {
         //using placeholder inputs for now
         int effectInstance = 0;
-        GameObject target = GetHex(6,6);
+        GameObject target = HexGridManager.GetHex(6,6);
         
         
         ISpell selected = activeSpells.GetSpellByID(0).GetComponent<ISpell>();
@@ -152,8 +129,12 @@ public class SysCallManager : MonoBehaviour
             return;
         }
 
+    //if using ISpell default behavior, run the coroutine
+        if (selected.OverrideMoveSpell(target))
+        {
+            StartCoroutine(selected.MoveRoutine(target));
+        }
         
-        StartCoroutine(selected.MoveRoutine(target));
         //new position
         return;
     }
