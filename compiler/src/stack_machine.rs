@@ -9,7 +9,8 @@ pub enum Syscall {
     OpponentLocation = 5,
     Sleep = 6,
     PrintChar = 7,
-    Halt = 8
+    Halt = 8,
+    Exception = 9
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -117,7 +118,8 @@ pub enum ExecutionException {
     IllegalSyscallArgument,
     WrongType,
     ArrayIndexOutOfBounds,
-    OutOfMemory
+    OutOfMemory,
+    RaisedException
 }
 
 impl VM {
@@ -162,7 +164,11 @@ impl VM {
             Instruction::Set(n) => {
                 let pos = self.stack.len().wrapping_sub(n.wrapping_add(1));
                 let v = self.pop()?;
-                *self.stack.get_mut(pos).ok_or(ExecutionException::EmptyStack)? = v;
+                let value = self.stack.get_mut(pos).ok_or(ExecutionException::EmptyStack)?;
+                if value.tpe() != v.tpe() {
+                    return Err(ExecutionException::WrongType)
+                }
+                *value = v;
             }
             Instruction::AddI  => self.bi_op(|a: i32, b| a.wrapping_add(b))?,
             Instruction::SubI  => self.bi_op(|a: i32, b| a.wrapping_sub(b))?,
@@ -172,9 +178,9 @@ impl VM {
             Instruction::AndI  => self.bi_op(|a: i32, b| a & b)?,
             Instruction::OrI   => self.bi_op(|a: i32, b| a | b)?,
             Instruction::XorI  => self.bi_op(|a: i32, b| a ^ b)?,
-            Instruction::ShlI  => self.bi_op(|a: i32, b| a >> b)?,
-            Instruction::ShrI  => self.bi_op(|a: i32, b| a << b)?,
-            Instruction::ShrlI => self.bi_op(|a: i32, b| ((a as u32) << b as u32) as i32)?,
+            Instruction::ShlI  => self.bi_op(|a: i32, b| a.wrapping_shl(b as u32))?,
+            Instruction::ShrI  => self.bi_op(|a: i32, b| a.wrapping_shr(b as u32))?,
+            Instruction::ShrlI => self.bi_op(|a: i32, b| ((a as u32).wrapping_shr(b as u32)) as i32)?,
             Instruction::LtI =>   self.bi_op(|a: i32, b| if a < b { 1 } else { 0 })?,
             Instruction::GeI =>   self.bi_op(|a: i32, b| if a >= b { 1 } else { 0 })?,
             Instruction::EqI =>   self.bi_op(|a: i32, b| if a == b { 1 } else { 0 })?,
@@ -240,7 +246,8 @@ impl VM {
                     Syscall::OpponentLocation => todo!(),
                     Syscall::Sleep => todo!(),
                     Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap()) },
-                    Syscall::Halt => return Err(ExecutionException::Halt)
+                    Syscall::Halt => return Err(ExecutionException::Halt),
+                    Syscall::Exception => return Err(ExecutionException::RaisedException)
                 }
             }
             Instruction::AllocA(tpe) => {
@@ -249,6 +256,8 @@ impl VM {
                 if size > 16384 {
                     return Err(ExecutionException::OutOfMemory)
                 }
+                let id = self.next_heap_addr;
+                self.next_heap_addr += 1;
                 let mut item = vec![];
                 for _ in 0..size {
                     let it = match t {
@@ -263,6 +272,7 @@ impl VM {
                     };
                     item.push(it);
                 }
+                self.stack.push(StackItem::Array(t, id))
             }
             Instruction::GetA => {
                 let arr = self.pop()?;
@@ -311,10 +321,13 @@ impl VM {
 
 #[cfg(test)]
 mod tests {
+    use std::ops::Not;
+
     use super::*;
     use super::Instruction::*;
     use super::StackItem::*;
     use super::ExecutionException::*;
+    use super::Syscall;
 
     fn do_test(instructions: Vec<Instruction>, stack: Vec<StackItem>, exception: ExecutionException) {
         let mut vm = VM::new(instructions);
@@ -355,13 +368,38 @@ mod tests {
     }
 
     macro_rules! test_op {
-        ($name:ident int: $($left:literal $op:ident $right:literal => $res:literal),+ $(,)?) => {
+        ($name:ident int: $($left:literal $op:ident $right:literal => $res:expr),+ $(,)?) => {
             test! { $name:
                 $(
                     ImmediateInt($left), ImmediateInt($right), $op => Int($res)
                 );+
             }
         };
+
+        ($name:ident intu: $($left:literal $op:ident $right:literal => $res:expr),+ $(,)?) => {
+            test! { $name:
+                $(
+                    ImmediateInt($left as i32), ImmediateInt($right as i32), $op => Int($res as i32)
+                );+
+            }
+        };
+
+        ($name:ident double: $($left:literal $op:ident $right:literal => $res:expr),+ $(,)?) => {
+            test! { $name:
+                $(
+                    ImmediateDouble($left), ImmediateDouble($right), $op => Double($res)
+                );+
+            }
+        };
+
+        ($name:ident doublei: $($left:literal $op:ident $right:literal => $res:expr),+ $(,)?) => {
+            test! { $name:
+                $(
+                    ImmediateDouble($left), ImmediateDouble($right), $op => Int($res)
+                );+
+            }
+        };
+
     }
 
     test! { test_int_immediate:
@@ -395,8 +433,10 @@ mod tests {
         ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(1) => Int(5), Int(7);
         ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(2) => Int(7), Int(6);
         ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(3) => Int(5), Int(6) => EmptyStack;
+        ImmediateInt(5), ImmediateInt(6), ImmediateDouble(1.0), Set(1) => Int(5), Int(6) => WrongType;
     }
 
+    // TODO: test wrong types for all of these
     test_op! { test_addi int:
         5 AddI 6 => 11,
         5 AddI 7 => 12,
@@ -434,6 +474,206 @@ mod tests {
     test_op! { test_modi int:
         6 ModI 5 => 1,
         6 ModI 0 => -1,
+        30 ModI 1 => 0,
+        30 ModI 2 => 0,
+        31 ModI 2 => 1,
+        37 ModI 5 => 2,
+        37 ModI -5 => 2,
+        -37 ModI 5 => -2,
+        37 ModI 500 => 37,
+        37 ModI -500 => 37,
+    }
+
+    test_op! { test_andi intu:
+        0xff00ff00u32 AndI 0xff00ff00u32 => 0xff00ff00u32,
+        0xff000f00u32 AndI 0xff00ff00u32 => 0xff000f00u32,
+        0xff00f000u32 AndI 0xff00ff00u32 => 0xff00f000u32,
+        0b1011 AndI 0b1111 => 0b1011,
+        0b1011 AndI 0b0011 => 0b0011,
+    }
+
+    test_op! { test_ori intu:
+        0xff00ff00u32 OrI 0xff00ff00u32 => 0xff00ff00u32,
+        0xff000f00u32 OrI 0xff00ff00u32 => 0xff00ff00u32,
+        0xff00f000u32 OrI 0xff00ff00u32 => 0xff00ff00u32,
+        0b1011 OrI 0b1111 => 0b1111,
+        0b1011 OrI 0b0011 => 0b1011,
+    }
+
+    test_op! { test_xori intu:
+        0xff00ff00u32 XorI 0xff00ff00u32 => 0,
+        0xff000f00u32 XorI 0xff00ff00u32 => 0x0000f000u32,
+        0xff00f000u32 XorI 0xff00ff00u32 => 0x00000f00u32,
+        0b1011 XorI 0b1111 => 0b0100,
+        0b1011 XorI 0b0011 => 0b1000,
+    }
+
+    test_op! { test_shli int:
+        123 ShlI 0 => 123,
+        123 ShlI 1 => 123 * 2,
+        123 ShlI 2 => 123 * 4,
+        123 ShlI 3 => 123 * 8,
+        123 ShlI 4 => 123 * 16,
+        123 ShlI 5 => 123 * 32,
+        -123 ShlI 5 => -123 * 32,
+        123 ShlI -1 => -2147483648,
+        122 ShlI -1 => 0,
+    }
+
+    test_op! { test_shr int:
+        123 ShrI 0 => 123,
+        123 ShrI 1 => 123 / 2,
+        123 ShrI 2 => 123 / 4,
+        123 ShrI 3 => 123 / 8,
+        123 ShrI 4 => 123 / 16,
+        123 ShrI 5 => 123 / 32,
+        -123 ShrI 5 => -123 / 32 - 1,
+        123 ShrI 0b10000000101 => 123 / 32,
+    }
+
+    test_op! { test_shrl intu:
+        123u32 ShrlI 0 => 123u32,
+        123u32 ShrlI 3 => 123u32 / 8,
+        0xf0000000u32 ShrlI 1 => 0x78000000u32,
+    }
+
+    test_op! { test_lti int:
+        5 LtI 6 => 1,
+        6 LtI 6 => 0,
+        -6 LtI 6 => 1,
+    }
+
+    test_op! { test_gei int:
+        5 GeI 6 => 0,
+        6 GeI 6 => 1,
+        7 GeI 6 => 1,
+        -7 GeI 6 => 0,
+    }
+
+    test_op! { test_eqi int:
+        5 EqI 5 => 1,
+        5 EqI 6 => 0,
+        -123 EqI -124 => 0,
+        -123 EqI -123 => 1,
+    }
+
+    test! { test_noti:
+        ImmediateInt(5), NotI => Int(5.not());
+        ImmediateInt(124824), NotI => Int(124824.not());
+        ImmediateInt(-124824), NotI => Int((-124824).not());
+    }
+
+    test_op! { test_addd double:
+        5.1 AddD 6.0 => 11.1,
+        -5.1 AddD 6.0 => 0.9000000000000004,
+        0.1 AddD 0.2 => 0.30000000000000004,
+        // TODO: test infinity and NaN
+    }
+
+    test_op! { test_subd double:
+        30.0 SubD 6.0 => 24.0,
+        5.1 SubD 6.0 => -0.9000000000000004,
+        -5.1 SubD 6.0 => -11.1,
+        0.1 SubD 0.2 => -0.1,
+        // TODO: test infinity and NaN
+    }
+
+    test_op! { test_muld double:
+        5.0 MulD 6.0 => 30.0,
+        0.5 MulD 6.0 => 3.0,
+        -0.5 MulD 6.0 => -3.0,
+        // TODO: test infinity and NaN
+    }
+
+    test_op! { test_divd double:
+        30.0 DivD 6.0 => 5.0,
+        30.0 DivD -6.0 => -5.0,
+        // TODO: test infinity, NaN, and divide by zero
+    }
+
+    test_op! { test_ltd doublei:
+        30.0 LtD 31.0 => 1,
+        30.0 LtD 30.0 => 0,
+        30.0 LtD 29.0 => 0,
+        // TODO: infinity, NaN
+    }
+
+    test_op! { test_ged doublei:
+        30.0 GeD 31.0 => 0,
+        30.0 GeD 30.0 => 1,
+        30.0 GeD 29.0 => 1,
+        // TODO: infinity, NaN
+    }
+
+    test_op! { test_eqd doublei:
+        30.0 EqD 31.0 => 0,
+        30.0 EqD 30.0 => 1,
+        30.0 EqD 29.0 => 0,
+        // TODO: infinity, NaN
+    }
+
+    test! { test_isinf:
+        ImmediateDouble(5.0), IsInf => Int(0);
+        ImmediateDouble(-5.0), IsInf => Int(0);
+        ImmediateDouble(f64::NAN), IsInf => Int(0);
+        ImmediateDouble(f64::INFINITY), IsInf => Int(1);
+        ImmediateDouble(f64::NEG_INFINITY), IsInf => Int(1);
+    }
+
+    test! { test_isnan:
+        ImmediateDouble(5.0), IsNaN => Int(0);
+        ImmediateDouble(-5.0), IsNaN => Int(0);
+        ImmediateDouble(f64::NAN), IsNaN => Int(1);
+        ImmediateDouble(f64::INFINITY), IsNaN => Int(0);
+        ImmediateDouble(f64::NEG_INFINITY), IsNaN => Int(0);
+    }
+
+    test! { test_convid:
+        ImmediateInt(5), ConvID => Double(5.0);
+        ImmediateInt(6), ConvID => Double(6.0);
+        ImmediateInt(-1000), ConvID => Double(-1000.0);
+    }
+
+    test! { test_convdi:
+        ImmediateDouble(5.0), ConvDI => Int(5);
+        ImmediateDouble(5.1), ConvDI => Int(5);
+        ImmediateDouble(5.9), ConvDI => Int(5);
+        ImmediateDouble(6.0), ConvDI => Int(6);
+        ImmediateDouble(-6.0), ConvDI => Int(-6);
+        ImmediateDouble(-6.1), ConvDI => Int(-6);
+        ImmediateDouble(-6.99), ConvDI => Int(-6);
+    }
+
+    test! { test_brz:
+        ImmediateInt(1), Brz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => Halt;
+        ImmediateInt(-123), Brz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => Halt;
+        ImmediateInt(1245329), Brz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => Halt;
+        ImmediateInt(0), Brz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => RaisedException;
+    }
+
+    test! { test_brnz:
+        ImmediateInt(1), Brnz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => RaisedException;
+        ImmediateInt(-123), Brnz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => RaisedException;
+        ImmediateInt(1245329), Brnz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => RaisedException;
+        ImmediateInt(0), Brnz(3), Syscall(Syscall::Halt), Syscall(Syscall::Exception) => => Halt;
+    }
+
+    test! { test_jmp:
+        Syscall(Syscall::Nop), Jmp(3), Syscall(Syscall::Exception), Syscall(Syscall::Halt) => => Halt;
+        // TODO: add more cases
+    }
+
+    test! { test_call:
+        Call(2), Syscall(Syscall::Exception), Syscall(Syscall::Halt) => ReturnAddr(1) => Halt;
+    }
+
+    test! { test_return:
+        ImmediateInt(0), Call(3), Syscall(Syscall::Exception), ImmediateInt(1), Set(2), Return => Int(1) => RaisedException;
+    }
+
+    test! { test_array:
+        ImmediateInt(5), AllocA(Tpe::Int) => Array(Tpe::Int, 0);
+        // TODO: test actual operations
     }
 }
 
