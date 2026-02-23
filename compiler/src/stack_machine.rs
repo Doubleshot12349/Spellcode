@@ -1,6 +1,17 @@
-pub enum Syscall {}
+use std::{char, collections::HashMap};
 
-#[derive(Debug, Clone)]
+pub enum Syscall {
+    Nop = 0,
+    GetMana = 1,
+    EnvironmentID = 2,
+    SpawnEffect = 3,
+    PlayerLocation = 4,
+    OpponentLocation = 5,
+    Sleep = 6,
+    PrintChar = 7
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tpe {
     Int, Double, Array(Box<Tpe>)
 }
@@ -14,15 +25,16 @@ pub enum Instruction {
 
     AddI, SubI, MulI, DivI, ModI,
     AndI, OrI, XorI, ShlI, ShrI, ShrlI,
-    LtI, GeI, NotI,
+    LtI, GeI, NotI, EqI,
 
     AddD, SubD, MulD, DivD,
+    LtD, GeD, EqD, IsInf, IsNaN,
 
     ConvID, ConvDI,
 
     Brz(usize), Brnz(usize),
     Jmp(usize),
-    Call(usize), Return(i32),
+    Call(usize), Return,
 
     Syscall(Syscall),
 
@@ -32,7 +44,18 @@ pub enum Instruction {
 
 #[derive(Debug, Clone)]
 pub enum StackItem {
-    Int(i32), Double(f64), Array(Tpe, Vec<StackItem>), ReturnAddr(usize)
+    Int(i32), Double(f64), Array(Tpe, usize), ReturnAddr(usize)
+}
+
+impl StackItem {
+    fn tpe(&self) -> Tpe {
+        match self {
+            StackItem::Int(_) => Tpe::Int,
+            StackItem::Double(_) => Tpe::Double,
+            StackItem::Array(tpe, _) => Tpe::Array(Box::new(tpe.clone())),
+            StackItem::ReturnAddr(_) => Tpe::Int,  // close enough
+        }
+    }
 }
 
 impl TryFrom<StackItem> for i32 {
@@ -69,20 +92,31 @@ impl From<f64> for StackItem {
     }
 }
 
+pub struct HeapItem {
+    value: Vec<StackItem>,
+    mark: bool,
+    tpe: Tpe
+}
+
 pub struct VM {
     pub stack: Vec<StackItem>,
     pub program: Vec<Instruction>,
     pub program_counter: usize,
+    pub heap: HashMap<usize, HeapItem>,
+    pub next_heap_addr: usize
 }
 
 // Only present in this debugging runtime, not in the real one
 // The compiled code must never raise any of these, save Halt
+#[derive(Debug)]
 pub enum ExecutionException {
     Halt,
     EmptyStack,
     IllegalJumpAddress,
     IllegalSyscallArgument,
-    WrongType
+    WrongType,
+    ArrayIndexOutOfBounds,
+    OutOfMemory
 }
 
 impl VM {
@@ -90,7 +124,9 @@ impl VM {
         VM {
             stack: vec![],
             program,
-            program_counter: 0
+            program_counter: 0,
+            heap: HashMap::new(),
+            next_heap_addr: 0
         }
     }
 
@@ -98,10 +134,10 @@ impl VM {
         self.stack.pop().ok_or(ExecutionException::EmptyStack)
     }
 
-    fn bi_op<T, F>(&mut self, func: F) -> Result<(), ExecutionException>
+    fn bi_op<T, K, F>(&mut self, func: F) -> Result<(), ExecutionException>
         where T: TryFrom<StackItem, Error = ExecutionException>,
-        T: Into<StackItem>,
-        F: Fn(T, T) -> T {
+        K: Into<StackItem>,
+        F: Fn(T, T) -> K {
             let b = T::try_from(self.pop()?)?;
             let a = T::try_from(self.pop()?)?;
             self.stack.push(func(a, b).into());
@@ -140,6 +176,7 @@ impl VM {
             Instruction::ShrlI => self.bi_op(|a: i32, b| ((a as u32) << b as u32) as i32)?,
             Instruction::LtI =>   self.bi_op(|a: i32, b| if a < b { 1 } else { 0 })?,
             Instruction::GeI =>   self.bi_op(|a: i32, b| if a >= b { 1 } else { 0 })?,
+            Instruction::EqI =>   self.bi_op(|a: i32, b| if a == b { 1 } else { 0 })?,
             Instruction::NotI => { 
                 let v: i32 = self.pop()?.try_into()?;
                 self.stack.push((!v).into());
@@ -148,6 +185,17 @@ impl VM {
             Instruction::SubD => self.bi_op(|a: f64, b| a - b)?,
             Instruction::MulD => self.bi_op(|a: f64, b| a * b)?,
             Instruction::DivD => self.bi_op(|a: f64, b| a / b)?,
+            Instruction::LtD => self.bi_op(|a: f64, b| if a < b { 1 } else { 0 })?,
+            Instruction::GeD => self.bi_op(|a: f64, b| if a >= b { 1 } else { 0 })?,
+            Instruction::EqD => self.bi_op(|a: f64, b| if a == b { 1 } else { 0 })?,
+            Instruction::IsInf => {
+                let v: f64 = self.pop()?.try_into()?;
+                self.stack.push(if v.is_infinite() { 1 } else { 0 }.into());
+            }
+            Instruction::IsNaN => {
+                let v: f64 = self.pop()?.try_into()?;
+                self.stack.push(if v.is_nan() { 1 } else { 0 }.into());
+            }
             Instruction::ConvID => {
                 let v: i32 = self.pop()?.try_into()?;
                 self.stack.push((v as f64).into());
@@ -156,19 +204,106 @@ impl VM {
                 let v: f64 = self.pop()?.try_into()?;
                 self.stack.push((v as i32).into());
             }
-            Instruction::Brz(_) => todo!(),
-            Instruction::Brnz(_) => todo!(),
-            Instruction::Jmp(_) => todo!(),
-            Instruction::Call(_) => todo!(),
-            Instruction::Return(_) => todo!(),
-            Instruction::Syscall(syscall) => todo!(),
-            Instruction::AllocA(tpe) => todo!(),
-            Instruction::GetA => todo!(),
-            Instruction::SetA => todo!(),
-            Instruction::LenA => todo!(),
+            Instruction::Brz(dst) => {
+                let d = *dst;
+                let v: i32 = self.pop()?.try_into()?;
+                if v == 0 {
+                    next_addr = d;
+                }
+            }
+            Instruction::Brnz(dst) => {
+                let d = *dst;
+                let v: i32 = self.pop()?.try_into()?;
+                if v != 0 {
+                    next_addr = d;
+                }
+            }
+            Instruction::Jmp(dst) => next_addr = *dst,
+            Instruction::Call(dst) => {
+                self.stack.push(StackItem::ReturnAddr(next_addr));
+                next_addr = *dst;
+            }
+            Instruction::Return => {
+                match self.pop()? {
+                    StackItem::ReturnAddr(dst) => next_addr = dst,
+                    _ => return Err(ExecutionException::WrongType)
+                }
+            }
+            Instruction::Syscall(syscall) => {
+                match syscall {
+                    Syscall::Nop => {}
+                    Syscall::GetMana => todo!(),
+                    Syscall::EnvironmentID => todo!(),
+                    Syscall::SpawnEffect => todo!(),
+                    Syscall::PlayerLocation => todo!(),
+                    Syscall::OpponentLocation => todo!(),
+                    Syscall::Sleep => todo!(),
+                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap()) }
+                }
+            }
+            Instruction::AllocA(tpe) => {
+                let t = tpe.clone();
+                let size: i32 = self.pop()?.try_into()?;
+                if size > 16384 {
+                    return Err(ExecutionException::OutOfMemory)
+                }
+                let mut item = vec![];
+                for _ in 0..size {
+                    let it = match t {
+                        Tpe::Int => StackItem::Int(0),
+                        Tpe::Double => StackItem::Double(0.0),
+                        Tpe::Array(ref v) => {
+                            let h = self.next_heap_addr;
+                            self.next_heap_addr += 1;
+                            self.heap.insert(h, HeapItem { value: vec![], mark: false, tpe: *v.clone() });
+                            StackItem::Array(*v.clone(), h)
+                        }
+                    };
+                    item.push(it);
+                }
+            }
+            Instruction::GetA => {
+                let arr = self.pop()?;
+                let idx: i32 = self.pop()?.try_into()?;
+                match arr {
+                    StackItem::Array(_, id) => {
+                        let v = &self.heap[&id];
+                        self.stack.push(v.value.get(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?.clone())
+                    }
+                    _ => return Err(ExecutionException::WrongType)
+                }
+            }
+            Instruction::SetA => {
+                let arr = self.pop()?;
+                let idx: i32 = self.pop()?.try_into()?;
+                let item = self.pop()?;
+                match arr {
+                    StackItem::Array(_, id) => {
+                        // there's no way for an illegal heap address to get on the stack
+                        let v = self.heap.get_mut(&id).unwrap();
+                        if item.tpe() != v.tpe {
+                            return Err(ExecutionException::WrongType)
+                        }
+                        *(v.value.get_mut(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?) = item;
+                    }
+                    _ => return Err(ExecutionException::WrongType)
+                }
+            }
+            Instruction::LenA => {
+                let arr = self.pop()?;
+                match arr {
+                    StackItem::Array(_, id) => {
+                        let v = &self.heap[&id];
+                        self.stack.push((v.value.len() as i32).into())
+                    }
+                    _ => return Err(ExecutionException::WrongType)
+                }
+
+            }
         }
 
-        todo!()
+        self.program_counter = next_addr;
+        Ok(())
     }
 }
 
