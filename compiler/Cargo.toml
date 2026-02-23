@@ -7,5 +7,7 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-peg = { path = "/tmp/rust-peg/"}
+peg = "0.8.5"
+#peg = { path = "/tmp/rust-peg/"}
+
 

@@ -1,5 +1,7 @@
 use peg;
 
+mod stack_machine;
+
 #[unsafe(no_mangle)]
 pub extern "C" fn add(left: u64, right: u64) -> u64 {
     left + right
@@ -12,11 +14,6 @@ peg::parser! {
     }
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn blah(inp: &str) -> i32 {
-    blorp::aowejoew(inp).unwrap_or_default()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -27,3 +24,4 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+
