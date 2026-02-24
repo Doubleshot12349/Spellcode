@@ -28,8 +28,57 @@ Spellcode is designed for users who enjoy:
   Players aren't just casting spells, they are creating them.
 
   ## 2. Installation Instructions
+  ### 2.1 Playing the Published Game (Recommended)
+  Spellcode will be distributed as a standalone Unity Build
+  #### Windows Executable
+  1. Download the latest release from the GitHub Releases page: https://github.com/Doubleshot12349/Spellcode/releases
+
+  2. Extract the downloaded .zip file
+  3. Open the extracted folder
+  4. Run Spellcode.exe
+ 
+  No Unity installation is required to play the published version
+
+  #### WebGL Build (Browser Version)
+  1. Navigate to the published game URL (to be provided in repository)
+  2. Open the link in a modern web browser:
+     - Google Chrome
+     - Microsoft Edge
+     - Firefox
+     - Etc.
+  3. No installation required
+ 
+  ### 2.2 System Requierments
+  Minimum:
+  - Windows 10 (64 -bit)
+  - 8 GB RAM
+  - Modern GPU
+  - Keyboard and mouse
+
+  For WebGL:
+  - Updated web browser
+  - Hardware acceleration enabled
 
   ## 3. How to Run the Software
+  ### Standalone Version
+  1. Double-click Spellcode.exe
+  2. The game will launch
+  3. Select Play
+ 
+  ### Web Version
+  1. Open browser
+  2. Navigate to published link
+  3. Click Play
+ 
+  ### Development Version
+  If users wish to modify or develop Spellcode:
+  1. Install Unity Hub
+  2. Install Unity 2022.3 LTS
+  3. Clone repository
+  4. Open project in Unity
+
+  This is not required for normal gameplay.
+
 
   ## 4. How to Use the Software
   ### 4.1 Core Gameplay Concept:
