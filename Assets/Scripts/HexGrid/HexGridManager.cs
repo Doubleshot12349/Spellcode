@@ -179,7 +179,11 @@ public class HexGridManager : MonoBehaviour
         return results;
     }
 
-    public static GameObject GetHex(int q,int r)
+    public static GameObject GetHex(HexCoords h)
+    {
+        return GetHex(h.q, h.r);
+    }
+    public static GameObject GetHex(int q, int r)
     {
         string hexName = string.Format($"Hex ({q},{r})");
         GameObject target = null;
@@ -189,13 +193,14 @@ public class HexGridManager : MonoBehaviour
             if (child.name.Contains(hexName))
             {
                 target = child.gameObject;
+                break;
             }
 
         }
-        
+
         if (target == null)
         {
-            Debug.Log($"Failed to find targetted hex");
+            Debug.Log($"Failed to find targetted hex: {q},{r}");
             return null;
         }
         return target;

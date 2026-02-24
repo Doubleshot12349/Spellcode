@@ -5,46 +5,34 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
 {
     public GameObject CurrentTile { get; set; }
      public GameObject Prefab { get; set; }
-     public GameObject prefab;
+    public GameObject prefab;
+    public GameObject portal1;
+    public GameObject portal2;
     public float moveSpeed;
     public float MoveSpeed { get; set; }
-    
+
+    //make sure this is only true for the initial one
+    public bool template;
+
     public void Awake()
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
-    }
-    public GameObject linkedPortal;
-    public void OnCollisionEnter()
-    {
-        //transfer to other side
-        //dissapate
+
     }
 
-    public Tuple<GameObject,GameObject> ConjurePortals(GameObject portalPrefab, HexCoords pos1,HexCoords pos2, UnityEngine.Quaternion rot, float hexSize)
+    public void Start()
     {
-        GameObject newPortal1 = Instantiate(portalPrefab, HexGridManager.AxialToWorld(pos1, hexSize),
-                    rot, GetComponent<Transform>()) as GameObject;
-        GameObject newPortal2 = Instantiate(portalPrefab, HexGridManager.AxialToWorld(pos2, hexSize),
-                    rot, GetComponent<Transform>()) as GameObject;
-        //Unity unexpectedly can make a 3rd child portal here, so we need to destroy it
-        //Destroy is safe to call on null if Unity decides to not make a child
-        Destroy(newPortal2.transform.GetChild(0).gameObject, 0);
-        if (newPortal1 == null||newPortal2 == null)
+        if (!template)
         {
-            Debug.Log("Error making portals");
-            return null;
-        }
-        else
-        {
-            //link the portals
-            newPortal1.GetComponent<Portal>().linkedPortal = newPortal2;
-            newPortal2.GetComponent<Portal>().linkedPortal = newPortal1;
+            portal1.GetComponent<SubPortal>().linkedPortal = portal2;
+            portal2.GetComponent<SubPortal>().linkedPortal = portal1;
 
-            var linkedPortals = new Tuple<GameObject, GameObject>(newPortal1, newPortal2);
-            return linkedPortals;
+            portal1.transform.SetParent(CurrentTile.transform);
+            portal2.transform.SetParent(CurrentTile.transform);
         }
+        
     }
     
 }

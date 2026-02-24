@@ -40,6 +40,7 @@ public interface ISpell : IGameObjectSource
 
         transform.position = end;
         CurrentTile = target;
+        gameObject.transform.SetParent(target.transform);
 
     }
 
