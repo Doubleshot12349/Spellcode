@@ -1,17 +1,9 @@
-use peg;
-
 mod stack_machine;
+mod parser;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn add(left: u64, right: u64) -> u64 {
     left + right
-}
-
-peg::parser! {
-    pub grammar blorp() for str {
-        pub rule aowejoew() -> i32
-            = "aaa" { 12 }
-    }
 }
 
 #[cfg(test)]
