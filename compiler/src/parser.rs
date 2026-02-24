@@ -1,3 +1,5 @@
+#![feature(box_patterns)]
+
 use peg;
 use std::{ops::{Range, Deref}, fmt::Debug};
 
@@ -191,4 +193,17 @@ impl<T> Tag<Option<T>> {
 }
 
 type BTag<T> = Box<Tag<T>>;
+
+#[cfg(test)]
+#[feature(box_patterns)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[feature(box_patterns)]
+    fn test_math() {
+        let parsed = spellcode::expression("1 + 1");
+        assert!(matches!(parsed, Ok(Expression::Math(box Expression::Lit(Tag { item: Literal::IntL(1), .. }), Tag { item: Op::Plus, .. }, box Expression::Lit(Tag { item: Literal::IntL(1), .. })))));
+    }
+}
 
