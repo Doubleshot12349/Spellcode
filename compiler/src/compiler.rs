@@ -23,7 +23,8 @@ pub enum CompStackI {
 
 #[derive(Debug)]
 pub enum CompilerError {
-    TypeMismatch
+    TypeMismatch,
+    VariableNotFound
 }
 
 #[derive(Debug)]
@@ -156,8 +157,26 @@ impl Compiler {
             Expression::PropertyAccess(expression, tag) => todo!(),
             Expression::Ternary { condition, if_true, if_false } => todo!(),
             Expression::ArrayAccess { array, index } => todo!(),
-            Expression::VarAccess(tag) => todo!(),
+            Expression::VarAccess(Tag { item: name, loc }) => {
+                // I'll fix this later I'm just in the mood for one liners right now
+                let Some((idx, tpe)) = self.stack.iter().rev().zip(1..).find_map(|(x, i)| if let CompStackI::Variable(n) = &x.0 && n == name { Some((i, x.1.clone())) } else { None }) else { return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start }) };
+                self.program.push(Instruction::Copy(idx));
+                self.stack.push((out, tpe.clone()));
+
+                Ok(tpe)
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parser;
+    use crate::stack_machine::VM;
+
+    #[test]
+    fn test_math() {
     }
 }
 

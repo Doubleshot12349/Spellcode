@@ -1,3 +1,5 @@
+#![feature(box_patterns)]
+
 use crate::compiler::Compiler;
 
 mod stack_machine;

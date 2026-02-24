@@ -1,5 +1,3 @@
-#![feature(box_patterns)]
-
 use peg;
 use std::{ops::{Range, Deref}, fmt::Debug};
 
@@ -12,7 +10,10 @@ peg::parser! {
               "0b" v:$(['0'..='1']+) {? i32::from_str_radix(v, 2).or(Err("invalid binary int")) } /
               v:$("-"? ['0'..='9']+) {? v.parse().or(Err("invalid int")) }
         rule double() -> f64
-            = v:$(['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) }
+            = v:$("-"? ['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$("-"? "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$("-"? ['0'..='9']+ "." ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$("-"? ['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
         rule bool() -> bool
             = "true" { true } / "false" { false }
         rule string() -> String
@@ -57,7 +58,9 @@ peg::parser! {
             x:(@) _ tl:position!() "/" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Divide, tl..tr), Box::new(y)) }
             x:(@) _ tl:position!() "%" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Mod, tl..tr), Box::new(y)) }
             --
-            name:ident() "(" args:expression() ** "," ")" { Expression::FunctionCall { name, args } }
+            "(" _ v:expression() _ ")" { v }
+            --
+            name:ident() "(" _ args:expression() ** (_ "," _) _ ")" { Expression::FunctionCall { name, args } }
             --
             x:(@) "." name:ident() { Expression::PropertyAccess(Box::new(x), name) }
             --
@@ -106,7 +109,7 @@ peg::parser! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Literal {
     IntL(i32),
     DoubleL(f64),
@@ -114,7 +117,7 @@ pub enum Literal {
     StringL(String)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Op {
     Plus, Minus, Times, Divide, Mod,
     Shl, Shr, Shrl,
@@ -123,7 +126,7 @@ pub enum Op {
     And, Or, Xor
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     Lit(Tag<Literal>),
     Math(Box<Expression>, Tag<Op>, Box<Expression>),
@@ -192,18 +195,81 @@ impl<T> Tag<Option<T>> {
     }
 }
 
+impl<T : PartialEq> PartialEq for Tag<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.item == other.item && self.loc == other.loc
+    }
+}
+
 type BTag<T> = Box<Tag<T>>;
 
 #[cfg(test)]
-#[feature(box_patterns)]
 mod tests {
     use super::*;
 
+    macro_rules! t {
+        ($v:pat) => {
+            Tag { item: $v, .. }
+        };
+        (il $v:literal) => {
+            Tag { item: Literal::IntL($v), .. }
+        };
+        (eil $v:literal) => {
+            Expression::Lit(t!(il $v))
+        };
+        (bil $v:literal) => {
+            box t!(eil $v)
+        };
+
+        (dl $v:literal) => {
+            Tag { item: Literal::DoubleL($v), .. }
+        };
+        (edl $v:literal) => {
+            Expression::Lit(t!(dl $v))
+        };
+
+        (elt $v:pat) => {
+            Expression::Lit(t!($v))
+        };
+    }
+
+
     #[test]
-    #[feature(box_patterns)]
+    fn test_int_literals() {
+        assert!(matches!(spellcode::expression("-123"), Ok(t!(eil -123))));
+        assert!(matches!(spellcode::expression("123"), Ok(t!(eil 123))));
+        assert!(matches!(spellcode::expression("0x7b"), Ok(t!(eil 123))));
+        assert!(matches!(spellcode::expression("0x7B"), Ok(t!(eil 123))));
+        assert!(matches!(spellcode::expression("0b1111011"), Ok(t!(eil 123))));
+    }
+
+
+    #[test]
+    fn test_double_literals() {
+        assert!(matches!(spellcode::expression("0.0"), Ok(t!(edl 0.0))));
+        assert!(matches!(spellcode::expression("0.1"), Ok(t!(edl 0.1))));
+        assert!(matches!(spellcode::expression("-0.1"), Ok(t!(edl -0.1))));
+        assert!(matches!(spellcode::expression("1e1"), Ok(t!(edl 1e1))));
+        assert!(matches!(spellcode::expression("1.1e1"), Ok(t!(edl 1.1e1))));
+        assert!(matches!(spellcode::expression("-1.1e1"), Ok(t!(edl -1.1e1))));
+        assert!(matches!(spellcode::expression("-1.e1"), Ok(t!(edl -1e1))));
+        assert!(matches!(spellcode::expression("-1e1"), Ok(t!(edl -1e1))));
+        assert!(matches!(spellcode::expression("1."), Ok(t!(edl 1.0))));
+        assert!(matches!(spellcode::expression(".1"), Ok(t!(edl 0.1))));
+    }
+
+    #[test]
+    fn test_bool_literals() {
+        assert!(matches!(spellcode::expression("true"), Ok(t!(elt Literal::BoolL(true)))));
+        assert!(matches!(spellcode::expression("false"), Ok(t!(elt Literal::BoolL(false)))));
+    }
+
+    #[test]
     fn test_math() {
-        let parsed = spellcode::expression("1 + 1");
-        assert!(matches!(parsed, Ok(Expression::Math(box Expression::Lit(Tag { item: Literal::IntL(1), .. }), Tag { item: Op::Plus, .. }, box Expression::Lit(Tag { item: Literal::IntL(1), .. })))));
+        assert!(matches!(spellcode::expression("1 + 2"), Ok(Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2)))));
+        assert!(matches!(spellcode::expression("1 * 2 + 3"), Ok(Expression::Math(box Expression::Math(t!(bil 1), t!(Op::Times), t!(bil 2)), t!(Op::Plus), t!(bil 3)))));
+        assert!(matches!(spellcode::expression("1 + 2 * 3"), Ok(Expression::Math(t!(bil 1), t!(Op::Plus), box Expression::Math(t!(bil 2), t!(Op::Times), t!(bil 3))))));
+        assert!(matches!(spellcode::expression("(1 + 2) * 3"), Ok(Expression::Math(box Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2)), t!(Op::Times), t!(bil 3)))));
     }
 }
 
