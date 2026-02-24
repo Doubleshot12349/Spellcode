@@ -16,8 +16,8 @@ peg::parser! {
         rule string() -> String
             = "\"" v:$([^'"']*) "\"" { v.to_owned() }
         rule literal_no_tag() -> Literal
-            = v:integer() { Literal::IntL(v) } /
-              v:double() { Literal::DoubleL(v) } /
+            = v:double() { Literal::DoubleL(v) } /
+              v:integer() { Literal::IntL(v) } /
               v:bool() { Literal::BoolL(v) } /
               v:string() { Literal::StringL(v) }
         rule literal() -> Tag<Literal>
@@ -26,7 +26,7 @@ peg::parser! {
         rule ident() -> Tag<String>
             = l:position!() v:$(['A'..='Z' | 'a'..='z'] ['A'..='Z' | 'a'..='z' | '0'..='9' | '_']*) r:position!() { Tag::new(v.to_owned(), l..r) }
 
-        rule expression() -> Expression = precedence! {
+        pub rule expression() -> Expression = precedence! {
             x:(@) _ tl:position!() "||" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::BoolOr, tl..tr), Box::new(y)) }
             --
             x:(@) _ tl:position!() "&&" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::BoolAnd, tl..tr), Box::new(y)) }
@@ -63,8 +63,8 @@ peg::parser! {
             --
             "if" _ condition:expression() _ "{" _ if_true:expression() _ "}" _ "else" _ "{" _ if_false:expression() _ "}" { Expression::Ternary { condition: Box::new(condition), if_true: Box::new(if_true), if_false: Box::new(if_false) } }
             --
-            v:ident() { Expression::VarAccess(v) }
             v:literal() { Expression::Lit(v) }
+            v:ident() { Expression::VarAccess(v) }
         }
 
         rule block() -> Vec<Statement>
@@ -86,7 +86,7 @@ peg::parser! {
         rule func_arg() -> (Tag<String>, Tag<TypeName>)
             = name:ident() _ ":" _ tpe:tpe() { (name, tpe) }
 
-        pub rule statement() -> Statement
+        rule statement() -> Statement
             = "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
               v:expression() { Statement::ExprS(v) } /

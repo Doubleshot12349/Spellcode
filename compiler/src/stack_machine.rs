@@ -1,5 +1,6 @@
 use std::{char, collections::HashMap};
 
+#[derive(Debug)]
 pub enum Syscall {
     Nop = 0,
     GetMana = 1,
@@ -18,6 +19,7 @@ pub enum Tpe {
     Int, Double, Array(Box<Tpe>)
 }
 
+#[derive(Debug)]
 pub enum Instruction {
     ImmediateInt(i32),
     ImmediateDouble(f64),

@@ -1,5 +1,8 @@
+use crate::compiler::Compiler;
+
 mod stack_machine;
 mod parser;
+mod compiler;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn add(left: u64, right: u64) -> u64 {
@@ -7,13 +10,12 @@ pub extern "C" fn add(left: u64, right: u64) -> u64 {
 }
 
 fn main() {
-    let inp = r#"
-    fun blah(a: int) -> string {
-        print("a");
-    }
-    "#;
-    let parsed = parser::spellcode::program(inp).unwrap();
+    let inp = "true && false";
+    let parsed = parser::spellcode::expression(inp).unwrap();
     println!("{parsed:?}");
+    let mut compiler = Compiler::new();
+    println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
+    println!("{:?}", compiler.program);
 }
 
 #[cfg(test)]
