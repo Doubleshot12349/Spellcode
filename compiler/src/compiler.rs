@@ -173,10 +173,76 @@ impl Compiler {
 mod tests {
     use super::*;
     use crate::parser;
-    use crate::stack_machine::VM;
+    use crate::stack_machine::{ExecutionException, StackItem, Syscall, VM};
 
-    #[test]
-    fn test_math() {
+    macro_rules! test_math {
+        ($name:ident: $($program:expr => $result:pat $(if $condition:expr)?),+ $(,)?) => {
+            #[test]
+            fn $name() {
+                $(
+                    assert!(matches!(compile_and_run_expr($program), $result $(if $condition)?))
+                );+
+            }
+        };
+        ($name:ident $tpe:path; $($program:expr),+ $(,)?) => {
+            test_math! { $name:
+                $(
+                    stringify!($program) => Ok(Ok($tpe(v))) if v == $program
+                ),+
+            }
+        };
+        ($name:ident: int_exp $($program:expr),+ $(,)?) => {
+            test_math! { $name StackItem::Int; $($program),+ }
+        };
+        ($name:ident: bool_exp $($program:expr),+ $(,)?) => {
+            test_math! { $name:
+                $(
+                    stringify!($program) => Ok(Ok(StackItem::Int(v))) if v == (if $program { 1 } else { 0 })
+                ),+
+            }
+        };
+    }
+
+    fn compile_and_run_expr(program: &str) -> Result<Result<StackItem, ExecutionException>, CompErr> {
+        let parsed = parser::spellcode::expression(program).expect("parse error");
+        let mut compiler = Compiler::new();
+        compiler.compile_expression(&parsed, CompStackI::Temp)?;
+        let mut vm = VM::new(compiler.program);
+        vm.program.push(Instruction::Syscall(Syscall::Halt));
+        for _ in 0..10000 {
+            match vm.tick() {
+                Ok(()) => continue,
+                Err(ExecutionException::Halt) => return Ok(Ok(vm.stack.last().expect("no item on stack").clone())),
+                Err(e) => return Ok(Err(e))
+            }
+        }
+        panic!("never exited");
+    }
+
+    test_math! { test_addition: int_exp
+        1 + 1,
+        1 + 7,
+        13243242 + 2,
+        -5 + 7,
+        -13498 + -239,
+        0x123 + 0x456,
+        0b10101 + 0b11111,
+    }
+
+    test_math! { test_comparisons: bool_exp
+        1 < 2, 1 < 1, 1 < 0,
+        1 <= 2, 1 <= 1, 1 <= 0,
+        1 > 2, 1 > 1, 1 > 0,
+        1 >= 2, 1 >= 1, 1 >= 0,
+        1 == 2, 1 == 1, 1 == 0,
+        1 != 2, 1 != 1, 1 != 0,
+
+        1.5 < 2.5, 1.5 < 1.5, 1.5 < 0.5,
+        1.5 <= 2.5, 1.5 <= 1.5, 1.5 <= 0.5,
+        1.5 > 2.5, 1.5 > 1.5, 1.5 > 0.5,
+        1.5 >= 2.5, 1.5 >= 1.5, 1.5 >= 0.5,
+        1.5 == 2.5, 1.5 == 1.5, 1.5 == 0.5,
+        1.5 != 2.5, 1.5 != 1.5, 1.5 != 0.5,
     }
 }
 
