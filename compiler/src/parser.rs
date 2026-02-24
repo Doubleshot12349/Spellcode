@@ -68,7 +68,7 @@ peg::parser! {
         }
 
         rule block() -> Vec<Statement>
-            = "{" _ v:statement() ** (";"?) _ "}" { v }
+            = _ "{" _ v:statement() ** (";"?) ";"? _ "}" _ { v }
 
         rule tpe_name_basic() -> Tag<TypeName>
             = l:position!() "int" r:position!() { Tag::new(TypeName::Int, l..r) } /
@@ -87,7 +87,10 @@ peg::parser! {
             = name:ident() _ ":" _ tpe:tpe() { (name, tpe) }
 
         pub rule statement() -> Statement
-            = v:expression() { Statement::ExprS(v) } /
+            = "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
+              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
+              v:expression() { Statement::ExprS(v) } /
+
               "var" _ name:ident() _ "=" _ value:expression() { Statement::VariableDecl(name, value) } /
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
               "if" _ condition:expression() _ block:block() _ "else" _ else_block:block() { Statement::If { condition, block, else_block: Some(else_block) } } /
@@ -95,14 +98,13 @@ peg::parser! {
               "for" _ "(" _ init:statement() _ ";" _ condition:expression() _ ";" _ increment:statement() _ ")" _ block:block() { Statement::CFor { init: Box::new(init), condition, increment: Box::new(increment), block } } /
               "for" _ variable:ident() _ "in" _ array:expression() _ block:block() { Statement::ForEach { variable, array, block } } /
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
-              "return" _ value:expression()? { Statement::Return(value) } /
-              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
-              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } }
+              "return" _ value:expression()? { Statement::Return(value) }
 
-        pub rule program() -> Vec<Statement> = statement() ** (";"?)
+        pub rule program() -> Vec<Statement> = _ v:statement() ** (_ ";"? _) _ ";"? _ { v }
     }
 }
 
+#[derive(Debug)]
 pub enum Literal {
     IntL(i32),
     DoubleL(f64),
@@ -110,6 +112,7 @@ pub enum Literal {
     StringL(String)
 }
 
+#[derive(Debug)]
 pub enum Op {
     Plus, Minus, Times, Divide, Mod,
     Shl, Shr, Shrl,
@@ -118,6 +121,7 @@ pub enum Op {
     And, Or, Xor
 }
 
+#[derive(Debug)]
 pub enum Expression {
     Lit(Tag<Literal>),
     Math(Box<Expression>, Tag<Op>, Box<Expression>),
@@ -128,10 +132,12 @@ pub enum Expression {
     VarAccess(Tag<String>)
 }
 
+#[derive(Debug)]
 pub enum TypeName {
     Int, Double, Char, String, Bool, Array(BTag<TypeName>)
 }
 
+#[derive(Debug)]
 pub enum Statement {
     ExprS(Expression),
     VariableDecl(Tag<String>, Expression),
