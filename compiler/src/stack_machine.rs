@@ -247,7 +247,7 @@ impl VM {
                     Syscall::PlayerLocation => todo!(),
                     Syscall::OpponentLocation => todo!(),
                     Syscall::Sleep => todo!(),
-                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap()) },
+                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap_or(char::REPLACEMENT_CHARACTER)) },
                     Syscall::Halt => return Err(ExecutionException::Halt),
                     Syscall::Exception => return Err(ExecutionException::RaisedException)
                 }

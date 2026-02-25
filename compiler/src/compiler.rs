@@ -1,4 +1,4 @@
-use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall}};
+use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall, Tpe}};
 
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
@@ -64,6 +64,20 @@ struct DeclaredFunction {
 struct RawFunction {
     pub func: DeclaredFunction,
     pub definition: Vec<Instruction>
+}
+
+impl From<&CompType> for Tpe {
+    fn from(value: &CompType) -> Self {
+        match value {
+            CompType::Int => Tpe::Int,
+            CompType::Double => Tpe::Double,
+            CompType::Char => Tpe::Int,
+            CompType::Bool => Tpe::Int,
+            CompType::String => Tpe::Array(Box::new(Tpe::Int)),
+            CompType::Array(box comp_type) => Tpe::Array(Box::new(comp_type.into())),
+            CompType::Void => Tpe::Int,
+        }
+    }
 }
 
 impl Compiler {
@@ -381,12 +395,12 @@ impl Compiler {
                         CompType::Bool
                     }
                     Literal::StringL(v) => {
-                        let chars = v.bytes();
+                        let chars = v.chars().collect::<Vec<_>>();
                         self.program.push(Instruction::ImmediateInt(chars.len() as i32));
                         self.program.push(Instruction::AllocA(stack_machine::Tpe::Int));
 
-                        for (i, c) in chars.enumerate() {
-                            self.program.push(Instruction::ImmediateInt(c as i32));
+                        for (i, c) in chars.iter().enumerate() {
+                            self.program.push(Instruction::ImmediateInt(u32::from(*c) as i32));
                             self.program.push(Instruction::ImmediateInt(i as i32));
                             self.program.push(Instruction::Copy(3));
                             self.program.push(Instruction::SetA);
@@ -612,6 +626,16 @@ impl Compiler {
                 self.stack.push((out, tpe.clone()));
 
                 Ok(tpe)
+            }
+            Expression::NewArray(Tag { item: tpe, .. }, box length) => {
+                let inner_type = self.resolve_type(tpe)?;
+                if self.compile_expression(length, CompStackI::Temp)? != CompType::Int {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                }
+                self.program.push(Instruction::AllocA((&inner_type).into()));
+                self.stack.pop();
+                self.stack.push((out, CompType::Array(Box::new(inner_type.clone()))));
+                Ok(CompType::Array(Box::new(inner_type)))
             }
         }
     }

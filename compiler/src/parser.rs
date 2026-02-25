@@ -83,6 +83,8 @@ peg::parser! {
             --
             x:(@) "." name:ident() { Expression::PropertyAccess(Box::new(x), name) }
             --
+            "new" _ tpe:tpe() _ "[" _ length:expression() _ "]" { Expression::NewArray(tpe, Box::new(length)) }
+            --
             x:(@) "[" _ index:expression() _ "]" { Expression::ArrayAccess { array: Box::new(x), index: Box::new(index) } }
             --
             "if" _ condition:expression() _ "{" _ if_true:expression() _ "}" _ "else" _ "{" _ if_false:expression() _ "}" { Expression::Ternary { condition: Box::new(condition), if_true: Box::new(if_true), if_false: Box::new(if_false) } }
@@ -154,10 +156,11 @@ pub enum Expression {
     PropertyAccess(Box<Expression>, Tag<String>),
     Ternary { condition: Box<Expression>, if_true: Box<Expression>, if_false: Box<Expression> },
     ArrayAccess { array: Box<Expression>, index: Box<Expression> },
-    VarAccess(Tag<String>)
+    VarAccess(Tag<String>),
+    NewArray(Tag<TypeName>, Box<Expression>)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TypeName {
     Int, Double, Char, String, Bool, Array(BTag<TypeName>)
 }

@@ -25,7 +25,7 @@ fn main() {
     println_int(123456);
 
     fun println_int(inp: int) {
-        var out = "          ";
+        var out = new char[16];
         var v = inp;
         if inp < 0 {
             putc('-');
