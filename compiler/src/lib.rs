@@ -19,12 +19,10 @@ fn main() {
     //println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
     //println!("{:?}", compiler.program);
 
-    let inp = "var i = 0; while (i < 5) { 1; 2; 3; i = i + 1; }";
+    let inp = "fun blah(a: int) -> int { 1; return a + 7; }";
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
-    for st in parsed {
-        compiler.compile_statement(&st).unwrap();
-    }
+    compiler.compile_program(&parsed).unwrap();
     println!("{:?}", compiler.program);
 }
 

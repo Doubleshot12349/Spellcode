@@ -1,8 +1,11 @@
-use crate::{parser::{Expression, Literal, Op, Statement, Tag}, stack_machine::{self, Instruction}};
+use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall}};
 
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
-    pub program: Vec<Instruction>
+    pub program: Vec<Instruction>,
+    pub functions: Vec<DeclaredFunction>,
+    function_calls: Vec<FunctionCallToFix>,
+    current_function: Option<DeclaredFunction>
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,6 +22,7 @@ pub enum CompStackI {
     Temp,
     Variable(String),
     ReturnAddress,
+    ReturnValue
 }
 
 #[derive(Debug)]
@@ -26,7 +30,9 @@ pub enum CompilerError {
     TypeMismatch,
     VariableNotFound,
     Redeclaration,
-    CannotAssign
+    CannotAssign,
+    FunctionsMustBeTopLevel,
+    NotInFunction
 }
 
 #[derive(Debug)]
@@ -35,9 +41,100 @@ pub struct CompErr {
     pub location: usize
 }
 
+struct FunctionCallToFix {
+    program_offset: usize,
+    function_id: usize
+}
+
+#[derive(Debug, Clone)]
+struct DeclaredFunction {
+    name: String,
+    args: Vec<(String, CompType)>,
+    return_type: Option<CompType>,
+    start_addr: Option<usize>
+}
+
 impl Compiler {
     pub fn new() -> Compiler {
-        Compiler { stack: vec![], program: vec![] }
+        Compiler { stack: vec![], program: vec![], functions: vec![], function_calls: vec![], current_function: None }
+    }
+
+    fn resolve_type(&self, tpe: &TypeName) -> Result<CompType, CompErr> {
+        Ok(match tpe {
+            TypeName::Int => CompType::Int,
+            TypeName::Double => CompType::Double,
+            TypeName::Char => CompType::Char,
+            TypeName::String => CompType::String,
+            TypeName::Bool => CompType::Bool,
+            TypeName::Array(box Tag { item: v, .. }) => CompType::Array(Box::new(self.resolve_type(v)?)),
+        })
+    }
+
+    pub fn compile_program(&mut self, program: &[Statement]) -> Result<(), CompErr> {
+        for st in program {
+            let Statement::FunctionDef { name: Tag { item: name, loc: name_l }, arguments, return_type, block } = st else { continue };
+            if self.functions.iter().any(|x| &x.name == name) {
+                return Err(CompErr { error: CompilerError::Redeclaration, location: name_l.start });
+            }
+
+            let mut args = vec![];
+            for (Tag { item: arg_name, .. }, Tag { item: tpe, .. }) in arguments {
+                args.push((arg_name.clone(), self.resolve_type(tpe)?));
+            }
+
+            let return_type = match return_type {
+                Some(v) => Some(self.resolve_type(v)?),
+                None => None
+            };
+            
+            self.functions.push(DeclaredFunction { name: name.clone(), args, return_type, start_addr: None });
+        }
+
+        for st in program {
+            if let Statement::FunctionDef { .. } = st { continue };
+            self.compile_statement(st)?;
+        }
+
+        self.program.push(Instruction::Syscall(Syscall::Halt));
+
+        let mut id = 0;
+        for st in program {
+            let Statement::FunctionDef { name: Tag { item: name, .. }, arguments, return_type, block } = st else { continue };
+
+            // TODO: allow using global variables
+            for item in &self.function_calls {
+                if item.function_id == id {
+                    self.program[item.program_offset] = Instruction::Call(self.program.len());
+                }
+            }
+            id += 1;
+
+            self.stack.clear();
+
+            self.current_function = Some(self.functions.iter().find(|x| &x.name == name).unwrap().clone());
+            for (Tag { item: arg_name, .. }, Tag { item: tpe, .. }) in arguments {
+                self.stack.push((CompStackI::Variable(arg_name.clone()), self.resolve_type(tpe)?));
+            }
+            if let Some(tpe) = return_type {
+                self.stack.push((CompStackI::ReturnValue, self.resolve_type(tpe)?));
+            }
+            self.stack.push((CompStackI::ReturnAddress, CompType::Int));
+            let stack_len = self.stack.len();
+            println!("stack len = {stack_len}");
+
+            for st in block {
+                self.compile_statement(st)?;
+            }
+            println!("stack len = {}", self.stack.len());
+            if self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).is_some() {
+                // don't bother updating compiler stack, it's getting cleared next iteration
+                self.program.push(Instruction::Pop(self.stack.len() - stack_len));
+                self.program.push(Instruction::Return);
+            }
+        }
+        Ok(())
+
+        //todo!()
     }
 
     pub fn compile_statement(&mut self, statement: &Statement) -> Result<(), CompErr> {
@@ -166,8 +263,26 @@ impl Compiler {
                 self.program.push(Instruction::Pop(condition_pop));
                 for _ in 0..condition_pop { self.stack.pop(); }
             }
-            Statement::Return(expression) => todo!(),
-            Statement::FunctionDef { name, arguments, return_type, block } => todo!(),
+            Statement::Return(expression) => {
+                let Some(func) = self.current_function.clone() else { return Err(CompErr { error: CompilerError::NotInFunction, location: todo!() }); };
+                if let Some(ret) = expression {
+                    let tpe = self.compile_expression(ret, CompStackI::Temp)?;
+                    if Some(tpe) != func.return_type {
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                    }
+                    let pos = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnValue)).unwrap();
+                    self.program.push(Instruction::Set(pos.0));
+                    self.stack.pop();
+                }
+                let num_pop = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).unwrap().0 - 1;
+                self.program.push(Instruction::Pop(num_pop));
+                for _ in 0..num_pop {
+                    self.stack.pop();
+                }
+                self.program.push(Instruction::Return);
+                self.stack.pop();
+            }
+            Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.start })
         }
 
         Ok(())
@@ -345,8 +460,13 @@ impl Compiler {
         }
     }
 
+
+    fn find_stack_item<F: Fn(&(CompStackI, CompType)) -> bool>(&self, cond: F) -> Option<(usize, CompType)> {
+        self.stack.iter().rev().zip(1..).find_map(|(x, i)| if cond(x) { Some((i, x.1.clone())) } else { None })
+    }
+
     fn find_variable(&self, name: &str) -> Option<(usize, CompType)> {
-        self.stack.iter().rev().zip(1..).find_map(|(x, i)| if let CompStackI::Variable(n) = &x.0 && n == name { Some((i, x.1.clone())) } else { None })
+        self.find_stack_item(|x| if let CompStackI::Variable(n) = &x.0 && n == name { true } else { false })
     }
 }
 
