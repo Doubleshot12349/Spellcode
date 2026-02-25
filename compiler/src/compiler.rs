@@ -3,7 +3,7 @@ use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_m
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
     pub program: Vec<Instruction>,
-    pub functions: Vec<DeclaredFunction>,
+    functions: Vec<DeclaredFunction>,
     function_calls: Vec<FunctionCallToFix>,
     current_function: Option<DeclaredFunction>,
     predefined: Vec<RawFunction>
@@ -198,7 +198,37 @@ impl Compiler {
                         self.program.push(Instruction::Set(idx - 1));
                         self.stack.pop();
                     }
-                    Expression::ArrayAccess { array, index } => todo!(),
+                    Expression::ArrayAccess { box array, box index } => {
+                        let value_index = self.stack.len() - 1;
+                        let inner = match self.compile_expression(array, CompStackI::Temp)? {
+                            CompType::Array(box v) => v,
+                            CompType::String => CompType::Char,
+                            _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                        };
+                        if inner != tpe {
+                            return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                        }
+                        let array_index = self.stack.len() - 1;
+                        let CompType::Int = self.compile_expression(index, CompStackI::Temp)?
+                            else {
+                                return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                            };
+                        let index_index = self.stack.len() - 1;
+                        // copy item
+                        self.program.push(Instruction::Copy(self.stack.len() - value_index));
+                        self.stack.push((CompStackI::Temp, tpe.clone()));
+                        // copy index
+                        self.program.push(Instruction::Copy(self.stack.len() - index_index));
+                        self.stack.push((CompStackI::Temp, CompType::Int));
+                        // copy array
+                        self.program.push(Instruction::Copy(self.stack.len() - array_index));
+                        self.stack.push((CompStackI::Temp, CompType::Array(Box::new(inner.clone()))));
+
+                        self.program.push(Instruction::SetA);
+                        self.stack.pop();
+                        self.stack.pop();
+                        self.stack.pop();
+                    }
                     _ => return Err(CompErr { error: CompilerError::CannotAssign, location: todo!() })
                 }
             }
@@ -240,9 +270,11 @@ impl Compiler {
                     self.program[jump_after_else] = Instruction::Jmp(self.program.len());
                 }
             }
-            Statement::CFor { init, condition, increment, block } => {
+            Statement::CFor { box init, condition, box increment, block } => {
                 let stack_len_start = self.stack.len();
-                self.compile_statement(init)?;
+                if let Some(v) = init {
+                    self.compile_statement(v)?;
+                }
 
                 let stack_len_cond = self.stack.len();
                 let start = self.program.len();
@@ -260,7 +292,9 @@ impl Compiler {
                 for st in block {
                     self.compile_statement(st)?;
                 }
-                self.compile_statement(increment)?;
+                if let Some(v) = increment {
+                    self.compile_statement(v)?;
+                }
 
                 let st_pop = self.stack.len() - stack_len_cond;
                 self.program.push(Instruction::Pop(st_pop));
@@ -274,6 +308,8 @@ impl Compiler {
             }
             Statement::ForEach { variable, array, block } => todo!(),
             Statement::While { condition, block } => {
+                let stack_len_start = self.stack.len();
+
                 let stack_len_cond = self.stack.len();
                 let start = self.program.len();
 
@@ -285,7 +321,7 @@ impl Compiler {
                 let jump_after = self.program.len();
                 self.program.push(Instruction::Brz(0));
                 self.stack.pop();
-                let condition_pop = self.stack.len() - stack_len_cond;
+                let condition_pop = self.stack.len() - stack_len_start;
                 
                 for st in block {
                     self.compile_statement(st)?;
@@ -387,6 +423,7 @@ impl Compiler {
                         self.stack.push((CompStackI::Temp, v1));
                         self.program.push(Instruction::Copy(2));
                         self.program.push(Instruction::GeI);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
                     (CompType::Int, Op::Eq, CompType::Int) => (Instruction::EqI, CompType::Bool),
@@ -394,6 +431,7 @@ impl Compiler {
                         self.program.push(Instruction::EqI);
                         self.program.push(Instruction::ImmediateInt(1));
                         self.program.push(Instruction::XorI);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
                     (CompType::Int, Op::Ge, CompType::Int) => (Instruction::GeI, CompType::Bool),
@@ -401,6 +439,7 @@ impl Compiler {
                         self.stack.push((CompStackI::Temp, v1));
                         self.program.push(Instruction::Copy(2));
                         self.program.push(Instruction::LtI);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
                     (CompType::Int, Op::And, CompType::Int) => (Instruction::AndI, CompType::Int),
@@ -420,6 +459,7 @@ impl Compiler {
                         self.stack.push((CompStackI::Temp, v1));
                         self.program.push(Instruction::Copy(2));
                         self.program.push(Instruction::GeD);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
                     (CompType::Double, Op::Eq, CompType::Double) => (Instruction::EqD, CompType::Bool),
@@ -427,6 +467,7 @@ impl Compiler {
                         self.program.push(Instruction::EqD);
                         self.program.push(Instruction::ImmediateInt(1));
                         self.program.push(Instruction::XorI);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
                     (CompType::Double, Op::Ge, CompType::Double) => (Instruction::GeD, CompType::Bool),
@@ -434,6 +475,7 @@ impl Compiler {
                         self.stack.push((CompStackI::Temp, v1));
                         self.program.push(Instruction::Copy(2));
                         self.program.push(Instruction::LtD);
+                        self.stack.push((out, CompType::Bool));
                         return Ok(CompType::Bool)
                     }
 
@@ -480,7 +522,6 @@ impl Compiler {
                 for _ in 0..(self.stack.len() - stack_len) {
                     self.stack.pop();
                 }
-                println!("adding function call to ID {} at {}", function_id, self.program.len());
                 self.function_calls.push(FunctionCallToFix { program_offset: self.program.len(), function_id });
                 self.program.push(Instruction::Call(usize::MAX));
 

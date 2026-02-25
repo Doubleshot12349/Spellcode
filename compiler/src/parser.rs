@@ -114,7 +114,7 @@ peg::parser! {
             = "var" _ name:ident() _ "=" _ value:expression() { Statement::VariableDecl(name, value) } /
               "if" _ condition:expression() _ block:block() _ "else" _ else_block:block() { Statement::If { condition, block, else_block: Some(else_block) } } /
               "if" _ condition:expression() _ block:block() { Statement::If { condition, block, else_block: None } } /
-              "for" _ "(" _ init:statement() _ ";" _ condition:expression() _ ";" _ increment:statement() _ ")" _ block:block() { Statement::CFor { init: Box::new(init), condition, increment: Box::new(increment), block } } /
+              "for" _ "(" _ init:statement()? _ ";" _ condition:expression() _ ";" _ increment:statement()? _ ")" _ block:block() { Statement::CFor { init: Box::new(init), condition, increment: Box::new(increment), block } } /
               "for" _ variable:ident() _ "in" _ array:expression() _ block:block() { Statement::ForEach { variable, array, block } } /
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
@@ -168,7 +168,7 @@ pub enum Statement {
     VariableDecl(Tag<String>, Expression),
     Assignment { left: Expression, value: Expression },
     If { condition: Expression, block: Vec<Statement>, else_block: Option<Vec<Statement>> },
-    CFor { init: Box<Statement>, condition: Expression, increment: Box<Statement>, block: Vec<Statement> },
+    CFor { init: Box<Option<Statement>>, condition: Expression, increment: Box<Option<Statement>>, block: Vec<Statement> },
     ForEach { variable: Tag<String>, array: Expression, block: Vec<Statement> },
     While { condition: Expression, block: Vec<Statement> },
     Return(Option<Expression>),

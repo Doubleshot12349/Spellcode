@@ -22,6 +22,27 @@ fn main() {
     let inp = r#"
 
     println_str("Hello, world!");
+    println_int(123456);
+
+    fun println_int(inp: int) {
+        var out = "          ";
+        var v = inp;
+        if inp < 0 {
+            putc('-');
+            v = v * -1;
+        }
+        var i = 0;
+        while (v != 0) {
+            out[i] = "0123456789"[v % 10];
+            v = v / 10;
+            i = i + 1;
+        }
+
+        for (i = i - 1; i >= 0; i = i - 1) {
+            putc(out[i]);
+        }
+        putc('\n');
+    }
 
     fun println_str(inp: string) {
         for (var i = 0; i < inp.size; i = i + 1) {
