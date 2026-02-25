@@ -19,7 +19,7 @@ fn main() {
     //println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
     //println!("{:?}", compiler.program);
 
-    let inp = "if true { 1; 2; 3; } else { 4; }";
+    let inp = "for (var i = 0; i < 10; i = i + 1) { 1; 2; 3; }";
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
     for st in parsed {
