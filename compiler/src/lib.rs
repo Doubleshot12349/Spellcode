@@ -21,10 +21,10 @@ fn main() {
 
     let inp = r#"
 
-    println_str("Hello, world!");
-    println_int(123456);
+    println("Hello, world!");
+    println(123456);
 
-    fun println_int(inp: int) {
+    fun println(inp: int) {
         var out = new char[16];
         var v = inp;
         if inp < 0 {
@@ -44,7 +44,7 @@ fn main() {
         putc('\n');
     }
 
-    fun println_str(inp: string) {
+    fun println(inp: string) {
         for (var i = 0; i < inp.size; i = i + 1) {
             putc(inp[i]);
         }

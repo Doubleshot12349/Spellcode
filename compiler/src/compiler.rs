@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall, Tpe}};
 
 pub struct Compiler {
@@ -6,10 +8,11 @@ pub struct Compiler {
     functions: Vec<DeclaredFunction>,
     function_calls: Vec<FunctionCallToFix>,
     current_function: Option<DeclaredFunction>,
-    predefined: Vec<RawFunction>
+    predefined: Vec<RawFunction>,
+    function_addresses: HashMap<FunctionSignature, usize>
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CompType {
     Int,
     Double,
@@ -20,7 +23,7 @@ pub enum CompType {
     Void
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CompStackI {
     Temp,
     Variable(String),
@@ -50,20 +53,31 @@ pub struct CompErr {
 #[derive(Debug)]
 struct FunctionCallToFix {
     program_offset: usize,
-    function_id: usize
+    function: FunctionSignature
 }
 
 #[derive(Debug, Clone)]
 struct DeclaredFunction {
     name: String,
     args: Vec<(String, CompType)>,
-    return_type: Option<CompType>,
-    start_addr: Option<usize>
+    return_type: Option<CompType>
 }
 
 struct RawFunction {
     pub func: DeclaredFunction,
     pub definition: Vec<Instruction>
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct FunctionSignature {
+    pub name: String,
+    pub args: Vec<CompType>
+}
+
+impl From<&DeclaredFunction> for FunctionSignature {
+    fn from(value: &DeclaredFunction) -> Self {
+        FunctionSignature { name: value.name.clone(), args: value.args.iter().map(|x| x.1.clone()).collect() }
+    }
 }
 
 impl From<&CompType> for Tpe {
@@ -80,6 +94,13 @@ impl From<&CompType> for Tpe {
     }
 }
 
+struct OpEvaluation {
+    pop: usize,
+    push: Vec<(CompStackI, CompType)>,
+    instructions: Vec<Instruction>,
+    tpe: CompType
+}
+
 impl Compiler {
     pub fn new() -> Compiler {
         let predefined = vec![
@@ -87,8 +108,7 @@ impl Compiler {
                 func: DeclaredFunction {
                     name: "putc".to_owned(),
                     args: vec![("c".to_owned(), CompType::Char)],
-                    return_type: None,
-                    start_addr: None
+                    return_type: None
                 },
                 definition: vec![Instruction::Copy(2), Instruction::Syscall(Syscall::PrintChar), Instruction::Return]
             }
@@ -99,7 +119,8 @@ impl Compiler {
             functions: predefined.iter().map(|x| x.func.clone()).collect(),
             function_calls: vec![],
             current_function: None,
-            predefined
+            predefined,
+            function_addresses: HashMap::new()
         }
     }
 
@@ -116,10 +137,7 @@ impl Compiler {
 
     pub fn compile_program(&mut self, program: &[Statement]) -> Result<(), CompErr> {
         for st in program {
-            let Statement::FunctionDef { name: Tag { item: name, loc: name_l }, arguments, return_type, block } = st else { continue };
-            if self.functions.iter().any(|x| &x.name == name) {
-                return Err(CompErr { error: CompilerError::Redeclaration, location: name_l.start });
-            }
+            let Statement::FunctionDef { name: Tag { item: name, loc: name_l }, arguments, return_type, block: _ } = st else { continue };
 
             let mut args = vec![];
             for (Tag { item: arg_name, .. }, Tag { item: tpe, .. }) in arguments {
@@ -130,8 +148,14 @@ impl Compiler {
                 Some(v) => Some(self.resolve_type(v)?),
                 None => None
             };
+
+            let f = DeclaredFunction { name: name.clone(), args, return_type };
             
-            self.functions.push(DeclaredFunction { name: name.clone(), args, return_type, start_addr: None });
+            if self.functions.iter().any(|x| FunctionSignature::from(x) == FunctionSignature::from(&f)) {
+                return Err(CompErr { error: CompilerError::Redeclaration, location: name_l.start });
+            }
+
+            self.functions.push(f);
         }
 
         for st in program {
@@ -141,23 +165,24 @@ impl Compiler {
 
         self.program.push(Instruction::Syscall(Syscall::Halt));
 
-        let mut id = 0;
-        for func in &mut self.predefined {
-            func.func.start_addr = Some(self.program.len());
-            self.functions[id].start_addr = Some(self.program.len());
+        for func in &self.predefined {
+            self.function_addresses.insert((&func.func).into(), self.program.len());
             self.program.extend(func.definition.iter().cloned());
-            id += 1;
         }
 
         for st in program {
             let Statement::FunctionDef { name: Tag { item: name, .. }, arguments, return_type, block } = st else { continue };
+            let mut args = vec![];
+            for (_, Tag { item: tpe, .. }) in arguments {
+                args.push(self.resolve_type(tpe)?);
+            }
+            let signature = FunctionSignature { name: name.clone(), args };
 
-            self.functions[id].start_addr = Some(self.program.len());
-            id += 1;
+            self.function_addresses.insert(signature.clone(), self.program.len());
 
             self.stack.clear();
 
-            self.current_function = Some(self.functions.iter().find(|x| &x.name == name).unwrap().clone());
+            self.current_function = Some(self.functions.iter().find(|x| FunctionSignature::from(*x) == signature).unwrap().clone());
             for (Tag { item: arg_name, .. }, Tag { item: tpe, .. }) in arguments {
                 self.stack.push((CompStackI::Variable(arg_name.clone()), self.resolve_type(tpe)?));
             }
@@ -179,14 +204,11 @@ impl Compiler {
         }
 
         for item in &self.function_calls {
-            self.program[item.program_offset] = Instruction::Call(self.functions[item.function_id].start_addr.unwrap());
+            // TODO figure out if a function can ever not have an address
+            self.program[item.program_offset] = Instruction::Call(self.function_addresses[&item.function]);
         }
 
-
-
         Ok(())
-
-        //todo!()
     }
 
     pub fn compile_statement(&mut self, statement: &Statement) -> Result<(), CompErr> {
@@ -376,6 +398,133 @@ impl Compiler {
         Ok(())
     }
 
+    fn get_op(&self, left: &CompType, op: &Op, right: &CompType) -> Result<OpEvaluation, CompErr> {
+        let (ins, tpe) = match (left, op, right) {
+            (CompType::Int, Op::Plus, CompType::Int) => (Instruction::AddI, CompType::Int),
+            (CompType::Int, Op::Minus, CompType::Int) => (Instruction::SubI, CompType::Int),
+            (CompType::Int, Op::Times, CompType::Int) => (Instruction::MulI, CompType::Int),
+            (CompType::Int, Op::Divide, CompType::Int) => (Instruction::DivI, CompType::Int),
+            (CompType::Int, Op::Mod, CompType::Int) => (Instruction::ModI, CompType::Int),
+            (CompType::Int, Op::Shl, CompType::Int) => (Instruction::ShlI, CompType::Int),
+            (CompType::Int, Op::Shr, CompType::Int) => (Instruction::ShrI, CompType::Int),
+            (CompType::Int, Op::Shrl, CompType::Int) => (Instruction::ShrlI, CompType::Int),
+            (CompType::Int, Op::Lt, CompType::Int) => (Instruction::LtI, CompType::Bool),
+            (CompType::Int, Op::Le, CompType::Int) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![(CompStackI::Temp, left.clone())],
+                    instructions: vec![Instruction::Copy(2), Instruction::GeI],
+                    tpe: CompType::Bool
+                })
+            }
+            (CompType::Int, Op::Eq, CompType::Int) => (Instruction::EqI, CompType::Bool),
+            (CompType::Int, Op::Ne, CompType::Int) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![],
+                    instructions: vec![Instruction::EqI, Instruction::ImmediateInt(1), Instruction::XorI],
+                    tpe: CompType::Bool
+                })
+            }
+            (CompType::Int, Op::Ge, CompType::Int) => (Instruction::GeI, CompType::Bool),
+            (CompType::Int, Op::Gt, CompType::Int) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![(CompStackI::Temp, left.clone())],
+                    instructions: vec![Instruction::Copy(2), Instruction::LtI],
+                    tpe: CompType::Bool
+                })
+            }
+            (CompType::Int, Op::And, CompType::Int) => (Instruction::AndI, CompType::Int),
+            (CompType::Int, Op::Or, CompType::Int) => (Instruction::OrI, CompType::Int),
+            (CompType::Int, Op::Xor, CompType::Int) => (Instruction::XorI, CompType::Int),
+
+            (CompType::Bool, Op::BoolAnd, CompType::Bool) => (Instruction::AndI, CompType::Bool),
+            (CompType::Bool, Op::BoolOr, CompType::Bool) => (Instruction::OrI, CompType::Bool),
+            (CompType::Bool, Op::Xor, CompType::Bool) => (Instruction::XorI, CompType::Bool),
+
+            (CompType::Double, Op::Plus, CompType::Double) => (Instruction::AddD, CompType::Double),
+            (CompType::Double, Op::Minus, CompType::Double) => (Instruction::SubD, CompType::Double),
+            (CompType::Double, Op::Times, CompType::Double) => (Instruction::MulD, CompType::Double),
+            (CompType::Double, Op::Divide, CompType::Double) => (Instruction::DivD, CompType::Double),
+            (CompType::Double, Op::Lt, CompType::Double) => (Instruction::LtD, CompType::Bool),
+            (CompType::Double, Op::Le, CompType::Double) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![(CompStackI::Temp, left.clone())],
+                    instructions: vec![Instruction::Copy(2), Instruction::GeD],
+                    tpe: CompType::Bool
+                })
+            }
+            (CompType::Double, Op::Eq, CompType::Double) => (Instruction::EqD, CompType::Bool),
+            (CompType::Double, Op::Ne, CompType::Double) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![],
+                    instructions: vec![Instruction::EqD, Instruction::ImmediateInt(1), Instruction::XorI],
+                    tpe: CompType::Bool
+                })
+            }
+            (CompType::Double, Op::Ge, CompType::Double) => (Instruction::GeD, CompType::Bool),
+            (CompType::Double, Op::Gt, CompType::Double) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![(CompStackI::Temp, left.clone())],
+                    instructions: vec![Instruction::Copy(2), Instruction::LtD],
+                    tpe: CompType::Bool
+                })
+            }
+
+            _ => return Err(CompErr { location: todo!(), error: CompilerError::TypeMismatch })
+        };
+
+        Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![ins], tpe })
+    }
+
+    fn get_type(&self, expr: &Expression) -> Result<CompType, CompErr> {
+        Ok(match expr {
+            Expression::Lit(Tag { item: lit, .. }) => match lit {
+                Literal::IntL(_) => CompType::Int,
+                Literal::DoubleL(_) => CompType::Double,
+                Literal::BoolL(_) => CompType::Bool,
+                Literal::StringL(_) => CompType::String,
+                Literal::CharL(_) => CompType::Char,
+            },
+            Expression::Math(box left, op, box right) => todo!(),
+            Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
+                let signature = FunctionSignature {
+                    name: name.clone(),
+                    args: args.iter().map(|x| self.get_type(x)).collect::<Result<_, _>>()?
+                };
+                if let Some(v) = self.functions.iter().find(|x| FunctionSignature::from(*x) == signature) {
+                    v.return_type.as_ref().map(|x| x.clone()).unwrap_or(CompType::Void)
+                } else {
+                    return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start })
+                }
+            }
+            Expression::PropertyAccess(box expression, Tag { item: name, loc }) => {
+                if matches!(self.get_type(expression)?, CompType::Array(_) | CompType::String) && name == "size" {
+                    CompType::Int
+                } else {
+                    return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.start })
+                }
+            }
+            Expression::Ternary { condition, if_true, if_false } => self.get_type(if_true)?,
+            Expression::ArrayAccess { array, index } => {
+                let tpe = self.get_type(array)?;
+                match tpe {
+                    CompType::Array(box v) => v.clone(),
+                    CompType::String => CompType::Char,
+                    _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: todo!() })
+                }
+            }
+            Expression::VarAccess(tag) => if let Some((_, t)) = self.find_variable(&tag.item) { t } else {
+                return Err(CompErr { error: CompilerError::VariableNotFound, location: tag.loc.start })
+            }
+            Expression::NewArray(tag, expression) => CompType::Array(Box::new(self.resolve_type(&tag.item)?))
+        })
+    }
+
     /// Compiles the given expression, leaves the result on the top of the stack with the given
     /// item type
     pub fn compile_expression(&mut self, expr: &Expression, out: CompStackI) -> Result<CompType, CompErr> {
@@ -422,88 +571,22 @@ impl Compiler {
                 let v2 = self.compile_expression(right, CompStackI::Temp)?;
                 self.stack.pop();
                 self.stack.pop();
-                // each clause must pop both items and push the result (unless it returns separately)
-                let (ins, tpe) = match (v1.clone(), op, v2) {
-                    (CompType::Int, Op::Plus, CompType::Int) => (Instruction::AddI, CompType::Int),
-                    (CompType::Int, Op::Minus, CompType::Int) => (Instruction::SubI, CompType::Int),
-                    (CompType::Int, Op::Times, CompType::Int) => (Instruction::MulI, CompType::Int),
-                    (CompType::Int, Op::Divide, CompType::Int) => (Instruction::DivI, CompType::Int),
-                    (CompType::Int, Op::Mod, CompType::Int) => (Instruction::ModI, CompType::Int),
-                    (CompType::Int, Op::Shl, CompType::Int) => (Instruction::ShlI, CompType::Int),
-                    (CompType::Int, Op::Shr, CompType::Int) => (Instruction::ShrI, CompType::Int),
-                    (CompType::Int, Op::Shrl, CompType::Int) => (Instruction::ShrlI, CompType::Int),
-                    (CompType::Int, Op::Lt, CompType::Int) => (Instruction::LtI, CompType::Bool),
-                    (CompType::Int, Op::Le, CompType::Int) => {
-                        self.stack.push((CompStackI::Temp, v1));
-                        self.program.push(Instruction::Copy(2));
-                        self.program.push(Instruction::GeI);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
-                    (CompType::Int, Op::Eq, CompType::Int) => (Instruction::EqI, CompType::Bool),
-                    (CompType::Int, Op::Ne, CompType::Int) => {
-                        self.program.push(Instruction::EqI);
-                        self.program.push(Instruction::ImmediateInt(1));
-                        self.program.push(Instruction::XorI);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
-                    (CompType::Int, Op::Ge, CompType::Int) => (Instruction::GeI, CompType::Bool),
-                    (CompType::Int, Op::Gt, CompType::Int) => {
-                        self.stack.push((CompStackI::Temp, v1));
-                        self.program.push(Instruction::Copy(2));
-                        self.program.push(Instruction::LtI);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
-                    (CompType::Int, Op::And, CompType::Int) => (Instruction::AndI, CompType::Int),
-                    (CompType::Int, Op::Or, CompType::Int) => (Instruction::OrI, CompType::Int),
-                    (CompType::Int, Op::Xor, CompType::Int) => (Instruction::XorI, CompType::Int),
+                let res = self.get_op(&v1, op, &v2)?;
 
-                    (CompType::Bool, Op::BoolAnd, CompType::Bool) => (Instruction::AndI, CompType::Bool),
-                    (CompType::Bool, Op::BoolOr, CompType::Bool) => (Instruction::OrI, CompType::Bool),
-                    (CompType::Bool, Op::Xor, CompType::Bool) => (Instruction::XorI, CompType::Bool),
+                self.program.extend(res.instructions);
+                for _ in 0..res.pop { self.stack.pop(); }
+                self.stack.extend(res.push);
 
-                    (CompType::Double, Op::Plus, CompType::Double) => (Instruction::AddD, CompType::Double),
-                    (CompType::Double, Op::Minus, CompType::Double) => (Instruction::SubD, CompType::Double),
-                    (CompType::Double, Op::Times, CompType::Double) => (Instruction::MulD, CompType::Double),
-                    (CompType::Double, Op::Divide, CompType::Double) => (Instruction::DivD, CompType::Double),
-                    (CompType::Double, Op::Lt, CompType::Double) => (Instruction::LtD, CompType::Bool),
-                    (CompType::Double, Op::Le, CompType::Double) => {
-                        self.stack.push((CompStackI::Temp, v1));
-                        self.program.push(Instruction::Copy(2));
-                        self.program.push(Instruction::GeD);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
-                    (CompType::Double, Op::Eq, CompType::Double) => (Instruction::EqD, CompType::Bool),
-                    (CompType::Double, Op::Ne, CompType::Double) => {
-                        self.program.push(Instruction::EqD);
-                        self.program.push(Instruction::ImmediateInt(1));
-                        self.program.push(Instruction::XorI);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
-                    (CompType::Double, Op::Ge, CompType::Double) => (Instruction::GeD, CompType::Bool),
-                    (CompType::Double, Op::Gt, CompType::Double) => {
-                        self.stack.push((CompStackI::Temp, v1));
-                        self.program.push(Instruction::Copy(2));
-                        self.program.push(Instruction::LtD);
-                        self.stack.push((out, CompType::Bool));
-                        return Ok(CompType::Bool)
-                    }
+                self.stack.push((out, res.tpe.clone()));
 
-                    _ => return Err(CompErr { location: loc.start, error: CompilerError::TypeMismatch })
-                };
-
-                self.program.push(ins);
-
-                self.stack.push((out, tpe.clone()));
-
-                Ok(tpe)
+                Ok(res.tpe)
             }
             Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
-                let Some((function_id, found)) = self.functions.iter().enumerate().find(|(_, x)| &x.name == name)
+                let signature = FunctionSignature {
+                    name: name.clone(),
+                    args: args.iter().map(|x| self.get_type(x)).collect::<Result<Vec<_>, _>>()?
+                };
+                let Some(found) = self.functions.iter().find(|x| FunctionSignature::from(*x) == signature)
                     else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start }) };
                 let found = found.clone();
                 if found.args.len() != args.len() {
@@ -536,7 +619,7 @@ impl Compiler {
                 for _ in 0..(self.stack.len() - stack_len) {
                     self.stack.pop();
                 }
-                self.function_calls.push(FunctionCallToFix { program_offset: self.program.len(), function_id });
+                self.function_calls.push(FunctionCallToFix { program_offset: self.program.len(), function: signature });
                 self.program.push(Instruction::Call(usize::MAX));
 
                 Ok(return_type)

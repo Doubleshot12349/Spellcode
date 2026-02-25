@@ -313,7 +313,6 @@ impl VM {
                     }
                     _ => return Err(ExecutionException::WrongType)
                 }
-
             }
         }
 
