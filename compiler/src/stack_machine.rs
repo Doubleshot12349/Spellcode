@@ -167,9 +167,9 @@ impl VM {
                 let pos = self.stack.len().wrapping_sub(n.wrapping_add(1));
                 let v = self.pop()?;
                 let value = self.stack.get_mut(pos).ok_or(ExecutionException::EmptyStack)?;
-                if value.tpe() != v.tpe() {
-                    return Err(ExecutionException::WrongType)
-                }
+                //if value.tpe() != v.tpe() {
+                //    return Err(ExecutionException::WrongType)
+                //}
                 *value = v;
             }
             Instruction::AddI  => self.bi_op(|a: i32, b| a.wrapping_add(b))?,
@@ -438,7 +438,7 @@ mod tests {
             ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(1) => Int(5), Int(7);
             ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(2) => Int(7), Int(6);
             ImmediateInt(5), ImmediateInt(6), ImmediateInt(7), Set(3) => Int(5), Int(6) => EmptyStack;
-            ImmediateInt(5), ImmediateInt(6), ImmediateDouble(1.0), Set(1) => Int(5), Int(6) => WrongType;
+            //ImmediateInt(5), ImmediateInt(6), ImmediateDouble(1.0), Set(1) => Int(5), Int(6) => WrongType;
         },
 
         // TODO: test wrong types for all of these

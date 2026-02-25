@@ -5,7 +5,7 @@ pub struct Compiler {
     pub program: Vec<Instruction>
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CompType {
     Int,
     Double,
@@ -155,7 +155,46 @@ impl Compiler {
             }
             Expression::FunctionCall { name, args } => todo!(),
             Expression::PropertyAccess(expression, tag) => todo!(),
-            Expression::Ternary { condition, if_true, if_false } => todo!(),
+            Expression::Ternary { condition, if_true, if_false } => {
+                self.stack.push((out, CompType::Int));
+                self.program.push(Instruction::ImmediateInt(-1));
+                let stack_len = self.stack.len();
+                let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
+                if cond_tpe != CompType::Bool {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                }
+                let branch_to_false = self.program.len();
+                self.program.push(Instruction::Brz(0));  // FIXME
+                self.stack.pop();
+
+                let tpe_if_true = self.compile_expression(if_true, CompStackI::Temp)?;
+                let offset = self.stack.len() - stack_len;
+                self.program.push(Instruction::Set(offset));
+                self.stack.pop();
+                self.stack[stack_len - 1].1 = tpe_if_true.clone();
+                self.program.push(Instruction::Pop(self.stack.len() - stack_len));
+                for _ in 0..(self.stack.len() - stack_len) {
+                    self.stack.pop();
+                }
+                let jump_to_after = self.program.len();
+                self.program.push(Instruction::Jmp(0));
+
+                self.program[branch_to_false] = Instruction::Brz(self.program.len());
+                let tpe_if_false = self.compile_expression(if_false, CompStackI::Temp)?;
+                let offset = self.stack.len() - stack_len;
+                self.program.push(Instruction::Set(offset));
+                self.stack.pop();
+                self.program.push(Instruction::Pop(self.stack.len() - stack_len));
+                for _ in 0..(self.stack.len() - stack_len) {
+                    self.stack.pop();
+                }
+                self.program[jump_to_after] = Instruction::Jmp(self.program.len());
+                if tpe_if_true != tpe_if_false {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                }
+
+                Ok(tpe_if_false)
+            }
             Expression::ArrayAccess { array, index } => todo!(),
             Expression::VarAccess(Tag { item: name, loc }) => {
                 // I'll fix this later I'm just in the mood for one liners right now
@@ -209,6 +248,7 @@ mod tests {
         compiler.compile_expression(&parsed, CompStackI::Temp)?;
         let mut vm = VM::new(compiler.program);
         vm.program.push(Instruction::Syscall(Syscall::Halt));
+        println!("expr = {program}, compiled = {:?}", vm.program);
         for _ in 0..10000 {
             match vm.tick() {
                 Ok(()) => continue,
@@ -243,6 +283,14 @@ mod tests {
         1.5 >= 2.5, 1.5 >= 1.5, 1.5 >= 0.5,
         1.5 == 2.5, 1.5 == 1.5, 1.5 == 0.5,
         1.5 != 2.5, 1.5 != 1.5, 1.5 != 0.5,
+    }
+
+    test_math! { test_ternary: int_exp
+        if true { 1 } else { 0 },
+        if true { 0 } else { 1 },
+        if false { 1 } else { 0 },
+        if false { 0 } else { 1 },
+        13 + if 1 + (2 * 3) == 7 { 5 * 3 } else { 3292 * 2783 } * 8329 + 5,
     }
 }
 
