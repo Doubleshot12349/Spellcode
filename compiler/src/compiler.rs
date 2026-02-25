@@ -1,4 +1,4 @@
-use crate::{parser::{Expression, Literal, Op, Tag}, stack_machine::{self, Instruction}};
+use crate::{parser::{Expression, Literal, Op, Statement, Tag}, stack_machine::{self, Instruction}};
 
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
@@ -24,7 +24,9 @@ pub enum CompStackI {
 #[derive(Debug)]
 pub enum CompilerError {
     TypeMismatch,
-    VariableNotFound
+    VariableNotFound,
+    Redeclaration,
+    CannotAssign
 }
 
 #[derive(Debug)]
@@ -36,6 +38,95 @@ pub struct CompErr {
 impl Compiler {
     pub fn new() -> Compiler {
         Compiler { stack: vec![], program: vec![] }
+    }
+
+    pub fn compile_statement(&mut self, statement: &Statement) -> Result<(), CompErr> {
+        match statement {
+            Statement::ExprS(expression) => { self.compile_expression(expression, CompStackI::Temp)?; }
+            Statement::VariableDecl(Tag { item: name, loc }, expression) => {
+                if self.stack.iter().any(|(value, _)| matches!(value, CompStackI::Variable(v) if v == name)) {
+                    return Err(CompErr { error: CompilerError::Redeclaration, location: loc.start });
+                }
+                self.compile_expression(expression, CompStackI::Variable(name.clone()))?;
+            }
+            Statement::Assignment { left, value } => {
+                let tpe = self.compile_expression(value, CompStackI::Temp)?;
+                match left {
+                    Expression::VarAccess(Tag { item: name, loc }) => {
+                        let Some((idx, value_tpe)) = self.find_variable(name)
+                            else {
+                                return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start })
+                            };
+                        if tpe != value_tpe {
+                            return Err(CompErr { error: CompilerError::TypeMismatch, location: loc.start });
+                        }
+                        self.program.push(Instruction::Set(idx));
+                        self.stack.pop();
+                    }
+                    Expression::ArrayAccess { array, index } => todo!(),
+                    _ => return Err(CompErr { error: CompilerError::CannotAssign, location: todo!() })
+                }
+            }
+            Statement::If { condition, block, else_block } => {
+                let tpe = self.compile_expression(condition, CompStackI::Temp)?;
+                if tpe != CompType::Bool {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                }
+                let branch_false = self.program.len();
+                self.program.push(Instruction::Brz(0));
+                self.stack.pop();
+
+                let stack_len = self.stack.len();
+                for st in block {
+                    self.compile_statement(st)?;
+                }
+                let diff = self.stack.len() - stack_len;
+                self.program.push(Instruction::Pop(diff));
+                for _ in 0..diff {
+                    self.stack.pop();
+                }
+
+                self.program[branch_false] = Instruction::Brz(self.program.len());
+
+                if let Some(else_b) = else_block {
+                    let jump_after_else = self.program.len();
+                    self.program.push(Instruction::Jmp(0));
+                    self.program[branch_false] = Instruction::Brz(self.program.len());
+
+                    for st in else_b {
+                        self.compile_statement(st)?;
+                    }
+                    let diff = self.stack.len() - stack_len;
+                    self.program.push(Instruction::Pop(diff));
+                    for _ in 0..diff {
+                        self.stack.pop();
+                    }
+
+                    self.program[jump_after_else] = Instruction::Jmp(self.program.len());
+                }
+            }
+            Statement::CFor { init, condition, increment, block } => {
+                let stack_len = self.stack.len();
+                self.compile_statement(init)?;
+
+                let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
+                if cond_tpe != CompType::Bool {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                }
+
+                let jump_after = self.program.len();
+                self.program.push(Instruction::Brz(0));  // FIXME
+                self.stack.pop();
+                
+                //for 
+            }
+            Statement::ForEach { variable, array, block } => todo!(),
+            Statement::While { condition, block } => todo!(),
+            Statement::Return(expression) => todo!(),
+            Statement::FunctionDef { name, arguments, return_type, block } => todo!(),
+        }
+
+        Ok(())
     }
 
     /// Compiles the given expression, leaves the result on the top of the stack with the given
@@ -197,14 +288,21 @@ impl Compiler {
             }
             Expression::ArrayAccess { array, index } => todo!(),
             Expression::VarAccess(Tag { item: name, loc }) => {
-                // I'll fix this later I'm just in the mood for one liners right now
-                let Some((idx, tpe)) = self.stack.iter().rev().zip(1..).find_map(|(x, i)| if let CompStackI::Variable(n) = &x.0 && n == name { Some((i, x.1.clone())) } else { None }) else { return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start }) };
+                let Some((idx, tpe)) = self.find_variable(name)
+                    else {
+                        return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start })
+                    };
+
                 self.program.push(Instruction::Copy(idx));
                 self.stack.push((out, tpe.clone()));
 
                 Ok(tpe)
             }
         }
+    }
+
+    fn find_variable(&self, name: &str) -> Option<(usize, CompType)> {
+        self.stack.iter().rev().zip(1..).find_map(|(x, i)| if let CompStackI::Variable(n) = &x.0 && n == name { Some((i, x.1.clone())) } else { None })
     }
 }
 

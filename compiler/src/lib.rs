@@ -12,22 +12,24 @@ pub extern "C" fn add(left: u64, right: u64) -> u64 {
 }
 
 fn main() {
-    let inp = "true && false";
-    let parsed = parser::spellcode::expression(inp).unwrap();
-    println!("{parsed:?}");
+    //let inp = "true && false";
+    //let parsed = parser::spellcode::expression(inp).unwrap();
+    //println!("{parsed:?}");
+    //let mut compiler = Compiler::new();
+    //println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
+    //println!("{:?}", compiler.program);
+
+    let inp = "if true { 1; 2; 3; } else { 4; }";
+    let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
-    println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
+    for st in parsed {
+        compiler.compile_statement(&st).unwrap();
+    }
     println!("{:?}", compiler.program);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+//#[cfg(test)]
+//mod tests {
+//    use super::*;
+//}
 
