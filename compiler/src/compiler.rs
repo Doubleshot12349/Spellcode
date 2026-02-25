@@ -138,7 +138,34 @@ impl Compiler {
                 for _ in 0..condition_pop { self.stack.pop(); }
             }
             Statement::ForEach { variable, array, block } => todo!(),
-            Statement::While { condition, block } => todo!(),
+            Statement::While { condition, block } => {
+                let stack_len_cond = self.stack.len();
+                let start = self.program.len();
+
+                let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
+                if cond_tpe != CompType::Bool {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                }
+
+                let jump_after = self.program.len();
+                self.program.push(Instruction::Brz(0));
+                self.stack.pop();
+                let condition_pop = self.stack.len() - stack_len_cond;
+                
+                for st in block {
+                    self.compile_statement(st)?;
+                }
+
+                let st_pop = self.stack.len() - stack_len_cond;
+                self.program.push(Instruction::Pop(st_pop));
+                for _ in 0..st_pop { self.stack.pop(); }
+                self.program.push(Instruction::Jmp(start));
+
+                self.program[jump_after] = Instruction::Brz(self.program.len());
+
+                self.program.push(Instruction::Pop(condition_pop));
+                for _ in 0..condition_pop { self.stack.pop(); }
+            }
             Statement::Return(expression) => todo!(),
             Statement::FunctionDef { name, arguments, return_type, block } => todo!(),
         }

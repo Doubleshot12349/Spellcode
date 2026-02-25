@@ -100,10 +100,10 @@ peg::parser! {
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
-              v:expression() { Statement::ExprS(v) } /
 
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
-              "return" _ value:expression()? { Statement::Return(value) }
+              "return" _ value:expression()? { Statement::Return(value) } /
+              v:expression() { Statement::ExprS(v) }
 
         pub rule program() -> Vec<Statement> = _ v:statement() ** (_ ";"? _) _ ";"? _ { v }
     }
