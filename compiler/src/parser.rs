@@ -16,13 +16,32 @@ peg::parser! {
               v:$("-"? ['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
         rule bool() -> bool
             = "true" { true } / "false" { false }
+
+        rule escape_sequence() -> char
+            = r"\\" { '\\' } /
+              r"\n" { '\n' } /
+              r"\r" { '\r' } /
+              r"\t" { '\t' } /
+              r#"\""# { '"' } /
+              r"\'" { '\'' }
+
+        rule string_char() -> char
+            = ([' ' | '!' | '#'..='[' | ']'..='~']) /
+              escape_sequence()
+
         rule string() -> String
-            = "\"" v:$([^'"']*) "\"" { v.to_owned() }
+            = "\"" v:string_char()* "\"" { v.into_iter().collect() }
+
+        rule char_lit() -> char
+            = "'" v:([' '..='&' | '('..='[' | ']'..='~']) "'" { v } /
+              "'" v:escape_sequence() "'" { v }
+
         rule literal_no_tag() -> Literal
             = v:double() { Literal::DoubleL(v) } /
               v:integer() { Literal::IntL(v) } /
               v:bool() { Literal::BoolL(v) } /
-              v:string() { Literal::StringL(v) }
+              v:string() { Literal::StringL(v) } /
+              v:char_lit() { Literal::CharL(v) }
         rule literal() -> Tag<Literal>
             = l:position!() v:literal_no_tag() r:position!() { Tag::new(v, l..r) }
 
@@ -114,7 +133,8 @@ pub enum Literal {
     IntL(i32),
     DoubleL(f64),
     BoolL(bool),
-    StringL(String)
+    StringL(String),
+    CharL(char),
 }
 
 #[derive(Debug, PartialEq)]

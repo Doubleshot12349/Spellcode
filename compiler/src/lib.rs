@@ -20,10 +20,16 @@ fn main() {
     //println!("{:?}", compiler.program);
 
     let inp = r#"
-    var str = "Hello, world!";
-    for (var i = 0; i < 13; i = i + 1) {
-        putc(str[i]);
+
+    println_str("Hello, world!");
+
+    fun println_str(inp: string) {
+        for (var i = 0; i < inp.size; i = i + 1) {
+            putc(inp[i]);
+        }
+        putc('\n');
     }
+
     "#;
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
@@ -33,7 +39,6 @@ fn main() {
     loop {
         //println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
         if let Err(e) = vm.tick() {
-            println!();
             println!("exited with error {e:?}");
             break;
         }

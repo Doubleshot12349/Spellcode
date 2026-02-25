@@ -37,7 +37,8 @@ pub enum CompilerError {
     FunctionsMustBeTopLevel,
     NotInFunction,
     FunctionNotFound,
-    WrongNumberOfArguments
+    WrongNumberOfArguments,
+    PropertyNotFound
 }
 
 #[derive(Debug)]
@@ -46,6 +47,7 @@ pub struct CompErr {
     pub location: usize
 }
 
+#[derive(Debug)]
 struct FunctionCallToFix {
     program_offset: usize,
     function_id: usize
@@ -126,27 +128,17 @@ impl Compiler {
         self.program.push(Instruction::Syscall(Syscall::Halt));
 
         let mut id = 0;
-
-        for func in &self.predefined {
-            for item in &self.function_calls {
-                if item.function_id == id {
-                    self.program[item.program_offset] = Instruction::Call(self.program.len());
-                }
-            }
-            id += 1;
-
+        for func in &mut self.predefined {
+            func.func.start_addr = Some(self.program.len());
+            self.functions[id].start_addr = Some(self.program.len());
             self.program.extend(func.definition.iter().cloned());
+            id += 1;
         }
 
         for st in program {
             let Statement::FunctionDef { name: Tag { item: name, .. }, arguments, return_type, block } = st else { continue };
 
-            // TODO: allow using global variables
-            for item in &self.function_calls {
-                if item.function_id == id {
-                    self.program[item.program_offset] = Instruction::Call(self.program.len());
-                }
-            }
+            self.functions[id].start_addr = Some(self.program.len());
             id += 1;
 
             self.stack.clear();
@@ -171,6 +163,12 @@ impl Compiler {
                 self.program.push(Instruction::Return);
             }
         }
+
+        for item in &self.function_calls {
+            self.program[item.program_offset] = Instruction::Call(self.functions[item.function_id].start_addr.unwrap());
+        }
+
+
 
         Ok(())
 
@@ -360,6 +358,11 @@ impl Compiler {
 
                         CompType::String
                     }
+                    Literal::CharL(v) => {
+                        self.program.push(Instruction::ImmediateInt(u32::from(*v) as i32));
+                        CompType::Char
+                    }
+
                 };
                 self.stack.push((out, tpe.clone()));
                 Ok(tpe)
@@ -477,12 +480,24 @@ impl Compiler {
                 for _ in 0..(self.stack.len() - stack_len) {
                     self.stack.pop();
                 }
+                println!("adding function call to ID {} at {}", function_id, self.program.len());
                 self.function_calls.push(FunctionCallToFix { program_offset: self.program.len(), function_id });
-                self.program.push(Instruction::Call(0));
+                self.program.push(Instruction::Call(usize::MAX));
 
                 Ok(return_type)
             }
-            Expression::PropertyAccess(expression, tag) => todo!(),
+            Expression::PropertyAccess(box expression, Tag { item: name, loc }) => {
+                let obj = self.compile_expression(expression, CompStackI::Temp)?;
+                match (obj, name.as_str()) {
+                    (CompType::Array(_) | CompType::String, "size") => {
+                        self.program.push(Instruction::LenA);
+                        self.stack.pop();
+                        self.stack.push((out, CompType::Int));
+                        return Ok(CompType::Int)
+                    }
+                    _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.start })
+                }
+            }
             Expression::Ternary { condition, if_true, if_false } => {
                 self.stack.push((out, CompType::Int));
                 self.program.push(Instruction::ImmediateInt(-1));
