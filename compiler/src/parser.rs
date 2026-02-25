@@ -130,7 +130,7 @@ peg::parser! {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     IntL(i32),
     DoubleL(f64),
@@ -139,7 +139,7 @@ pub enum Literal {
     CharL(char),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Op {
     Plus, Minus, Times, Divide, Mod,
     Shl, Shr, Shrl,
@@ -148,7 +148,7 @@ pub enum Op {
     And, Or, Xor
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Lit(Tag<Literal>),
     Math(Box<Expression>, Tag<Op>, Box<Expression>),
@@ -160,12 +160,12 @@ pub enum Expression {
     NewArray(Tag<TypeName>, Box<Expression>)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TypeName {
     Int, Double, Char, String, Bool, Array(BTag<TypeName>)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     ExprS(Expression),
     VariableDecl(Tag<String>, Expression),

@@ -135,8 +135,10 @@ impl Compiler {
         })
     }
 
-    pub fn compile_program(&mut self, program: &[Statement]) -> Result<(), CompErr> {
-        for st in program {
+    pub fn compile_program(&mut self, inp: &[Statement]) -> Result<(), CompErr> {
+        let mut program = inp.to_vec();
+        program.extend(crate::parser::spellcode::program(include_str!("../stdlib.spc")).unwrap());
+        for st in &program {
             let Statement::FunctionDef { name: Tag { item: name, loc: name_l }, arguments, return_type, block: _ } = st else { continue };
 
             let mut args = vec![];
@@ -158,7 +160,7 @@ impl Compiler {
             self.functions.push(f);
         }
 
-        for st in program {
+        for st in &program {
             if let Statement::FunctionDef { .. } = st { continue };
             self.compile_statement(st)?;
         }
@@ -170,7 +172,7 @@ impl Compiler {
             self.program.extend(func.definition.iter().cloned());
         }
 
-        for st in program {
+        for st in &program {
             let Statement::FunctionDef { name: Tag { item: name, .. }, arguments, return_type, block } = st else { continue };
             let mut args = vec![];
             for (_, Tag { item: tpe, .. }) in arguments {
