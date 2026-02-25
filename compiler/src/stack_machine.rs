@@ -1,6 +1,6 @@
 use std::{char, collections::HashMap};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Syscall {
     Nop = 0,
     GetMana = 1,
@@ -19,7 +19,7 @@ pub enum Tpe {
     Int, Double, Array(Box<Tpe>)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Instruction {
     ImmediateInt(i32),
     ImmediateDouble(f64),
@@ -274,6 +274,7 @@ impl VM {
                     };
                     item.push(it);
                 }
+                self.heap.insert(id, HeapItem { value: item, mark: false, tpe: t.clone() });
                 self.stack.push(StackItem::Array(t, id))
             }
             Instruction::GetA => {

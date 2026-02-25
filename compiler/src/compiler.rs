@@ -5,7 +5,8 @@ pub struct Compiler {
     pub program: Vec<Instruction>,
     pub functions: Vec<DeclaredFunction>,
     function_calls: Vec<FunctionCallToFix>,
-    current_function: Option<DeclaredFunction>
+    current_function: Option<DeclaredFunction>,
+    predefined: Vec<RawFunction>
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,6 +20,7 @@ pub enum CompType {
     Void
 }
 
+#[derive(Debug)]
 pub enum CompStackI {
     Temp,
     Variable(String),
@@ -57,9 +59,32 @@ struct DeclaredFunction {
     start_addr: Option<usize>
 }
 
+struct RawFunction {
+    pub func: DeclaredFunction,
+    pub definition: Vec<Instruction>
+}
+
 impl Compiler {
     pub fn new() -> Compiler {
-        Compiler { stack: vec![], program: vec![], functions: vec![], function_calls: vec![], current_function: None }
+        let predefined = vec![
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "putc".to_owned(),
+                    args: vec![("c".to_owned(), CompType::Char)],
+                    return_type: None,
+                    start_addr: None
+                },
+                definition: vec![Instruction::Copy(2), Instruction::Syscall(Syscall::PrintChar), Instruction::Return]
+            }
+        ];
+        Compiler {
+            stack: vec![],
+            program: vec![],
+            functions: predefined.iter().map(|x| x.func.clone()).collect(),
+            function_calls: vec![],
+            current_function: None,
+            predefined
+        }
     }
 
     fn resolve_type(&self, tpe: &TypeName) -> Result<CompType, CompErr> {
@@ -101,6 +126,18 @@ impl Compiler {
         self.program.push(Instruction::Syscall(Syscall::Halt));
 
         let mut id = 0;
+
+        for func in &self.predefined {
+            for item in &self.function_calls {
+                if item.function_id == id {
+                    self.program[item.program_offset] = Instruction::Call(self.program.len());
+                }
+            }
+            id += 1;
+
+            self.program.extend(func.definition.iter().cloned());
+        }
+
         for st in program {
             let Statement::FunctionDef { name: Tag { item: name, .. }, arguments, return_type, block } = st else { continue };
 
@@ -134,6 +171,7 @@ impl Compiler {
                 self.program.push(Instruction::Return);
             }
         }
+
         Ok(())
 
         //todo!()
@@ -159,7 +197,7 @@ impl Compiler {
                         if tpe != value_tpe {
                             return Err(CompErr { error: CompilerError::TypeMismatch, location: loc.start });
                         }
-                        self.program.push(Instruction::Set(idx));
+                        self.program.push(Instruction::Set(idx - 1));
                         self.stack.pop();
                     }
                     Expression::ArrayAccess { array, index } => todo!(),
@@ -314,9 +352,9 @@ impl Compiler {
                         self.program.push(Instruction::AllocA(stack_machine::Tpe::Int));
 
                         for (i, c) in chars.enumerate() {
-                            self.program.push(Instruction::Copy(1));
-                            self.program.push(Instruction::ImmediateInt(i as i32));
                             self.program.push(Instruction::ImmediateInt(c as i32));
+                            self.program.push(Instruction::ImmediateInt(i as i32));
+                            self.program.push(Instruction::Copy(3));
                             self.program.push(Instruction::SetA);
                         }
 
@@ -406,7 +444,7 @@ impl Compiler {
                 Ok(tpe)
             }
             Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
-                let Some((function_id, found)) = self.functions.iter().enumerate().find(|(i, x)| &x.name == name)
+                let Some((function_id, found)) = self.functions.iter().enumerate().find(|(_, x)| &x.name == name)
                     else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start }) };
                 let found = found.clone();
                 if found.args.len() != args.len() {
@@ -414,9 +452,9 @@ impl Compiler {
                 }
                 let mut arg_positions = vec![];
                 for (_, tpe) in &found.args {
-                    arg_positions.push(self.stack.len());
                     self.program.push(Instruction::ImmediateInt(0));
                     self.stack.push((CompStackI::Temp, tpe.clone()));
+                    arg_positions.push(self.stack.len());
                 }
                 let return_type = if let Some(ret) = &found.return_type {
                     self.program.push(Instruction::ImmediateInt(0));
@@ -485,7 +523,29 @@ impl Compiler {
 
                 Ok(tpe_if_false)
             }
-            Expression::ArrayAccess { array, index } => todo!(),
+            Expression::ArrayAccess { array, index } => {
+                let inner = match self.compile_expression(array, CompStackI::Temp)? {
+                    CompType::Array(box inner) => inner.clone(),
+                    CompType::String => CompType::Char,
+                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                };
+                let array_addr = self.stack.len() - 1;
+                let CompType::Int = self.compile_expression(index, CompStackI::Temp)?
+                    else {
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    };
+
+
+                self.program.push(Instruction::Copy(self.stack.len() - array_addr));
+                self.stack.push((CompStackI::Temp, CompType::Void));
+                self.program.push(Instruction::GetA);
+                self.stack.pop();
+                self.stack.pop();
+
+                self.stack.push((out, inner.clone()));
+
+                Ok(inner)
+            }
             Expression::VarAccess(Tag { item: name, loc }) => {
                 let Some((idx, tpe)) = self.find_variable(name)
                     else {
