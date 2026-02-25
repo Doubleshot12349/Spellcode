@@ -19,7 +19,13 @@ fn main() {
     //println!("{:?}", compiler.compile_expression(&parsed, compiler::CompStackI::Temp));
     //println!("{:?}", compiler.program);
 
-    let inp = "fun blah(a: int) -> int { 1; return a + 7; }";
+    let inp = "
+        fun blah(a: int) -> int {
+            return a + 7;
+        }
+
+        blah(2);
+    ";
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
     compiler.compile_program(&parsed).unwrap();

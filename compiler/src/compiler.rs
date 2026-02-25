@@ -16,6 +16,7 @@ pub enum CompType {
     Bool,
     String,
     Array(Box<CompType>),
+    Void
 }
 
 pub enum CompStackI {
@@ -32,7 +33,9 @@ pub enum CompilerError {
     Redeclaration,
     CannotAssign,
     FunctionsMustBeTopLevel,
-    NotInFunction
+    NotInFunction,
+    FunctionNotFound,
+    WrongNumberOfArguments
 }
 
 #[derive(Debug)]
@@ -120,12 +123,11 @@ impl Compiler {
             }
             self.stack.push((CompStackI::ReturnAddress, CompType::Int));
             let stack_len = self.stack.len();
-            println!("stack len = {stack_len}");
 
             for st in block {
                 self.compile_statement(st)?;
             }
-            println!("stack len = {}", self.stack.len());
+
             if self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).is_some() {
                 // don't bother updating compiler stack, it's getting cleared next iteration
                 self.program.push(Instruction::Pop(self.stack.len() - stack_len));
@@ -403,7 +405,45 @@ impl Compiler {
 
                 Ok(tpe)
             }
-            Expression::FunctionCall { name, args } => todo!(),
+            Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
+                let Some((function_id, found)) = self.functions.iter().enumerate().find(|(i, x)| &x.name == name)
+                    else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start }) };
+                let found = found.clone();
+                if found.args.len() != args.len() {
+                    return Err(CompErr { error: CompilerError::WrongNumberOfArguments, location: loc.start })
+                }
+                let mut arg_positions = vec![];
+                for (_, tpe) in &found.args {
+                    arg_positions.push(self.stack.len());
+                    self.program.push(Instruction::ImmediateInt(0));
+                    self.stack.push((CompStackI::Temp, tpe.clone()));
+                }
+                let return_type = if let Some(ret) = &found.return_type {
+                    self.program.push(Instruction::ImmediateInt(0));
+                    self.stack.push((out, ret.clone()));
+                    ret.clone()
+                } else {
+                    CompType::Void
+                };
+                let stack_len = self.stack.len();
+
+                for (i, arg) in args.iter().enumerate() {
+                    let tpe = self.compile_expression(arg, CompStackI::Temp)?;
+                    if tpe != found.args[i].1 {
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                    }
+                    self.program.push(Instruction::Set(self.stack.len() - arg_positions[i]));
+                    self.stack.pop();
+                }
+                self.program.push(Instruction::Pop(self.stack.len() - stack_len));
+                for _ in 0..(self.stack.len() - stack_len) {
+                    self.stack.pop();
+                }
+                self.function_calls.push(FunctionCallToFix { program_offset: self.program.len(), function_id });
+                self.program.push(Instruction::Call(0));
+
+                Ok(return_type)
+            }
             Expression::PropertyAccess(expression, tag) => todo!(),
             Expression::Ternary { condition, if_true, if_false } => {
                 self.stack.push((out, CompType::Int));
@@ -414,7 +454,7 @@ impl Compiler {
                     return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
                 }
                 let branch_to_false = self.program.len();
-                self.program.push(Instruction::Brz(0));  // FIXME
+                self.program.push(Instruction::Brz(0));
                 self.stack.pop();
 
                 let tpe_if_true = self.compile_expression(if_true, CompStackI::Temp)?;
