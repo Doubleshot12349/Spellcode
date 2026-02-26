@@ -46,6 +46,8 @@ on:
       - 'Packages/**'
       - 'ProjectSettings/**'
       - 'Tests/**'
+    branches:
+      - 'unity-ci'
   pull_request:
     types: [ready_for_review, synchronize, reopened]
     paths:
