@@ -3,8 +3,8 @@ fun print(inp: char) {
 }
 
 fun print(inp: string) {
-    for (var i = 0; i < inp.size; i = i + 1) {
-        putc(inp[i]);
+    for v in inp {
+        putc(v);
     }
 }
 

@@ -344,7 +344,97 @@ impl Compiler {
                 self.program.push(Instruction::Pop(condition_pop));
                 for _ in 0..condition_pop { self.stack.pop(); }
             }
-            Statement::ForEach { variable, array, block } => todo!(),
+            Statement::ForEach { variable, array, block } => {
+                let inner = match self.compile_expression(array, CompStackI::Temp)? {
+                    CompType::Array(v) => *v.clone(),
+                    CompType::String => CompType::Char,
+                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                };
+
+                self.program.push(Instruction::Copy(1));
+                self.program.push(Instruction::LenA);
+                self.stack.push((CompStackI::Temp, CompType::Int));
+
+                self.program.push(Instruction::ImmediateInt(0));
+                self.stack.push((CompStackI::Temp, CompType::Int));
+
+                // array
+                // length
+                // index
+
+                let jump_target = self.program.len();
+                let stack_len = self.stack.len();
+                self.program.push(Instruction::Copy(1));
+                //self.program.push(Instruction::ImmediateInt(1));
+                //self.program.push(Instruction::AddI);
+                self.stack.push((CompStackI::Temp, CompType::Int));
+
+                self.program.push(Instruction::Copy(3));
+                self.stack.push((CompStackI::Temp, CompType::Int));
+
+                // array
+                // length
+                // index
+                // index
+                // length
+
+                self.program.push(Instruction::LtI);
+                self.stack.pop();
+                // array
+                // length
+                // index
+                // 1 if continue
+                let branch_idx = self.program.len();
+                self.program.push(Instruction::Brz(0));
+                self.stack.pop();
+                // array
+                // length
+                // index
+
+                self.program.push(Instruction::Copy(1));
+                self.stack.push((CompStackI::Temp, CompType::Int));
+
+                self.program.push(Instruction::Copy(4));
+                self.stack.push((CompStackI::Temp, CompType::Array(Box::new(inner.clone()))));
+
+                // array
+                // length
+                // index
+                // index
+                // array
+
+                self.program.push(Instruction::GetA);
+                self.stack.pop();
+                self.stack.pop();
+                self.stack.push((CompStackI::Variable(variable.item.clone()), inner.clone()));
+
+                // array
+                // length
+                // index
+                // variable
+
+                for st in block {
+                    self.compile_statement(st)?;
+                }
+
+                let n = self.stack.len() - stack_len;
+                self.program.push(Instruction::Pop(n));
+                for _ in 0..n { self.stack.pop(); }
+
+                // array
+                // length
+                // index
+
+                self.program.push(Instruction::ImmediateInt(1));
+                self.program.push(Instruction::AddI);
+
+                // array
+                // length
+                // index + 1
+                self.program.push(Instruction::Jmp(jump_target));
+
+                self.program[branch_idx] = Instruction::Brz(self.program.len());
+            }
             Statement::While { condition, block } => {
                 let stack_len_start = self.stack.len();
 

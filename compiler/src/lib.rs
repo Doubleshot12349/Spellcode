@@ -13,8 +13,8 @@ pub extern "C" fn add(left: u64, right: u64) -> u64 {
 
 fn main() {
     let inp = r#"
-    println("Hello, world!");
-    println(123456);
+    println("Hello, world!")
+    println(123456)
     "#;
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
