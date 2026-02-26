@@ -92,7 +92,7 @@ public class StackMachineVM : MonoBehaviour
     // ===== Internal Runtime =======
     // ==============================
 
-    private List<Value> stack = new List<Value>();
+    public List<Value> stack = new List<Value>();
     private int ip = 0;
     private int steps = 0;
 
@@ -139,17 +139,85 @@ public class StackMachineVM : MonoBehaviour
         public ArrayObject ArrayValue;
 
         //these convert from c# types to VM types and vice versa
-        public static Value FromInt(int v) => new Value { Type = ValueType.Int, IntValue = v };
-        public static Value FromDouble(double v) => new Value { Type = ValueType.Double, DoubleValue = v };
-        public static Value FromReturn(int addr) => new Value { Type = ValueType.ReturnAddress, ReturnAddress = addr };
+        public static Value FromInt(int v) => new Value { Type = ValueType.Int, IntValue = v, DoubleValue = 0.0, ReturnAddress = 0, ArrayValue = null };
+        public static Value FromDouble(double v) => new Value { Type = ValueType.Double, DoubleValue = v, IntValue = 0, ReturnAddress = 0, ArrayValue = null };
+        public static Value FromReturn(int addr) => new Value { Type = ValueType.ReturnAddress, ReturnAddress = addr, IntValue = 0, DoubleValue = 0.0, ArrayValue = null };
         public static Value FromArray(ArrayObject arr) => new Value { Type = ValueType.Array, ArrayValue = arr };
 
         public static explicit operator int(Value v) => v.IntValue;
         public static explicit operator double(Value v) => v.DoubleValue;
         public static explicit operator ArrayObject(Value v) => v.ArrayValue;
 
+        Value() { Type = ValueType.Int; IntValue = 0; DoubleValue = 0.0; ReturnAddress = 0; ArrayValue = null; }
+
+
+        // from https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type#class-example
+
+        public override bool Equals(object obj) => this.Equals(obj as Value);
+
+        public bool Equals(Value p)
+        {
+            if (p is null)
+            {
+                return false;
+            }
+
+            //// Optimization for a common success case.
+            //if (Object.ReferenceEquals(this, p))
+            //{
+            //    return true;
+            //}
+
+            // If run-time types are not exactly the same, return false.
+            if (this.GetType() != p.GetType())
+            {
+                return false;
+            }
+
+            // Return true if the fields match.
+            // Note that the base class is not invoked because it is
+            // System.Object, which defines Equals as reference equality.
+            return (Type == p.Type) && (IntValue == p.IntValue) && (DoubleValue == p.DoubleValue) && (ReturnAddress == p.ReturnAddress) && (ArrayValue == p.ArrayValue);
+        }
+
+        public override int GetHashCode() => (Type, IntValue, DoubleValue, ReturnAddress, ArrayValue).GetHashCode();
+
+        public static bool operator ==(Value lhs, Value rhs)
+        {
+            if (lhs is null)
+            {
+                if (rhs is null)
+                {
+                    return true;
+                }
+
+                // Only the left side is null.
+                return false;
+            }
+            // Equals handles case of null on right side.
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Value lhs, Value rhs) => !(lhs == rhs);
+
+        public override string ToString()
+        {
+            switch (Type) {
+                case ValueType.Int:
+                    return $"Value(Int, {IntValue})";
+                case ValueType.Double:
+                    return $"Value(Double, {DoubleValue})";
+                case ValueType.ReturnAddress:
+                    return $"Value(ReturnAddress, {ReturnAddress})";
+                case ValueType.Array:
+                    return $"Value(Array, {ArrayValue})";
+                default:
+                    return "unreachable state";
+            }
+        }
     }
 
+    // FIXME: implement equality operators
     public class ArrayObject
     {
         public ElementType InnerType;
@@ -217,6 +285,25 @@ public class StackMachineVM : MonoBehaviour
         {
             Op = op;
         }
+
+        public Instruction(OpCode op, int v)
+        {
+            Op = op;
+            A = v;
+        }
+
+        public Instruction(OpCode op, double v)
+        {
+            Op = op;
+            D = v;
+        }
+
+        public Instruction(OpCode op, ElementType v)
+        {
+            Op = op;
+            ElementType = v;
+        }
+
     }
 
     // ==============================
