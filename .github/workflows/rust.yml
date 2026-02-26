@@ -1,0 +1,26 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "rust-interop" ]
+  pull_request:
+    branches: [ "rust-interop" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set toolchain to nightly
+      run: rustup override set nightly
+    - name: Build
+      working-directory: compiler
+      run: cargo build --verbose
+    - name: Run tests
+      working-directory: compiler
+      run: cargo test --verbose
