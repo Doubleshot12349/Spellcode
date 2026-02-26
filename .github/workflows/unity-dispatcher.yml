@@ -136,7 +136,7 @@ jobs:
     with:
       runnerMain: ${{ needs.resolve_runners.outputs.main }}
       runnerMacos: ${{ needs.resolve_runners.outputs.macos }}
-      unityVersion: ${{ vars.UNITY_VERSION }}
+      unityVersion: "6000.3.4f1"
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
