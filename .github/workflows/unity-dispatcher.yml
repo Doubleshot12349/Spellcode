@@ -193,7 +193,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
-          gh workflow run ci-cd-pipeline.yml \
+          gh workflow run unity-pipeline.yml \
             --ref "${{ github.ref }}" \
             --field runnerMain="$(printf '%s' '${{ needs.resolve_runners.outputs.main }}')" \
             --field runnerMacos="$(printf '%s' '${{ needs.resolve_runners.outputs.macos }}')" \
