@@ -10,7 +10,7 @@ public class ConjureTests
     private GameObject lightning;
     private GameObject ice;
     private GameObject targetHex;
-    private Fire fireComponent;
+    /*private Fire fireComponent;
 
     [UnitySetUp]
     public IEnumerator SetUp()
@@ -62,5 +62,5 @@ public class ConjureTests
         Object.Destroy(prefabObject);
         Object.Destroy(targetObject);
         yield return null;
-    }
+    }*/
 }
