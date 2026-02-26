@@ -8,6 +8,8 @@ public class PlayerMover : MonoBehaviour
     public float moveSpeed = 6f;
 
     public HexTile currentTile;
+    public int startHexQ;
+    public int startHexR;
 
     private bool isMoving;
 
@@ -58,7 +60,7 @@ public class PlayerMover : MonoBehaviour
         isMoving = false;
     }
 
-    public void AutoSnapToNearestTile()
+    /*public void AutoSnapToNearestTile()
     {
         if (grid == null) return;
 
@@ -80,10 +82,12 @@ public class PlayerMover : MonoBehaviour
 
         if (nearest != null)
             SnapToTile(nearest);
-    }
+    }*/
 
     private void Start()
     {
-        AutoSnapToNearestTile();
+        //AutoSnapToNearestTile();
+        currentTile = HexGridManager.GetHex(startHexQ, startHexR).GetComponent<HexTile>();
+        SnapToTile(currentTile);
     }
 }

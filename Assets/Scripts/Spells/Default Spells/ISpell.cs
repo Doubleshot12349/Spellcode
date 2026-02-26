@@ -12,11 +12,7 @@ public interface ISpell : IGameObjectSource
     float MoveSpeed { get; set; }
     GameObject CurrentTile { get; set; }
     GameObject Prefab { get; set; }
-
-
-
-    
-
+    string Type { get; }
 
     public bool OverrideMoveSpell(GameObject target)
     {
@@ -30,12 +26,28 @@ public interface ISpell : IGameObjectSource
         float t = 0f;
         float dist = Vector3.Distance(start, end);
         float duration = dist / Mathf.Max(0.01f, MoveSpeed);
+        bool isDestroyed = false;
 
         while (t < 1f)
         {
-            t += Time.deltaTime / duration;
-            transform.position = Vector3.Lerp(start, end, t);
-            yield return null;
+            try
+            {
+                t += Time.deltaTime / duration;
+                transform.position = Vector3.Lerp(start, end, t);
+            }
+            catch
+            {
+                isDestroyed = true;
+            }
+            if (isDestroyed)
+            {
+                yield break;
+            }
+            else
+            {
+                yield return null;
+            }
+            
         }
 
         transform.position = end;

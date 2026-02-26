@@ -13,7 +13,8 @@ public class SysCallManager : MonoBehaviour
     public GameObject iceSpike;
     private Renderer iceSprite;
     public GameObject portal;
-    private Renderer portalSprite;
+    private Renderer portalSprite1;
+    private Renderer portalSprite2;
     private static GameObject map;
 
     private StackMachineVM weaver;
@@ -31,6 +32,8 @@ public class SysCallManager : MonoBehaviour
         (fireSprite = fireball.GetComponent<Renderer>()).enabled = false;
         (lightSprite = lightning.GetComponent<Renderer>()).enabled = false;
         (iceSprite = iceSpike.GetComponent<Renderer>()).enabled = false;
+        (portalSprite1 = portal.GetComponent<Portal>().portal1.GetComponent<Renderer>()).enabled = false;;
+        (portalSprite2 = portal.GetComponent<Portal>().portal2.GetComponent<Renderer>()).enabled = false;
         weaver = this.GetComponent<StackMachineVM>();
         playerStats = player.GetComponent<PlayerController>();
         map = GameObject.Find("HexGrid");
@@ -101,12 +104,15 @@ public class SysCallManager : MonoBehaviour
             case 3:
                 //portal
                 Debug.Log("Portal");
+                portalSprite1.enabled = true;
+                portalSprite2.enabled = true;
                 GameObject portals = portal.GetComponent<ISpell>().Conjure(target);
-                for(int i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     activeSpells.AddSpell(portals.transform.GetChild(i).gameObject);
-                    portal.transform.GetChild(i).GetComponent<Renderer>().enabled = false;
                 }
+                portalSprite1.enabled = false;
+                portalSprite2.enabled = false;
                 break;
             default:
                 break;

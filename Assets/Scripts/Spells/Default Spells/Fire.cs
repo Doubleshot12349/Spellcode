@@ -7,6 +7,14 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
      public GameObject prefab;
     public float moveSpeed;
     public float MoveSpeed { get; set; }
+    public int currentDamage = 10;
+    public string type = "Fire";
+    public string Type {
+        get
+        {
+            return type;
+        }
+    }
     
     public void Awake()
     {
@@ -14,15 +22,13 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
     }
-    public void OnCollisionEnter2D()
+    public void OnTriggerEnter2D(Collider2D col)
     {
-        //deal damage
-        //dissapate
-    }
+        if (col.gameObject.tag == "Player")
+        {
+            col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
 
-    public void Move(int x,int y)
-    {
-        //move to next square
-        //adjust power based on mana present (leylines)
+            Destroy(gameObject);
+        }
     }
 }

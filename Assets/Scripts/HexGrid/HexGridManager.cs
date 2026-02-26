@@ -12,7 +12,7 @@ public class HexGridManager : MonoBehaviour
 
     public float hexSize = 1f; // "radius" in word units
 
-    private readonly Dictionary<HexCoords, HexTile> tiles =
+    private static Dictionary<HexCoords, HexTile> tiles =
         new Dictionary<HexCoords, HexTile>();
 
     // Axial neighbor directions for pointy-top layout
@@ -27,7 +27,7 @@ public class HexGridManager : MonoBehaviour
     };
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         GenerateGrid();
     }
@@ -181,29 +181,12 @@ public class HexGridManager : MonoBehaviour
 
     public static GameObject GetHex(HexCoords h)
     {
-        return GetHex(h.q, h.r);
+        return tiles[h].gameObject;
     }
     public static GameObject GetHex(int q, int r)
     {
-        string hexName = string.Format($"Hex ({q},{r})");
-        GameObject target = null;
-        //no wildcards exist in C#, and find doesn't support partial string matching
-        foreach (Transform child in GameObject.Find("HexGrid").transform)
-        {
-            if (child.name.Contains(hexName))
-            {
-                target = child.gameObject;
-                break;
-            }
-
-        }
-
-        if (target == null)
-        {
-            Debug.Log($"Failed to find targetted hex: {q},{r}");
-            return null;
-        }
-        return target;
+        HexCoords h = new HexCoords(q, r);
+        return GetHex(h);
     }
 
     //AI gen

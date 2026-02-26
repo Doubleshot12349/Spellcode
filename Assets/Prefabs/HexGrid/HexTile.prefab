@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 6178428561959583155}
   m_Layer: 0
   m_Name: HexTile
-  m_TagString: Untagged
+  m_TagString: Tile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -254,7 +254,7 @@ MonoBehaviour:
     q: 0
     r: 0
   walkable: 1
-  baseColor: {r: 1, g: 1, b: 1, a: 1}
   hoverValidColor: {r: 0.4, g: 1, b: 0.4, a: 1}
   hoverInvalidColor: {r: 1, g: 0.4, b: 0.4, a: 1}
   selectedColor: {r: 1, g: 1, b: 0.3, a: 1}
+  highlightSR: {fileID: 0}

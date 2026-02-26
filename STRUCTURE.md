@@ -17,11 +17,9 @@ Files necessary for the game running belong in the Assets folder this includes:
 
 1. Ensure Unity Test Framework package is added to the project
 
-2. Place tests in Packages/Test Framework/Tests/"category" where category is:
-    Unit
-    Integration
-    Validation
-    System
+2. Place tests in Assets/Tests/"mode" where mode is either:
+    - EditModeTests
+    - PlayModeTests
 3. Tests should be named "Method/Class""test #".cs (or whichever ;anguage you wrote the test in)
 
 4. Go to Window -> General -> Test Runner

@@ -15,6 +15,14 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public List<GameObject> path;
+    public int currentDamage;
+    public string type = "Lightning";
+    public string Type {
+        get
+        {
+            return type;
+        }
+    }
 
     public void Cast()
     {
@@ -132,9 +140,12 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
     }
-    public void OnCollisionEnter()
+    public void OnTriggerEnter2D(Collider2D col)
     {
-        //deal damage
+        if (col.gameObject.tag == "Player")
+        {
+            col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
+        }
         //dissapate
     }
 
