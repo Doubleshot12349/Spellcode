@@ -43,7 +43,7 @@ jobs:
       retentionDays: ${{ steps.unpack.outputs.retentionDays }}
       requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
       skipPerBuildTarget: ${{ steps.unpack.outputs.skipPerBuildTarget }}
-      unityVersion: ${{ steps.unpack.outputs.unityVersion }}
+      unityVersion: "6000.3.4f1"
       useGitLfs: ${{ steps.unpack.outputs.useGitLfs }}
       editModePath: ${{ steps.unpack.outputs.editModePath }}
       playModePath: ${{ steps.unpack.outputs.playModePath }}
@@ -88,7 +88,7 @@ jobs:
     uses: avalin/unity-ci-cd/.github/workflows/step-1-test.yml@v1
     with:
       runnerMain: ${{ inputs.runnerMain }}
-      unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
+      unityVersion: "6000.3.4f1"
       useGitLfs: ${{ needs.unpack_inputs.outputs.useGitLfs }}
       editModePath: ${{ needs.unpack_inputs.outputs.editModePath }}
       playModePath: ${{ needs.unpack_inputs.outputs.playModePath }}
@@ -117,7 +117,7 @@ jobs:
       runnerMain: ${{ inputs.runnerMain }}
       runnerMacos: ${{ inputs.runnerMacos }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
-      unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
+      unityVersion: "6000.3.4f1"
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       buildTargets: ${{ inputs.buildTargets }}
