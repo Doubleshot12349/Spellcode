@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Range};
 
 use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall, Tpe}};
 
@@ -47,7 +47,7 @@ pub enum CompilerError {
 #[derive(Debug)]
 pub struct CompErr {
     pub error: CompilerError,
-    pub location: usize
+    pub location: Range<usize>
 }
 
 #[derive(Debug)]
@@ -154,7 +154,7 @@ impl Compiler {
             let f = DeclaredFunction { name: name.clone(), args, return_type };
             
             if self.functions.iter().any(|x| FunctionSignature::from(x) == FunctionSignature::from(&f)) {
-                return Err(CompErr { error: CompilerError::Redeclaration, location: name_l.start });
+                return Err(CompErr { error: CompilerError::Redeclaration, location: name_l.clone() });
             }
 
             self.functions.push(f);
@@ -218,7 +218,7 @@ impl Compiler {
             Statement::ExprS(expression) => { self.compile_expression(expression, CompStackI::Temp)?; }
             Statement::VariableDecl(Tag { item: name, loc }, expression) => {
                 if self.stack.iter().any(|(value, _)| matches!(value, CompStackI::Variable(v) if v == name)) {
-                    return Err(CompErr { error: CompilerError::Redeclaration, location: loc.start });
+                    return Err(CompErr { error: CompilerError::Redeclaration, location: loc.clone() });
                 }
                 self.compile_expression(expression, CompStackI::Variable(name.clone()))?;
             }
@@ -228,10 +228,10 @@ impl Compiler {
                     Expression::VarAccess(Tag { item: name, loc }) => {
                         let Some((idx, value_tpe)) = self.find_variable(name)
                             else {
-                                return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start })
+                                return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.clone() })
                             };
                         if tpe != value_tpe {
-                            return Err(CompErr { error: CompilerError::TypeMismatch, location: loc.start });
+                            return Err(CompErr { error: CompilerError::TypeMismatch, location: loc.clone() });
                         }
                         self.program.push(Instruction::Set(idx - 1));
                         self.stack.pop();
@@ -241,15 +241,15 @@ impl Compiler {
                         let inner = match self.compile_expression(array, CompStackI::Temp)? {
                             CompType::Array(box v) => v,
                             CompType::String => CompType::Char,
-                            _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                            _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: index.loc.clone() })
                         };
                         if inner != tpe {
-                            return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                            return Err(CompErr { error: CompilerError::TypeMismatch, location: left_loc.clone() })
                         }
                         let array_index = self.stack.len() - 1;
                         let CompType::Int = self.compile_expression(index, CompStackI::Temp)?
                             else {
-                                return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                                return Err(CompErr { error: CompilerError::TypeMismatch, location: index.loc.clone() })
                             };
                         let index_index = self.stack.len() - 1;
                         // copy item
@@ -267,13 +267,13 @@ impl Compiler {
                         self.stack.pop();
                         self.stack.pop();
                     }
-                    _ => return Err(CompErr { error: CompilerError::CannotAssign, location: todo!() })
+                    _ => return Err(CompErr { error: CompilerError::CannotAssign, location: left_loc.clone() })
                 }
             }
             Statement::If { condition, block, else_block } => {
                 let tpe = self.compile_expression(condition, CompStackI::Temp)?;
                 if tpe != CompType::Bool {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: condition.loc.clone() })
                 }
                 let branch_false = self.program.len();
                 self.program.push(Instruction::Brz(0));
@@ -319,7 +319,7 @@ impl Compiler {
 
                 let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
                 if cond_tpe != CompType::Bool {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: condition.loc.clone() })
                 }
 
                 let jump_after = self.program.len();
@@ -348,7 +348,7 @@ impl Compiler {
                 let inner = match self.compile_expression(array, CompStackI::Temp)? {
                     CompType::Array(v) => *v.clone(),
                     CompType::String => CompType::Char,
-                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: array.loc.clone() })
                 };
 
                 self.program.push(Instruction::Copy(1));
@@ -443,7 +443,7 @@ impl Compiler {
 
                 let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
                 if cond_tpe != CompType::Bool {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: condition.loc.clone() })
                 }
 
                 let jump_after = self.program.len();
@@ -470,7 +470,7 @@ impl Compiler {
                 if let Some(ret) = expression {
                     let tpe = self.compile_expression(ret, CompStackI::Temp)?;
                     if Some(tpe) != func.return_type {
-                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: ret.loc.clone() });
                     }
                     let pos = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnValue)).unwrap();
                     self.program.push(Instruction::Set(pos.0));
@@ -484,14 +484,14 @@ impl Compiler {
                 self.program.push(Instruction::Return);
                 self.stack.pop();
             }
-            Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.start })
+            Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.clone() })
         }
 
         Ok(())
     }
 
-    fn get_op(&self, left: &CompType, op: &Op, right: &CompType) -> Result<OpEvaluation, CompErr> {
-        let (ins, tpe) = match (left, op, right) {
+    fn get_op(&self, left: &CompType, op: Tag<Op>, right: &CompType) -> Result<OpEvaluation, CompErr> {
+        let (ins, tpe) = match (left, op.item, right) {
             (CompType::Int, Op::Plus, CompType::Int) => (Instruction::AddI, CompType::Int),
             (CompType::Int, Op::Minus, CompType::Int) => (Instruction::SubI, CompType::Int),
             (CompType::Int, Op::Times, CompType::Int) => (Instruction::MulI, CompType::Int),
@@ -567,7 +567,7 @@ impl Compiler {
                 })
             }
 
-            _ => return Err(CompErr { location: todo!(), error: CompilerError::TypeMismatch })
+            _ => return Err(CompErr { location: op.loc, error: CompilerError::TypeMismatch })
         };
 
         Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![ins], tpe })
@@ -582,7 +582,11 @@ impl Compiler {
                 Literal::StringL(_) => CompType::String,
                 Literal::CharL(_) => CompType::Char,
             },
-            Expression::Math(box left, op, box right) => todo!(),
+            Expression::Math(box left, op, box right) => {
+                let l = self.get_type(left)?;
+                let r = self.get_type(right)?;
+                self.get_op(&l, op.clone(), &r)?.tpe
+            }
             Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
                 let signature = FunctionSignature {
                     name: name.clone(),
@@ -591,29 +595,29 @@ impl Compiler {
                 if let Some(v) = self.functions.iter().find(|x| FunctionSignature::from(*x) == signature) {
                     v.return_type.as_ref().map(|x| x.clone()).unwrap_or(CompType::Void)
                 } else {
-                    return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start })
+                    return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.clone() })
                 }
             }
             Expression::PropertyAccess(box expression, Tag { item: name, loc }) => {
                 if matches!(self.get_type(expression)?, CompType::Array(_) | CompType::String) && name == "size" {
                     CompType::Int
                 } else {
-                    return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.start })
+                    return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })
                 }
             }
-            Expression::Ternary { condition, if_true, if_false } => self.get_type(if_true)?,
-            Expression::ArrayAccess { array, index } => {
+            Expression::Ternary { if_true, .. } => self.get_type(if_true)?,
+            Expression::ArrayAccess { array, .. } => {
                 let tpe = self.get_type(array)?;
                 match tpe {
                     CompType::Array(box v) => v.clone(),
                     CompType::String => CompType::Char,
-                    _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: todo!() })
+                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: array.loc.clone() })
                 }
             }
             Expression::VarAccess(tag) => if let Some((_, t)) = self.find_variable(&tag.item) { t } else {
-                return Err(CompErr { error: CompilerError::VariableNotFound, location: tag.loc.start })
+                return Err(CompErr { error: CompilerError::VariableNotFound, location: tag.loc.clone() })
             }
-            Expression::NewArray(tag, expression) => CompType::Array(Box::new(self.resolve_type(&tag.item)?))
+            Expression::NewArray(tag, _) => CompType::Array(Box::new(self.resolve_type(&tag.item)?))
         })
     }
 
@@ -658,12 +662,12 @@ impl Compiler {
                 self.stack.push((out, tpe.clone()));
                 Ok(tpe)
             }
-            Expression::Math(left, Tag { item: op, loc }, right) => {
+            Expression::Math(left, op, right) => {
                 let v1 = self.compile_expression(left, CompStackI::Temp)?;
                 let v2 = self.compile_expression(right, CompStackI::Temp)?;
                 self.stack.pop();
                 self.stack.pop();
-                let res = self.get_op(&v1, op, &v2)?;
+                let res = self.get_op(&v1, op.clone(), &v2)?;
 
                 self.program.extend(res.instructions);
                 for _ in 0..res.pop { self.stack.pop(); }
@@ -673,16 +677,16 @@ impl Compiler {
 
                 Ok(res.tpe)
             }
-            Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
+            Expression::FunctionCall { name, args } => {
                 let signature = FunctionSignature {
-                    name: name.clone(),
+                    name: name.item.clone(),
                     args: args.iter().map(|x| self.get_type(x)).collect::<Result<Vec<_>, _>>()?
                 };
                 let Some(found) = self.functions.iter().find(|x| FunctionSignature::from(*x) == signature)
-                    else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: loc.start }) };
+                    else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: name.loc.clone() }) };
                 let found = found.clone();
                 if found.args.len() != args.len() {
-                    return Err(CompErr { error: CompilerError::WrongNumberOfArguments, location: loc.start })
+                    return Err(CompErr { error: CompilerError::WrongNumberOfArguments, location: name.loc.clone() })
                 }
                 let mut arg_positions = vec![];
                 for (_, tpe) in &found.args {
@@ -702,7 +706,7 @@ impl Compiler {
                 for (i, arg) in args.iter().enumerate() {
                     let tpe = self.compile_expression(arg, CompStackI::Temp)?;
                     if tpe != found.args[i].1 {
-                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: arg.loc.clone() });
                     }
                     self.program.push(Instruction::Set(self.stack.len() - arg_positions[i]));
                     self.stack.pop();
@@ -725,7 +729,7 @@ impl Compiler {
                         self.stack.push((out, CompType::Int));
                         return Ok(CompType::Int)
                     }
-                    _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.start })
+                    _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })
                 }
             }
             Expression::Ternary { condition, if_true, if_false } => {
@@ -734,7 +738,7 @@ impl Compiler {
                 let stack_len = self.stack.len();
                 let cond_tpe = self.compile_expression(condition, CompStackI::Temp)?;
                 if cond_tpe != CompType::Bool {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: condition.loc.clone() });
                 }
                 let branch_to_false = self.program.len();
                 self.program.push(Instruction::Brz(0));
@@ -763,7 +767,7 @@ impl Compiler {
                 }
                 self.program[jump_to_after] = Instruction::Jmp(self.program.len());
                 if tpe_if_true != tpe_if_false {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() });
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: if_false.loc.clone() });
                 }
 
                 Ok(tpe_if_false)
@@ -772,12 +776,12 @@ impl Compiler {
                 let inner = match self.compile_expression(array, CompStackI::Temp)? {
                     CompType::Array(box inner) => inner.clone(),
                     CompType::String => CompType::Char,
-                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    _ => return Err(CompErr { error: CompilerError::TypeMismatch, location: array.loc.clone() })
                 };
                 let array_addr = self.stack.len() - 1;
                 let CompType::Int = self.compile_expression(index, CompStackI::Temp)?
                     else {
-                        return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                        return Err(CompErr { error: CompilerError::TypeMismatch, location: index.loc.clone() })
                     };
 
 
@@ -794,7 +798,7 @@ impl Compiler {
             Expression::VarAccess(Tag { item: name, loc }) => {
                 let Some((idx, tpe)) = self.find_variable(name)
                     else {
-                        return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.start })
+                        return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.clone() })
                     };
 
                 self.program.push(Instruction::Copy(idx));
@@ -802,10 +806,10 @@ impl Compiler {
 
                 Ok(tpe)
             }
-            Expression::NewArray(Tag { item: tpe, .. }, box length) => {
+            Expression::NewArray(tpe, box length) => {
                 let inner_type = self.resolve_type(tpe)?;
                 if self.compile_expression(length, CompStackI::Temp)? != CompType::Int {
-                    return Err(CompErr { error: CompilerError::TypeMismatch, location: todo!() })
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: tpe.loc.clone() })
                 }
                 self.program.push(Instruction::AllocA((&inner_type).into()));
                 self.stack.pop();
