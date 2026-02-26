@@ -1,9 +1,21 @@
 use peg;
 use std::{ops::{Range, Deref}, fmt::Debug};
 
+fn btg<T>(value: T, left: usize, right: usize) -> BTag<T> {
+    Box::new(Tag { item: value, loc: left..right })
+}
+
+fn math_tag(left: Tag<Expression>, op: Tag<Op>, right: Tag<Expression>) -> Tag<Expression> {
+    let range = left.loc.start..right.loc.end;
+    Tag { item: Expression::Math(Box::new(left), op, Box::new(right)), loc: range }
+}
+
 peg::parser! {
     pub grammar spellcode() for str {
         rule _ = [' ' | '\n']*
+
+        rule t<T>(x: rule<T>) -> Tag<T> = l:position!() v:x() r:position!() { Tag { item: v, loc: l..r } }
+        rule t_op<T>(x: rule<T>, v: Op) -> Tag<Op> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
 
         rule integer() -> i32
             = "0x" v:$(['0'..='9' | 'a'..='f' | 'A'..='F']+) {? i32::from_str_radix(v, 16).or(Err("invalid hexadecimal int")) } /
@@ -43,54 +55,54 @@ peg::parser! {
               v:string() { Literal::StringL(v) } /
               v:char_lit() { Literal::CharL(v) }
         rule literal() -> Tag<Literal>
-            = l:position!() v:literal_no_tag() r:position!() { Tag::new(v, l..r) }
+            = t(<literal_no_tag()>)
 
         rule ident() -> Tag<String>
             = l:position!() v:$(['A'..='Z' | 'a'..='z'] ['A'..='Z' | 'a'..='z' | '0'..='9' | '_']*) r:position!() { Tag::new(v.to_owned(), l..r) }
 
-        pub rule expression() -> Expression = precedence! {
-            x:(@) _ tl:position!() "||" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::BoolOr, tl..tr), Box::new(y)) }
+        pub rule expression() -> Tag<Expression> = precedence! {
+            x:(@) _ op:t_op(<"||">, Op::BoolOr) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "&&" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::BoolAnd, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"&&">, Op::BoolAnd) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "<" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Lt, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "<=" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Le, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "==" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Eq, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "!=" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Ne, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() ">=" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Ge, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() ">" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Gt, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"<">, Op::Lt) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"<=">, Op::Le) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"==">, Op::Eq) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"!=">, Op::Ne) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<">">, Op::Gt) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<">=">, Op::Ge) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "|" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Or, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"|">, Op::Or) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "^" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Xor, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"^">, Op::Xor) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "&" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::And, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"&">, Op::And) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "<<" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Shl, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() ">>" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Shr, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() ">>>" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Shrl, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"<<">, Op::Shl) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<">>">, Op::Shr) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<">>>">, Op::Shrl) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "+" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Plus, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "-" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Minus, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"+">, Op::Plus) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"-">, Op::Minus) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ tl:position!() "*" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Times, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "/" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Divide, tl..tr), Box::new(y)) }
-            x:(@) _ tl:position!() "%" tr:position!() _ y:@ { Expression::Math(Box::new(x), Tag::new(Op::Mod, tl..tr), Box::new(y)) }
+            x:(@) _ op:t_op(<"*">, Op::Times) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"/">, Op::Divide) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_op(<"%">, Op::Mod) _ y:@ { math_tag(x, op, y) }
             --
-            "(" _ v:expression() _ ")" { v }
+            v:t(<"(" _ v:expression() _ ")" { v }>) { Tag { item: v.item.item, loc: v.loc } }
             --
-            name:ident() "(" _ args:expression() ** (_ "," _) _ ")" { Expression::FunctionCall { name, args } }
+            l:position!() name:ident() "(" _ args:expression() ** (_ "," _) _ ")" r:position!() { Tag { item: Expression::FunctionCall { name, args }, loc: l..r } }
             --
-            x:(@) "." name:ident() { Expression::PropertyAccess(Box::new(x), name) }
+            x:(@) "." name:ident() r:position!() { let loc = x.loc.start..r; Tag { item: Expression::PropertyAccess(Box::new(x), name), loc } }
             --
-            "new" _ tpe:tpe() _ "[" _ length:expression() _ "]" { Expression::NewArray(tpe, Box::new(length)) }
+            v:t(<"new" _ tpe:tpe() _ "[" _ length:expression() _ "]" { Expression::NewArray(tpe, Box::new(length)) }>) { v }
             --
-            x:(@) "[" _ index:expression() _ "]" { Expression::ArrayAccess { array: Box::new(x), index: Box::new(index) } }
+            x:(@) "[" _ index:expression() _ "]" r:position!() { let loc = x.loc.start..r; Tag { item: Expression::ArrayAccess { array: Box::new(x), index: Box::new(index) }, loc } }
             --
-            "if" _ condition:expression() _ "{" _ if_true:expression() _ "}" _ "else" _ "{" _ if_false:expression() _ "}" { Expression::Ternary { condition: Box::new(condition), if_true: Box::new(if_true), if_false: Box::new(if_false) } }
+            v:t(<"if" _ condition:expression() _ "{" _ if_true:expression() _ "}" _ "else" _ "{" _ if_false:expression() _ "}" { Expression::Ternary { condition: Box::new(condition), if_true: Box::new(if_true), if_false: Box::new(if_false) } }>) { v }
             --
-            v:literal() { Expression::Lit(v) }
-            v:ident() { Expression::VarAccess(v) }
+            v:t(<v:literal() { Expression::Lit(v) }>) { v }
+            v:t(<v:ident() { Expression::VarAccess(v) }>) { v }
         }
 
         rule block() -> Vec<Statement>
@@ -151,13 +163,13 @@ pub enum Op {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Lit(Tag<Literal>),
-    Math(Box<Expression>, Tag<Op>, Box<Expression>),
-    FunctionCall { name: Tag<String>, args: Vec<Expression> },
-    PropertyAccess(Box<Expression>, Tag<String>),
-    Ternary { condition: Box<Expression>, if_true: Box<Expression>, if_false: Box<Expression> },
-    ArrayAccess { array: Box<Expression>, index: Box<Expression> },
+    Math(BTag<Expression>, Tag<Op>, BTag<Expression>),
+    FunctionCall { name: Tag<String>, args: Vec<Tag<Expression>> },
+    PropertyAccess(BTag<Expression>, Tag<String>),
+    Ternary { condition: BTag<Expression>, if_true: BTag<Expression>, if_false: BTag<Expression> },
+    ArrayAccess { array: BTag<Expression>, index: BTag<Expression> },
     VarAccess(Tag<String>),
-    NewArray(Tag<TypeName>, Box<Expression>)
+    NewArray(Tag<TypeName>, BTag<Expression>)
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -167,14 +179,14 @@ pub enum TypeName {
 
 #[derive(Debug, Clone)]
 pub enum Statement {
-    ExprS(Expression),
-    VariableDecl(Tag<String>, Expression),
-    Assignment { left: Expression, value: Expression },
-    If { condition: Expression, block: Vec<Statement>, else_block: Option<Vec<Statement>> },
-    CFor { init: Box<Option<Statement>>, condition: Expression, increment: Box<Option<Statement>>, block: Vec<Statement> },
-    ForEach { variable: Tag<String>, array: Expression, block: Vec<Statement> },
-    While { condition: Expression, block: Vec<Statement> },
-    Return(Option<Expression>),
+    ExprS(Tag<Expression>),
+    VariableDecl(Tag<String>, Tag<Expression>),
+    Assignment { left: Tag<Expression>, value: Tag<Expression> },
+    If { condition: Tag<Expression>, block: Vec<Statement>, else_block: Option<Vec<Statement>> },
+    CFor { init: Box<Option<Statement>>, condition: Tag<Expression>, increment: Box<Option<Statement>>, block: Vec<Statement> },
+    ForEach { variable: Tag<String>, array: Tag<Expression>, block: Vec<Statement> },
+    While { condition: Tag<Expression>, block: Vec<Statement> },
+    Return(Option<Tag<Expression>>),
     FunctionDef { name: Tag<String>, arguments: Vec<(Tag<String>, Tag<TypeName>)>, return_type: Option<Tag<TypeName>>, block: Vec<Statement> }
 }
 
@@ -238,7 +250,7 @@ mod tests {
             Tag { item: Literal::IntL($v), .. }
         };
         (eil $v:literal) => {
-            Expression::Lit(t!(il $v))
+            t!(Expression::Lit(t!(il $v)))
         };
         (bil $v:literal) => {
             box t!(eil $v)
@@ -248,11 +260,11 @@ mod tests {
             Tag { item: Literal::DoubleL($v), .. }
         };
         (edl $v:literal) => {
-            Expression::Lit(t!(dl $v))
+            t!(Expression::Lit(t!(dl $v)))
         };
 
         (elt $v:pat) => {
-            Expression::Lit(t!($v))
+            t!(Expression::Lit(t!($v)))
         };
     }
 
@@ -289,10 +301,10 @@ mod tests {
 
     #[test]
     fn test_math() {
-        assert!(matches!(spellcode::expression("1 + 2"), Ok(Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2)))));
-        assert!(matches!(spellcode::expression("1 * 2 + 3"), Ok(Expression::Math(box Expression::Math(t!(bil 1), t!(Op::Times), t!(bil 2)), t!(Op::Plus), t!(bil 3)))));
-        assert!(matches!(spellcode::expression("1 + 2 * 3"), Ok(Expression::Math(t!(bil 1), t!(Op::Plus), box Expression::Math(t!(bil 2), t!(Op::Times), t!(bil 3))))));
-        assert!(matches!(spellcode::expression("(1 + 2) * 3"), Ok(Expression::Math(box Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2)), t!(Op::Times), t!(bil 3)))));
+        assert!(matches!(spellcode::expression("1 + 2"), Ok(t!(Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2))))));
+        assert!(matches!(spellcode::expression("1 * 2 + 3"), Ok(t!(Expression::Math(box t!(Expression::Math(t!(bil 1), t!(Op::Times), t!(bil 2))), t!(Op::Plus), t!(bil 3))))));
+        assert!(matches!(spellcode::expression("1 + 2 * 3"), Ok(t!(Expression::Math(t!(bil 1), t!(Op::Plus), box t!(Expression::Math(t!(bil 2), t!(Op::Times), t!(bil 3))))))));
+        assert!(matches!(spellcode::expression("(1 + 2) * 3"), Ok(t!(Expression::Math(box t!(Expression::Math(t!(bil 1), t!(Op::Plus), t!(bil 2))), t!(Op::Times), t!(bil 3))))));
     }
 }
 

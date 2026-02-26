@@ -222,7 +222,7 @@ impl Compiler {
                 }
                 self.compile_expression(expression, CompStackI::Variable(name.clone()))?;
             }
-            Statement::Assignment { left, value } => {
+            Statement::Assignment { left: Tag { item: left, loc: left_loc }, value } => {
                 let tpe = self.compile_expression(value, CompStackI::Temp)?;
                 match left {
                     Expression::VarAccess(Tag { item: name, loc }) => {
