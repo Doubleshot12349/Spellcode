@@ -22,7 +22,7 @@ jobs:
         id: activate
         uses: game-ci/unity-activate@main
         with:
-          unityVersion: "6000.3.4f1"
+          unityVersion: "6000.3.10f1"
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
