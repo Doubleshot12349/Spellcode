@@ -82,7 +82,7 @@ jobs:
       - detect_tests
       - upload_unity_license
     if: needs.detect_tests.outputs.has_editmode == 'true'
-    uses: ./.github/workflows/unity-tests-runner.yml
+    uses: avalin/unity-ci-cd/.github/workflows/unity-tests-runner.yml
     with:
       runnerMain: ${{ inputs.runnerMain }}
       testMode: EditMode
@@ -98,7 +98,7 @@ jobs:
       - detect_tests
       - upload_unity_license
     if: needs.detect_tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-tests-runner.yml
+    uses: avalin/unity-ci-cd/.github/workflows/unity-tests-runner.yml
     with:
       runnerMain: ${{ inputs.runnerMain }}
       testMode: PlayMode
@@ -120,7 +120,7 @@ jobs:
         (needs.run_editmode.result == 'success' && needs.run_editmode.outputs.failed == 'true') ||
         (needs.run_playmode.result == 'success' && needs.run_playmode.outputs.failed == 'true')
       )
-    uses: ./.github/workflows/summarize-tests.yml
+    uses: avalin/unity-ci-cd/.github/workflows/summarize-tests.yml
     with:
       runnerMain: ${{ inputs.runnerMain }}
       quietMode: ${{ inputs.quietMode }}
