@@ -85,7 +85,7 @@ jobs:
     name: Run Tests
     if: ${{ needs.unpack_inputs.outputs.skipTests != 'true' }}
     needs: unpack_inputs
-    uses: ./.github/workflows/step-1-test.yml
+    uses: ./.github/workflows/step-1-test.yml@v1
     with:
       runnerMain: ${{ inputs.runnerMain }}
       unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
