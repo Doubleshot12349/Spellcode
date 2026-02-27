@@ -20,7 +20,7 @@ jobs:
 
       - name: Activate Unity License
         id: activate
-        uses: game-ci/unity-activate@v2
+        uses: game-ci/unity-activate@main
         with:
           unityVersion: "6000.3.4f1"
         env:
