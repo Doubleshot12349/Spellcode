@@ -5,62 +5,29 @@ using UnityEngine.TestTools;
 
 public class ConjureTests
 {
-    private GameObject casterObject;
-    private GameObject fireball;
-    private GameObject lightning;
-    private GameObject ice;
-    private GameObject targetHex;
-    /*private Fire fireComponent;
+
+    //step 1 create all fields needed by conjure
+    private GameObject Prefab;
+    private GameObject gameObject;
+    private GameObject target;
+
+
+    //step 2 instantiate necessary prefabs
+    //  or manually create minimal viable objects with .AddComponent
 
     [UnitySetUp]
     public IEnumerator SetUp()
     {
-        // Create caster
-        casterObject = new GameObject("Caster");
-
-        // Create prefab
-        fireball = new GameObject("SpellPrefab");
-        fireball.AddComponent<Fire>();
-
-        fireComponent.Prefab = fireball;
-        casterObject.AddComponent<GameObject>(fireball);
-
-        // Create target
-        targetHex = new GameObject("Target");
-
+        Prefab = Resources.Load("Fireball") as GameObject;
+        gameObject = GameObject.Instantiate(Prefab) as GameObject;
+        target = new GameObject("Hex");
+        target.AddComponent<Transform>();
         yield return null;
     }
 
-    [UnityTest]
-    public IEnumerator Conjure_CreatesSpell_AsChildOfTarget()
+    [Test]
+    public void SetupComplete()
     {
-        var result = spellComponent.Conjure(targetObject);
-
-        Assert.IsNotNull(result);
-        Assert.AreEqual(targetObject.transform, result.transform.parent);
-        Assert.AreEqual(Vector3.zero, casterObject.transform.position);
-
-        yield return null;
+        Assert.IsNotNull(Prefab, "Failed to load prefab from resources");
     }
-
-    [UnityTest]
-    public IEnumerator Conjure_Sets_CurrentTile()
-    {
-        var result = spellComponent.Conjure(targetObject);
-
-        var spell = result.GetComponent<ISpell>();
-
-        Assert.AreEqual(targetObject, spell.CurrentTile);
-
-        yield return null;
-    }
-
-    [UnityTearDown]
-    public IEnumerator TearDown()
-    {
-        Object.Destroy(casterObject);
-        Object.Destroy(prefabObject);
-        Object.Destroy(targetObject);
-        yield return null;
-    }*/
 }
