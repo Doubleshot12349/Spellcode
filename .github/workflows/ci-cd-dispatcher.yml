@@ -25,7 +25,7 @@ on:
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
-        default: '[]'
+        default: '["gh-pages"]'
         type: string
       buildTargets:
         description: "JSON array of build targets (e.g. [\"WebGL\",\"iOS\"])"
@@ -46,8 +46,6 @@ on:
       - 'Packages/**'
       - 'ProjectSettings/**'
       - 'Tests/**'
-    branches:
-      - 'unity-ci'
   pull_request:
     types: [ready_for_review, synchronize, reopened]
     paths:
@@ -136,7 +134,7 @@ jobs:
     with:
       runnerMain: ${{ needs.resolve_runners.outputs.main }}
       runnerMacos: ${{ needs.resolve_runners.outputs.macos }}
-      unityVersion: "6000.3.4f1"
+      unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
@@ -193,7 +191,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
-          gh workflow run unity-pipeline.yml \
+          gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
             --field runnerMain="$(printf '%s' '${{ needs.resolve_runners.outputs.main }}')" \
             --field runnerMacos="$(printf '%s' '${{ needs.resolve_runners.outputs.macos }}')" \
@@ -220,3 +218,4 @@ jobs:
               --arg playModePath "${{ needs.prepare_metadata.outputs.playModePath }}" \
               --arg quietMode "${{ needs.prepare_metadata.outputs.quietMode }}" \
               '{unityVersion: $unityVersion, useGitLfs: $useGitLfs, editModePath: $editModePath, playModePath: $playModePath, quietMode: $quietMode}')"
+
