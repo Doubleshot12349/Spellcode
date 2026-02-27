@@ -20,9 +20,9 @@ jobs:
 
       - name: Activate Unity License
         id: activate
-        uses: ./.github/workflows/unity-activate
+        uses: ./.github/workflows/unity-activate.yml
         with:
-          unityVersion: ${{ vars.UNITY_VERSION }}
+          unityVersion: "6000.3.4f1"
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
