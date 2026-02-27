@@ -20,7 +20,7 @@ jobs:
 
       - name: Activate Unity License
         id: activate
-        uses: ./.github/workflows/unity-activate.yml
+        uses: game-ci/unity-activate@v2
         with:
           unityVersion: "6000.3.4f1"
         env:
