@@ -100,3 +100,10 @@ InitTestScene*.unity*
 
 .vscode
 *.slnx
+
+/Assets/Plugins/**/*.so
+/Assets/Plugins/**/*.so.meta
+/Assets/Plugins/**/*.a
+/Assets/Plugins/**/*.a.meta
+/Assets/Plugins/**/*.dll
+/Assets/Plugins/**/*.dll.meta
