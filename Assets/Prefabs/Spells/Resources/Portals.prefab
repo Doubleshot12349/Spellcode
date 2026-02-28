@@ -51,7 +51,7 @@ MonoBehaviour:
   portal2: {fileID: 1173555271145997625}
   moveSpeed: 6
   type: PortalHandler
-  template: 1
+  template: 0
 --- !u!1001 &2729666088209783818
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -18,9 +18,6 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
         }
     }
 
-    //make sure this is only true for the initial one
-    public bool template;
-
     public void Awake()
     {
         //read fields from inspector
@@ -31,14 +28,14 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
 
     public void Start()
     {
-        if (!template)
-        {
-            portal1.GetComponent<SubPortal>().linkedPortal = portal2;
-            portal2.GetComponent<SubPortal>().linkedPortal = portal1;
-
-            portal1.transform.SetParent(CurrentTile.transform);
-            portal2.transform.SetParent(CurrentTile.transform);
-        }
+        portal1.GetComponent<SubPortal>().linkedPortal = portal2;
+        portal2.GetComponent<SubPortal>().linkedPortal = portal1;
+        
+        portal1.transform.SetParent(CurrentTile.transform);
+        portal1.transform.position = CurrentTile.transform.position;
+        portal2.transform.SetParent(CurrentTile.transform);
+        portal2.transform.position = CurrentTile.transform.position;
+        
 
     }
     
