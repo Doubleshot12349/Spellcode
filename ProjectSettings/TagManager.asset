@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Harmful
   - Portal
+  - Tile
   layers:
   - Default
   - TransparentFX
