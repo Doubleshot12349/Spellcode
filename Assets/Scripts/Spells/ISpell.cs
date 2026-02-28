@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-//There's a hardlink to this in Spells/DefaultSpells
 
     public interface IGameObjectSource
     {
@@ -60,8 +59,9 @@ using System.Collections;
 
         public GameObject Conjure(GameObject target)
         {
-            gameObject.transform.position = new Vector3(0, 0, 0);
             GameObject newSpell = GameObject.Instantiate(Prefab, target.transform);
+            gameObject.transform.position = target.transform.position;
+            
             if (newSpell == null)
             {
                 Debug.Log("Error conjuring spell");
