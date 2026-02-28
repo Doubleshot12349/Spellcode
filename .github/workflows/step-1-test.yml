@@ -99,6 +99,8 @@ jobs:
       - upload_unity_license
     if: needs.detect_tests.outputs.has_playmode == 'true'
     uses: avalin/unity-ci-cd/.github/workflows/unity-tests-runner.yml@main
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     with:
       runnerMain: ${{ inputs.runnerMain }}
       testMode: PlayMode
