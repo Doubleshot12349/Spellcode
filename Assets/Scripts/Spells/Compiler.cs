@@ -1,6 +1,12 @@
-//using TMPro;
-using UnityEngine;
+//using UnityEngine;
 using System.Runtime.InteropServices;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct CompileResult {
+    public long id;
+    [MarshalAs(UnmanagedType.LPStr)]
+    public string error;
+}
 
 public static class Compiler {
 
@@ -10,7 +16,15 @@ public static class Compiler {
     private const string dllName = "compiler";
 //#endif
 
+
     [DllImport(dllName)]
-    public static extern ulong add(ulong left, ulong right);
+    public static extern int add(int a, int b);
+
+    [DllImport(dllName)]
+    public static extern void compile(
+            [MarshalAs(UnmanagedType.LPStr)]
+            string program,
+            CompileResult res
+    );
 }
 

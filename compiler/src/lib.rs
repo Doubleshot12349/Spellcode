@@ -34,16 +34,15 @@ pub extern "C" fn free_compileresult(inp: *const CompileResult) {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn compile(program: *const i8) -> *const CompileResult {
+pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();
-    let mut res = Box::new(CompileResult { id: -1, error: std::ptr::null_mut() });
+    let res = unsafe { &mut *output };
     let parsed = match parser::spellcode::program(&inp) {
         Ok(v) => v,
         Err(e) => {
             let error = CString::new(format!("{e:?}")).unwrap();
             res.error = error.into_raw();
-
-            return unsafe { std::mem::transmute(res) }
+            return;
         }
     };
         
@@ -51,15 +50,12 @@ pub extern "C" fn compile(program: *const i8) -> *const CompileResult {
     if let Err(e) = compiler.compile_program(&parsed) {
         let error = CString::new(format!("{e:?}")).unwrap();
         res.error = error.into_raw();
-
-        return unsafe { std::mem::transmute(res) }
+        return;
     }
     let mut vms = VMS.lock().unwrap();
     let id = vms.next_id;
     vms.next_id += 1;
     vms.vms.push((id, VM::new(compiler.program)));
-
-    unsafe { std::mem::transmute(res) }
 }
 
 
@@ -68,8 +64,8 @@ pub extern "C" fn compile(program: *const i8) -> *const CompileResult {
 //}
 
 #[unsafe(no_mangle)]
-pub extern "C" fn add(left: u64, right: u64) -> u64 {
-    left + right + 1
+pub extern "C" fn add(left: i32, right: i32) -> i32 {
+    left + right
 }
 
 fn main() {
