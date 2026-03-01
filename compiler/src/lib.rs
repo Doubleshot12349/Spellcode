@@ -107,6 +107,7 @@ pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();
     let res = unsafe { &mut *output };
     res.id = -1;
+
     let parsed = match parser::spellcode::program(&inp) {
         Ok(v) => v,
         Err(e) => {
