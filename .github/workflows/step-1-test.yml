@@ -54,6 +54,9 @@ on:
       UNITY_PASSWORD: { required: true }
       UNITY_LICENSE: { required: true }
 
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
 jobs:
   upload_unity_license:
     name: 📥️ Upload Unity License
