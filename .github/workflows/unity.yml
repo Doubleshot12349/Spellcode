@@ -1,6 +1,17 @@
 name: Unity Build
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [ready_for_review, synchronize, reopened]
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'            # matches v1.2.3
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'  # matches v1.2.3-rc.1
 
 jobs:
   build:
@@ -41,8 +52,8 @@ jobs:
         with:
           targetPlatform: WebGL
 
-      # Output
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Build
-          path: build
+      ## Output
+      #- uses: actions/upload-artifact@v4
+      #  with:
+      #    name: Build
+      #    path: build
