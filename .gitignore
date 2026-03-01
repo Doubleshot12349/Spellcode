@@ -107,3 +107,7 @@ InitTestScene*.unity*
 /Assets/Plugins/**/*.a.meta
 /Assets/Plugins/**/*.dll
 /Assets/Plugins/**/*.dll.meta
+/Assets/_Recovery
+/Assets/_Recovery.meta
+/core.*
+
