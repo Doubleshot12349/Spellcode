@@ -35,6 +35,12 @@ const WINDOWS_MINGW: Target = Target {
     output: Some("target/x86_64-pc-windows-gnu/release/compiler.dll"),
     unity_path: "windows"
 };
+const WINDOWS_MSVC: Target = Target {
+    triple: Some("x86_64-pc-windows-msvc"),
+    crate_type: None,
+    output: Some("target/x86_64-pc-windows-msvc/release/compiler.dll"),
+    unity_path: "windows"
+};
 const WEB: Target = Target {
     triple: Some("wasm32-wasip1"),
     crate_type: Some("staticlib"),
@@ -101,26 +107,16 @@ fn build_binary(Target { triple, crate_type, .. }: &Target) -> Result<(), DynErr
 }
 
 fn dist_binary() -> Result<(), DynError> {
-    build_binary(&Target { triple: None, crate_type: None, output: None, unity_path: todo!() })?;
+    let target = if cfg!(target_os = "linux") {
+        LINUX
+    } else if cfg!(target_os = "windows") {
+        WINDOWS_MSVC
+    } else {
+        panic!()
+    };
 
-    //let dst = project_root().join("target/release/hello-world");
-
-    //fs::copy(&dst, dist_dir().join("hello-world"))?;
-
-    //if Command::new("strip")
-    //    .arg("--version")
-    //    .stdout(Stdio::null())
-    //    .status()
-    //    .is_ok()
-    //{
-    //    eprintln!("stripping the binary");
-    //    let status = Command::new("strip").arg(&dst).status()?;
-    //    if !status.success() {
-    //        Err("strip failed")?;
-    //    }
-    //} else {
-    //    eprintln!("no `strip` utility found")
-    //}
+    build_binary(&target)?;
+    copy_binary(&target)?;
 
     Ok(())
 }
