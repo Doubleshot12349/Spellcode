@@ -99,17 +99,20 @@ public class HexGridManager : MonoBehaviour
 
     private float GetHexSizeFromPrefab()
     {
-        var sr = hexTilePrefab.GetComponent<SpriteRenderer>();
-        if (sr == null || sr.sprite == null)
-            return hexSize; // fallback to inspector value
+        
+            var sr = hexTilePrefab.GetComponent<SpriteRenderer>();
+            if (sr == null || sr.sprite == null)
+                return hexSize; // fallback to inspector value
 
-        // For a pointy-top hex sprite, "radius" is half its height in world units
-        float radius = sr.sprite.bounds.extents.y;
+            // For a pointy-top hex sprite, "radius" is half its height in world units
+            float radius = sr.sprite.bounds.extents.y;
 
-        // account for prefab scale
-        radius *= hexTilePrefab.transform.lossyScale.y;
+            // account for prefab scale
+            radius *= hexTilePrefab.transform.lossyScale.y;
 
-        return radius;
+            return radius;
+        
+        
     }
 
     // ODD-R offset (pointy-top) -> axial

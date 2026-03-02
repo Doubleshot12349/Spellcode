@@ -15,14 +15,17 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public List<GameObject> path;
+    public int Damage { get; set; }
     public int currentDamage;
     public string type = "Lightning";
-    public string Type {
+    public string Type
+    {
         get
         {
             return type;
         }
     }
+    public GameObject LastPortal { get; set; }
 
     public void Cast()
     {
@@ -139,6 +142,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
+        Damage = currentDamage;
     }
     public void OnTriggerEnter2D(Collider2D col)
     {

@@ -14,6 +14,8 @@ using System.Collections;
         GameObject CurrentTile { get; set; }
         GameObject Prefab { get; set; }
         string Type { get; }
+        int Damage { get; set; }
+        GameObject LastPortal { get; set; }
 
         public bool OverrideMoveSpell(GameObject target)
         {

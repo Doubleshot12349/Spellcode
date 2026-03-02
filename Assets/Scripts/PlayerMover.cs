@@ -12,6 +12,7 @@ public class PlayerMover : MonoBehaviour
     public int startHexR;
 
     private bool isMoving;
+    
 
     public void SnapToTile(HexTile tile)
     {
@@ -60,29 +61,10 @@ public class PlayerMover : MonoBehaviour
         isMoving = false;
     }
 
-    /*public void AutoSnapToNearestTile()
+    public void OnMyTurn()
     {
-        if (grid == null) return;
-
-        HexTile nearest = null;
-        float best = float.PositiveInfinity;
-
-        foreach (Transform child in grid.tilesParent)
-        {
-            var t = child.GetComponent<HexTile>();
-            if (t == null) continue;
-
-            float d = Vector3.SqrMagnitude(transform.position - t.transform.position);
-            if (d < best)
-            {
-                best = d;
-                nearest = t;
-            }
-        }
-
-        if (nearest != null)
-            SnapToTile(nearest);
-    }*/
+        
+    }
 
     private void Start()
     {
