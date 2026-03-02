@@ -1,6 +1,6 @@
 use std::{char, collections::HashMap};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Syscall {
     Nop = 0,
     GetMana = 1,
@@ -121,7 +121,8 @@ pub enum ExecutionException {
     WrongType,
     ArrayIndexOutOfBounds,
     OutOfMemory,
-    RaisedException
+    RaisedException,
+    Syscall(Syscall)
 }
 
 impl VM {
@@ -150,6 +151,15 @@ impl VM {
     }
 
     pub fn tick(&mut self) -> Result<(), ExecutionException> {
+        match self.tick_nohandle() {
+            Ok(()) => Ok(()),
+            Err(ExecutionException::Syscall(Syscall::Nop)) => Ok(()),
+            Err(ExecutionException::Syscall(Syscall::PrintChar)) => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap_or(char::REPLACEMENT_CHARACTER)); Ok(()) }
+            Err(e) => Err(e)
+        }
+    }
+
+    pub fn tick_nohandle(&mut self) -> Result<(), ExecutionException> {
         let ins = self.program.get(self.program_counter)
             .ok_or(ExecutionException::IllegalJumpAddress)?;
         let mut next_addr = self.program_counter + 1;
@@ -239,18 +249,8 @@ impl VM {
                 }
             }
             Instruction::Syscall(syscall) => {
-                match syscall {
-                    Syscall::Nop => {}
-                    Syscall::GetMana => todo!(),
-                    Syscall::EnvironmentID => todo!(),
-                    Syscall::SpawnEffect => todo!(),
-                    Syscall::PlayerLocation => todo!(),
-                    Syscall::OpponentLocation => todo!(),
-                    Syscall::Sleep => todo!(),
-                    Syscall::PrintChar => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap_or(char::REPLACEMENT_CHARACTER)) },
-                    Syscall::Halt => return Err(ExecutionException::Halt),
-                    Syscall::Exception => return Err(ExecutionException::RaisedException)
-                }
+                self.program_counter = next_addr;
+                return Err(ExecutionException::Syscall(*syscall))
             }
             Instruction::AllocA(tpe) => {
                 let t = tpe.clone();

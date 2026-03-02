@@ -210,11 +210,30 @@ public class StackMachineTests
 
     [Test]
     public void TestCompilerFFI() {
+        Compiler.init();
         Assert.That(Compiler.add(1, 2), Is.EqualTo(3));
-        //CompileResult res = new CompileResult();
-        //res.id = -123;
-        //Compiler.compile("ieowjfoiwe", res);
-        //Assert.That(res.id, Is.EqualTo(-1));
+        Compiler.compile("iwjeoifweoif", out CompileResult res);
+        Debug.Log(res.error);
+        Assert.That(res.id, Is.EqualTo(-1));
+
+        Compiler.compile("7", out CompileResult res2);
+        Debug.Log(res2.error);
+        Assert.That(res2.id, Is.EqualTo(0));
+
+        Compiler.compile("putc('b')", out CompileResult res3);
+        Debug.Log(res3.error);
+        Assert.That(res3.id, Is.EqualTo(1));
+
+        int ex = 0;
+        Compiler.run_to_syscall_or_n(0, 1000, ref ex);
+        Compiler.pop_int(0, out int popped);
+        Debug.Log(popped);
+        Assert.That(popped, Is.EqualTo(7));
+
+        int call = Compiler.run_to_syscall_or_n(1, 1000, ref ex);
+        Assert.That(call, Is.EqualTo(7));
+        Compiler.pop_int(1, out int character);
+        Assert.That(character, Is.EqualTo(0x62));
     }
  
 
