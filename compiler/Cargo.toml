@@ -3,4 +3,5 @@ members = [
     "compiler",
     "xtask",
 ]
+workspace.resolver = "3"
 
