@@ -6,17 +6,21 @@ public class SubPortal : MonoBehaviour,ISpell
     public float MoveSpeed { get; set; }
     public GameObject Prefab { get; set; }
     public GameObject CurrentTile { get; set; }
+    public int Damage { get; set; }
     public string type = "Portal";
-    public string Type {
+    public string Type
+    {
         get
         {
             return type;
         }
     }
+    public GameObject LastPortal { get; set; }
     
     public void Awake()
     {
         MoveSpeed = 6;
+        Damage = 0;
         //animate me
     }
     public void OnTriggerEnter2D(Collider2D col)

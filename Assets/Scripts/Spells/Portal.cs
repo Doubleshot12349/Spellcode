@@ -8,21 +8,25 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject prefab;
     public GameObject portal1;
     public GameObject portal2;
+    public int Damage { get; set; }
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public string type = "PortalHandler";
-    public string Type {
+    public string Type
+    {
         get
         {
             return type;
         }
     }
+    public GameObject LastPortal { get; set; }
 
     public void Awake()
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
+        Damage = 0;
 
     }
 
@@ -30,12 +34,13 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
     {
         portal1.GetComponent<SubPortal>().linkedPortal = portal2;
         portal2.GetComponent<SubPortal>().linkedPortal = portal1;
-        
-        portal1.transform.SetParent(CurrentTile.transform);
-        portal1.transform.position = CurrentTile.transform.position;
-        portal2.transform.SetParent(CurrentTile.transform);
-        portal2.transform.position = CurrentTile.transform.position;
-        
+        if (CurrentTile != null)
+        {
+            portal1.transform.SetParent(CurrentTile.transform);
+            portal1.transform.position = CurrentTile.transform.position;
+            portal2.transform.SetParent(CurrentTile.transform);
+            portal2.transform.position = CurrentTile.transform.position;
+        }
 
     }
     
