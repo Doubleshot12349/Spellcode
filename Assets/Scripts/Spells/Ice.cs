@@ -8,21 +8,25 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
     public float MoveSpeed { get; set; }
      public GameObject Prefab { get; set; }
     public GameObject prefab;
+    public int Damage { get; set; }
     private int currentDamage = 5;
     public int health = 25;
     public string type = "Ice";
-    public string Type {
+    public string Type
+    {
         get
         {
             return type;
         }
     }
+    public GameObject LastPortal { get; set; }
 
     public void Awake()
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
+        Damage = currentDamage;
     }
     public void OnTriggerEnter2D(Collider2D col)
     {
