@@ -1,4 +1,10 @@
 # Wizard’s Spell-Code
+## Beta Testing
+Follow this link to build for development purposes (requires a free Unity account)
+[Build instructions](https://github.com/Doubleshot12349/Spellcode/BUILD.md)
+Follow this link for instructions on installing and running the game
+[Installation Instructions](https://github.com/Doubleshot12349/Spellcode/INSTALLATION.md)
+
 ## Team Info
 - Brett Thompson, programmer, music producer
 - Kaitlyn McLaughlin, programmer, asset developer
@@ -308,6 +314,7 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   Our team will use a combination of industry-standard development tools to ensure effective collaboration and stable       development
   - Unity - Primary game engine for rendering, physics, input handling, and deployment
   - C# - Core programming language for game logic and systems
+  - Rust - Unity free code used to run the spell language
   - GitHub - Version control, issue tracking, and project management
   - Visual Studio / VS Code - Integrated development environments for C# and scripting
   - Discord - daily communication, quick feedback, and coordination
@@ -366,8 +373,15 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   ## Test Plan & Bugs
 
 Testing ensures Wizard’s Spell-Code works correctly, especially for player-written spells and turn-based combat. We focus on correctness, integration, and usability.
-
-### Unit Testing
+# Unity Test framework guide
+UTF can be finicky so if you are unsure of how to add and run tests follow these steps:
+1. Ensure there's a .asmref file set to autorefrenced in the same folder or above any scripts that need to be refrenced by your test so that  Unity's linker doesn't have a stroke.
+2. Ensure any GameObjects you need to access are up-to date prefabs in a Resources folder (not nested in another folder in that resources folder)
+3. Ensure there's a .asmref in your test's folder with a refrence to the one for your other scripts
+4. Make sure you know whether you need to make a play mode or edit mode test (if you use anything from MonoBehaviour then it needs to be PlayMode)
+5. Make your test! Copy format of preexisting tests if needed
+6. If your test still doesn't appear, restart Unity and clear the test results
+# Unit Testing
 We use the **Unity Test Framework** to test components in isolation:
 
 - Spell parser accepts valid syntax and rejects invalid code.
@@ -375,6 +389,8 @@ We use the **Unity Test Framework** to test components in isolation:
 - Turn Manager enforces legal actions and turn order.
 - Spell execution correctly applies damage, movement, and mana cost.
 - Effects expire and despawn correctly.
+- Spell objects are correctly created
+- Spell objects move properly
 
 Tests run before merging into `main` to prevent regressions in the spell system.
 

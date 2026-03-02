@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-//using System.Numerics;
 
 public class SysCallManager : MonoBehaviour
 {
@@ -124,7 +123,7 @@ public class SysCallManager : MonoBehaviour
     public void MoveSpell()
     {
         //using placeholder inputs for now
-        int effectInstance = 0;
+        
         GameObject target = HexGridManager.GetHex(6,6);
         
         
