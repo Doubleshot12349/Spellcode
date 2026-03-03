@@ -11,7 +11,8 @@ pub enum Syscall {
     Sleep = 6,
     PrintChar = 7,
     Halt = 8,
-    Exception = 9
+    Exception = 9,
+    MoveEffect = 10
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
