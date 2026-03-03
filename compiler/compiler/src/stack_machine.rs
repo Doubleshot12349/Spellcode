@@ -123,7 +123,7 @@ pub enum ExecutionException {
     ArrayIndexOutOfBounds,
     OutOfMemory,
     RaisedException,
-    Syscall(Syscall)
+    SyscallException(Syscall)
 }
 
 impl VM {
@@ -154,8 +154,10 @@ impl VM {
     pub fn tick(&mut self) -> Result<(), ExecutionException> {
         match self.tick_nohandle() {
             Ok(()) => Ok(()),
-            Err(ExecutionException::Syscall(Syscall::Nop)) => Ok(()),
-            Err(ExecutionException::Syscall(Syscall::PrintChar)) => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap_or(char::REPLACEMENT_CHARACTER)); Ok(()) }
+            Err(ExecutionException::SyscallException(Syscall::Nop)) => Ok(()),
+            Err(ExecutionException::SyscallException(Syscall::Halt)) => Err(ExecutionException::Halt),
+            Err(ExecutionException::SyscallException(Syscall::Exception)) => Err(ExecutionException::RaisedException),
+            Err(ExecutionException::SyscallException(Syscall::PrintChar)) => { print!("{}", char::from_u32(i32::try_from(self.pop()?)? as u32).unwrap_or(char::REPLACEMENT_CHARACTER)); Ok(()) }
             Err(e) => Err(e)
         }
     }
@@ -251,7 +253,7 @@ impl VM {
             }
             Instruction::Syscall(syscall) => {
                 self.program_counter = next_addr;
-                return Err(ExecutionException::Syscall(*syscall))
+                return Err(ExecutionException::SyscallException(*syscall))
             }
             Instruction::AllocA(tpe) => {
                 let t = tpe.clone();

@@ -51,7 +51,7 @@ pub extern "C" fn run_to_syscall_or_n(id: i64, max_instructions: i32, executed: 
         unsafe { *executed += 1 };
         match found.1.tick_nohandle() {
             Ok(_) => {},
-            Err(stack_machine::ExecutionException::Syscall(v)) => return v as i32,
+            Err(stack_machine::ExecutionException::SyscallException(v)) => return v as i32,
             Err(stack_machine::ExecutionException::Halt) => return -4,
             Err(stack_machine::ExecutionException::WrongType) => return -5,
             Err(stack_machine::ExecutionException::EmptyStack) => return -6,
