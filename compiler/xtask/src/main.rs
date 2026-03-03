@@ -48,10 +48,15 @@ const WEB: Target = Target {
     unity_path: "web"
 };
 
+#[cfg(unix)]
+const WINDOWS: Target = WINDOWS_MINGW;
+#[cfg(windows)]
+const WINDOWS: Target = WINDOWS_MSVC;
+
 fn dist_all() -> Result<(), DynError> {
     clean()?;
 
-    for target in [LINUX, WINDOWS_MINGW, WEB] {
+    for target in [LINUX, WINDOWS, WEB] {
         build_binary(&target)?;
         copy_binary(&target)?;
     }
