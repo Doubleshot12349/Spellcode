@@ -1,0 +1,6 @@
+#[target.wasm32-unknown-emscripten]
+#linker = "/home/foo/Unity/Hub/Editor/6000.3.10f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/Emscripten/llvm/clang"
+
+#[target.wasm32-unknown-unknown]
+#linker = "/home/foo/Unity/Hub/Editor/6000.3.10f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/Emscripten/llvm/clang"
+
