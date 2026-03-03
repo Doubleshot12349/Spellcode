@@ -8,8 +8,8 @@
   5. You may need to install Web,Mac,linux and/or Windows development support
 
 # For Players:
-- Go to itch.io to play the web game, or download the game here
-- Downloading is required for online multiplayer
+- Go to [itch.io](https://brett24.itch.io/spellcode) to play the web game, or download the game here
+- Or download the game for your platform from builds folder
 # Controls:
 On your turn:
   - left click an adjacent hex (highlighted in green) to move the player
