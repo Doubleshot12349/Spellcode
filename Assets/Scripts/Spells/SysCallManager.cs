@@ -60,7 +60,7 @@ public class SysCallManager : MonoBehaviour
     }
 
 
-    public void Effect(int type)
+    public int Effect(int type)
     {
         //TODO: need to define syscall to pull q,r,s coord to place in right spot
 
@@ -69,10 +69,11 @@ public class SysCallManager : MonoBehaviour
         if (playerStats.mana < 5)
         {
             Debug.Log("Insufficient Mana");
-            return;
+            return -1;
         }
 
         playerStats.mana -= 5;
+        int instID;
 
         switch (type)
         {
@@ -82,7 +83,7 @@ public class SysCallManager : MonoBehaviour
                 Debug.Log("Fireball");
                 fireSprite.enabled = true;
                 GameObject summonedFireball = fireball.GetComponent<ISpell>().Conjure(target);
-                activeSpells.AddSpell(summonedFireball);
+                instID = activeSpells.AddSpell(summonedFireball);
                 fireSprite.enabled = false;
                 break;
             case 1:
@@ -90,7 +91,7 @@ public class SysCallManager : MonoBehaviour
                 Debug.Log("Lightning");
                 lightSprite.enabled = true;
                 GameObject summonedLightning = lightning.GetComponent<ISpell>().Conjure(target);
-                activeSpells.AddSpell(summonedLightning);
+                instID = activeSpells.AddSpell(summonedLightning);
                 lightSprite.enabled = false;
                 break;
             case 2:
@@ -98,7 +99,7 @@ public class SysCallManager : MonoBehaviour
                 Debug.Log("Ice Spike");
                 iceSprite.enabled = true;
                 GameObject summonedIceSpike = iceSpike.GetComponent<ISpell>().Conjure(target);
-                activeSpells.AddSpell(summonedIceSpike);
+                instID = activeSpells.AddSpell(summonedIceSpike);
                 iceSprite.enabled = false;
                 break;
             case 3:
@@ -108,20 +109,21 @@ public class SysCallManager : MonoBehaviour
                 portalSprite2.enabled = true;
                 GameObject portals = portal.GetComponent<ISpell>().Conjure(target);
 
-                activeSpells.AddSpell(portals.GetComponent<Portal>().portal1);
+                instID = activeSpells.AddSpell(portals.GetComponent<Portal>().portal1);
                 activeSpells.AddSpell(portals.GetComponent<Portal>().portal2);
                 
                 portalSprite1.enabled = false;
                 portalSprite2.enabled = false;
                 break;
             default:
+                instID = -1;
                 break;
 
         }
-        return;
+        return instID;
     }
 
-    public void MoveSpell(int inst,int r, int q)
+    public void MoveSpell(int inst,int q, int r)
     {        
         GameObject target = HexGridManager.GetHex(q,r);
 

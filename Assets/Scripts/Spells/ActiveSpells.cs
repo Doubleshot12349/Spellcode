@@ -5,9 +5,10 @@ public class ActiveSpells : MonoBehaviour
 {
     [SerializeField] private List<GameObject> spells;
     //private int iterator=0;
-    public void AddSpell(GameObject spell)
+    public int AddSpell(GameObject spell)
     {
         spells.Add(spell);
+        return spells.Count;
     }
 
     public GameObject GetSpellByID(int id)
