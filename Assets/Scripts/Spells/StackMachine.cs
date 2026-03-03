@@ -34,6 +34,7 @@ public class StackMachine: MonoBehaviour {
         while (running)
         {
             int syscall = Compiler.run_to_syscall_or_n(id, total_allowance - num_executed, ref num_executed);
+            Debug.Log($"syscall = {syscall}");
             if (syscall < 0) return;
 
             SyscallResult res = await SyscallHandler(syscall);
@@ -76,7 +77,8 @@ public class StackMachine: MonoBehaviour {
             case 3:
                 //spawn effect (fireball, lightning, etc.)
                 Compiler.pop_int(id, out int val);
-                manager.Effect(val);
+                int eff = manager.Effect(val);
+                Compiler.push_int(id, eff);
                 //need to put instance ID on stack
                 return SyscallResult.Nothing;
             case 4:
@@ -89,8 +91,9 @@ public class StackMachine: MonoBehaviour {
             case 5:
                 //get clicked location
                 (int, int) location = await manager.GetClickedLocation();
-                // FIXME
-                //VM.stack.Add(Value.FromArray());
+                //Debug.Log("pushing array");
+                Compiler.PushIntArray(id, new int[] { location.Item1, location.Item2 });
+                Debug.Log("pushing array");
                 return SyscallResult.Nothing;
             case 6:
                 //sleep a turn
@@ -99,8 +102,7 @@ public class StackMachine: MonoBehaviour {
                 //print ascii character
                 //manager.Print(Convert.ToString(VM.Pop()));
                 Compiler.pop_int(id, out int r1);
-                Debug.Log("printed char");
-                Debug.Log(r1);
+                Debug.Log($"printed char {(char) r1}");
                 return SyscallResult.Nothing;
             case 8:
                 // halt
@@ -110,9 +112,10 @@ public class StackMachine: MonoBehaviour {
                 return SyscallResult.Halt;
             case 10:
                 // move effect
-                Compiler.pop_int(id, out int r2);
                 Compiler.pop_int(id, out int q2);
+                Compiler.pop_int(id, out int r2);
                 Compiler.pop_int(id, out int instance_id);
+                Debug.Log($"moving spell {instance_id} to {r2} {q2}");
                 await manager.MoveSpell(instance_id, q2, r2);
                 return SyscallResult.Nothing;
                 

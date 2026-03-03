@@ -7,7 +7,7 @@ pub enum Syscall {
     EnvironmentID = 2,
     SpawnEffect = 3,
     PlayerLocation = 4,
-    OpponentLocation = 5,
+    ClickLocation = 5,
     Sleep = 6,
     PrintChar = 7,
     Halt = 8,
@@ -98,9 +98,9 @@ impl From<f64> for StackItem {
 }
 
 pub struct HeapItem {
-    value: Vec<StackItem>,
-    mark: bool,
-    tpe: Tpe
+    pub value: Vec<StackItem>,
+    pub mark: bool,
+    pub tpe: Tpe
 }
 
 pub struct VM {

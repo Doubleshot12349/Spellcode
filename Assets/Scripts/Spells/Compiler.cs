@@ -9,6 +9,12 @@ public ref struct CompileResult {
     public string error;
 }
 
+//[StructLayout(LayoutKind.Sequential)]
+//public ref struct IntArray {
+//    public IntPtr items;
+//    public ulong size;
+//}
+
 public static class Compiler {
 
 //#if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
@@ -41,5 +47,35 @@ public static class Compiler {
 
     [DllImport(dllName)]
     public static extern bool pop_int(long id, out int value);
+   
+    [DllImport(dllName)]
+    private static extern bool push_int_array(long id, IntPtr data, ulong len);
+
+    [DllImport(dllName)]
+    private static extern void free_int_array(IntPtr data, ulong len);
+
+    [DllImport(dllName)]
+    private static extern bool pop_int_array(long id, out /*ref?*/ IntPtr data, out ulong len);
+
+    public static void PushIntArray(long id, int[] items) {
+        unsafe {
+            fixed (int* ptr = items) {
+                push_int_array(id, (IntPtr) ptr, (ulong) items.Length);
+            }
+        }
+    }
+
+    public static int[] PopIntArray(long id) {
+        pop_int_array(id, out IntPtr items, out ulong length);
+        unsafe {
+            int* ptr = (int*) items.ToPointer();
+            int[] output = new int[(int) length];
+            for (int i = 0; i < (int) length; i++) {
+                output[i] = *ptr++;
+            }
+            free_int_array(items, length);
+            return output;
+        }
+    }
 }
 

@@ -5448,7 +5448,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: program
-      value: print("AAAAAA");
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);     } }
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

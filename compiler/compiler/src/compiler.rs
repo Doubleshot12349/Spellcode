@@ -118,6 +118,7 @@ impl Compiler {
                     args: vec![("type".to_owned(), CompType::Int)],
                     return_type: Some(CompType::Int)
                 },
+                // type, return value, return address, v
                 definition: vec![Instruction::Copy(3), Instruction::Syscall(Syscall::SpawnEffect), Instruction::Set(2), Instruction::Return]
             },
             RawFunction {
@@ -126,7 +127,19 @@ impl Compiler {
                     args: vec![("q".to_owned(), CompType::Int), ("r".to_owned(), CompType::Int), ("instance_id".to_owned(), CompType::Int)],
                     return_type: None
                 },
+                // q, r, id, return address
+                // q, r, id, return address, id
+                // q, r, id, return address, id, r
+                // q, r, id, return address, id, r, q
                 definition: vec![Instruction::Copy(2), Instruction::Copy(4), Instruction::Copy(6), Instruction::Syscall(Syscall::MoveEffect), Instruction::Return]
+            },
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "get_click".to_owned(),
+                    args: vec![],
+                    return_type: Some(CompType::Array(Box::new(CompType::Int)))
+                },
+                definition: vec![Instruction::Syscall(Syscall::ClickLocation), Instruction::Set(2), Instruction::Return]
             }
         ];
         Compiler {
