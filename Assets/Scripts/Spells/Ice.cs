@@ -31,18 +31,20 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
     public void OnTriggerEnter2D(Collider2D col)
     {
 
-        if (col.gameObject.tag == "Player")
+        if (col.gameObject.CompareTag("Player"))
         {
             col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
+            Destroy(gameObject);
         }
-        else if(col.gameObject.tag != "Tile")
+        else if(!col.gameObject.CompareTag("Tile"))
         {
             ISpell spell = col.gameObject.GetComponent<ISpell>();
             if (spell.Type == "Fire")
             {
                 this.health -= 2 * col.gameObject.GetComponent<Fire>().currentDamage;
                 Destroy(spell.gameObject);
-            }else if(spell.Type == "Ice")
+                //check to make sure correct(moving) ice spell is deleted
+            }else if(spell.Type == "Ice" && this.gameObject.GetComponent<Rigidbody2D>().linearVelocity.magnitude == 0)
             {
                 this.health += ((Ice)spell).health;
                 Destroy(spell.gameObject);

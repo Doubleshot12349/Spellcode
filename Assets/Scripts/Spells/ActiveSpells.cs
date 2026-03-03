@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ActiveSpells : MonoBehaviour
 {
     [SerializeField] private List<GameObject> spells;
-    private int iterator=0;
+    //private int iterator=0;
     public void AddSpell(GameObject spell)
     {
         spells.Add(spell);

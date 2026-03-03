@@ -106,10 +106,10 @@ public class SysCallManager : MonoBehaviour
                 portalSprite1.enabled = true;
                 portalSprite2.enabled = true;
                 GameObject portals = portal.GetComponent<ISpell>().Conjure(target);
-                for (int i = 0; i < 2; i++)
-                {
-                    activeSpells.AddSpell(portals.transform.GetChild(i).gameObject);
-                }
+
+                activeSpells.AddSpell(portals.GetComponent<Portal>().portal1);
+                activeSpells.AddSpell(portals.GetComponent<Portal>().portal2);
+                
                 portalSprite1.enabled = false;
                 portalSprite2.enabled = false;
                 break;

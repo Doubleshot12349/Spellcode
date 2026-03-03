@@ -1616,6 +1616,51 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1237935278
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1237935280}
+  - component: {fileID: 1237935279}
+  m_Layer: 0
+  m_Name: TurnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1237935279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237935278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09f23bcf2c27e984793368c36eb03cb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TestAssembly::TurnManager
+  currentTurn: 0
+--- !u!4 &1237935280
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237935278}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1496645524
 GameObject:
   m_ObjectHideFlags: 0
@@ -5347,11 +5392,31 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
     - target: {fileID: 1229939184451707076, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: grid
       value: 
       objectReference: {fileID: 1798582444}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
+    - target: {fileID: 3205211585290331625, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: RunOnStart
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3205211585290331625, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: Program.Array.data[0].A
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
+    - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -5372,3 +5437,4 @@ SceneRoots:
   - {fileID: 359587103}
   - {fileID: 336334927}
   - {fileID: 113434283}
+  - {fileID: 1237935280}

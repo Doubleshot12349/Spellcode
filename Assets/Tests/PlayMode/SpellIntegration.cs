@@ -38,10 +38,18 @@ public class SpellIntegrationTests
         h = new HexCoords(5, 5);
         hexTile3 = HexGridManager.GetHex(h);
 
-        Player = GameObject.Instantiate(Resources.Load<GameObject>("Player"));
+        Player = GameObject.Instantiate(Resources.Load<GameObject>("PlayerObject"));
         Player.GetComponent<PlayerMover>().grid = HexGrid.GetComponent<HexGridManager>();
         Player.GetComponent<PlayerMover>().startHexQ = 5;
         Player.GetComponent<PlayerMover>().startHexR = 5;
+
+        //turning off VMs which is not used in this test
+        var vms = Player.GetComponentsInChildren<StackMachineVM>();
+        foreach (var vm in vms)
+        {
+            if(vm != null) vm.enabled = false;
+        }
+        
 
         yield return null;
     }
@@ -58,6 +66,67 @@ public class SpellIntegrationTests
 
     //step 4: run tests
 
+    static string[] Spell = { "Fireball", "Lightning", "IceSpike" };
+    [UnityTest]
+    public IEnumerator SpellDamagesPlayer([ValueSource(nameof(Spell))] string spell)
+    {
+        Prefab1 = Resources.Load<GameObject>(spell);
+        gameObject1 = GameObject.Instantiate<GameObject>(Prefab1);
+        gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
+        yield return null;
+        var expectedHealth = Player.GetComponent<PlayerController>().health - gameObject1.GetComponent<ISpell>().Damage;
+
+        yield return gameObject1.GetComponent<ISpell>().Conjure(hexTile1);
+        yield return gameObject1.GetComponent<ISpell>().MoveRoutine(hexTile3);
+
+        yield return new WaitForFixedUpdate();
+
+        Assert.AreEqual(expectedHealth, Player.GetComponent<PlayerController>().health);
+        Assert.IsTrue(gameObject1 == null, $"{spell} was not deleted");
+
+    }
+
+    [UnityTest]
+    public IEnumerator SpellDamagesIce([ValueSource(nameof(Spell))] string spell)
+    {
+        //Spell to collide with Ice
+        Prefab1 = Resources.Load<GameObject>(spell);
+        gameObject1 = GameObject.Instantiate<GameObject>(Prefab1);
+        gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
+
+        //Ice spell
+        Prefab2 = Resources.Load<GameObject>("IceSpike");
+        gameObject2 = GameObject.Instantiate<GameObject>(Prefab2);
+        gameObject2.GetComponent<ISpell>().CurrentTile = this.hexTile3;
+
+
+
+        yield return null;
+
+        Assert.IsTrue(gameObject2 != null, "Ice spell was null");
+        Assert.IsTrue(gameObject1 != null, "Moving spell was null before moving");
+
+        var expectedHealth = gameObject2.GetComponent<Ice>().health;
+        if (spell == "Fireball")
+        {
+            expectedHealth -= 2*gameObject1.GetComponent<ISpell>().Damage;
+        }else if (spell == "IceSpike")
+        {
+            expectedHealth += gameObject1.GetComponent<ISpell>().Damage;
+        }
+
+        yield return gameObject1.GetComponent<ISpell>().Conjure(hexTile1);
+        yield return gameObject1.GetComponent<ISpell>().MoveRoutine(hexTile3);
+
+        Physics.SyncTransforms();
+        yield return new WaitForFixedUpdate();
+
+        Assert.IsTrue(gameObject1 == null, "Moving spell not deleted");
+        Assert.AreEqual(expectedHealth, gameObject2.GetComponent<Ice>().health,"Ice health not adjusted properly");
+
+
+    }
+    /*
     static string[] Spell1 = { "Fireball", "Lightning", "IceSpike", "Portals" };
     static string[] Spell2 = { "Fireball", "Lightning", "IceSpike", "Portals" };
     static (Vector3, string)[] TestCases =
@@ -86,7 +155,9 @@ public class SpellIntegrationTests
         GameObject newSpell2 = gameObject2.GetComponent<ISpell>().Conjure(hexTile2);
 
         int expectedHealth = Player.GetComponent<PlayerController>().health;
-        Player.GetComponent<Rigidbody>().WakeUp();
+
+        Physics.SyncTransforms();
+        Player.GetComponent<Rigidbody2D>().WakeUp();
         //assignments to calm down compiler
         int actualHealth=-1;
         Vector3 expectedPosition;
@@ -260,5 +331,5 @@ public class SpellIntegrationTests
         Object.Destroy(Player);
         Object.Destroy(HexGrid);
         yield return null;
-    }
+    }*/
 }

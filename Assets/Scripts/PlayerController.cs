@@ -10,9 +10,10 @@ public class PlayerController : MonoBehaviour
     public GameObject spell1;
     public GameObject spell2;
     public GameObject spell3;
-    
+    public GameObject selectedSpell;
 
-    
+
+
     void Update()
     {
         /*
@@ -23,6 +24,18 @@ public class PlayerController : MonoBehaviour
         }
         */
     }
+    /*
+        writing code here to avoid merge conflicts
+        if (isMyTurn){
+            if(Input.GetKeyUp("1")){
+                selectedSpell=spell1;
+            }else if(Input.GetKeyUp("2")){
+                selectedSpell=spell2;
+            }else if(Input.GetKeyUp("3")){
+                selectedSpell=spell3;
+            }
+        }
+    */
     
     public void Cast(int spellNum)
     {

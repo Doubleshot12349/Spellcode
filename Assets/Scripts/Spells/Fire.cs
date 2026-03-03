@@ -28,8 +28,9 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     }
     public void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.tag == "Player")
+        if (col.gameObject.CompareTag("Player"))
         {
+            Debug.Log("Collison");
             col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
 
             Destroy(gameObject);

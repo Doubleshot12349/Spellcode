@@ -55,6 +55,12 @@ public class ConjureTests
         Assert.IsNotNull(gameObject, "Instantiated prefab is null");
         Assert.AreEqual(gameObject.transform.position, target.transform.position, $"{testCase} spell failed to snap to hex");
 
+        if (testCase == "Portal")
+        {
+            Assert.IsNotNull(gameObject.GetComponent<Portal>().portal1);
+            Assert.IsNotNull(gameObject.GetComponent<Portal>().portal2);
+        }
+
 
         yield return null;
     }

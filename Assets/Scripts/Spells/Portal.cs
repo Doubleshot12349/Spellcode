@@ -27,13 +27,13 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
         Damage = 0;
-
+        portal1.GetComponent<SubPortal>().linkedPortal = portal2;
+        portal2.GetComponent<SubPortal>().linkedPortal = portal1;
     }
 
     public void Start()
     {
-        portal1.GetComponent<SubPortal>().linkedPortal = portal2;
-        portal2.GetComponent<SubPortal>().linkedPortal = portal1;
+        
         if (CurrentTile != null)
         {
             portal1.transform.SetParent(CurrentTile.transform);
