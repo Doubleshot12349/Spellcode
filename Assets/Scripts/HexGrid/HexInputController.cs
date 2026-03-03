@@ -82,6 +82,7 @@ public class HexInputController : MonoBehaviour
         selected.SetSelected(true);
 
         player.MoveTo(selected);
+        player.gameObject.GetComponent<PlayerController>().hasMoved = true;
     }
 
     private void RightClickSelect()
@@ -90,8 +91,7 @@ public class HexInputController : MonoBehaviour
 
         if (!player.CanCastOn(hovered))
             return;
-
-        player.GetComponent<PlayerController>().selectedHex = selected;
+        player.GetComponent<PlayerController>().selectedHex = hovered;
     }
 
     private HexTile RaycastTileUnderMouse()
