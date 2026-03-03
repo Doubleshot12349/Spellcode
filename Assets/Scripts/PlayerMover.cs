@@ -67,11 +67,6 @@ public class PlayerMover : MonoBehaviour
         isMoving = false;
     }
 
-    public void OnMyTurn()
-    {
-        
-    }
-
     private void Start()
     {
         //AutoSnapToNearestTile();

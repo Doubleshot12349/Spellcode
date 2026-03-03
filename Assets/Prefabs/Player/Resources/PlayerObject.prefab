@@ -130,12 +130,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   health: 50
   mana: 20
-  spell1: {fileID: 0}
-  spell2: {fileID: 0}
-  spell3: {fileID: 0}
+  spell1: {fileID: 1698189430288821889}
+  spell2: {fileID: 3289493050850803449}
+  spell3: {fileID: 7691847877710592199}
   selectedSpell: {fileID: 0}
+  turnManager: {fileID: 0}
   selectedHex: {fileID: 0}
   hasCastSpell: 0
+  hasMoved: 0
+  myTurn: 0
+  turnStarted: 0
 --- !u!58 &3947304419332037508
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -405,6 +409,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2542938868185345557, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
   m_PrefabInstance: {fileID: 1524453476245829635}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7691847877710592199 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9194411692354027716, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+  m_PrefabInstance: {fileID: 1524453476245829635}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5926662583521525309
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -498,6 +507,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+--- !u!1 &3289493050850803449 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9194411692354027716, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+  m_PrefabInstance: {fileID: 5926662583521525309}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7878678125677629251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4569196745271144830, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
@@ -577,6 +591,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+--- !u!1 &1698189430288821889 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9194411692354027716, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+  m_PrefabInstance: {fileID: 7496297595808378437}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5423010834768805968 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2542938868185345557, guid: 518e21cac38e4e841befe10c73596be7, type: 3}

@@ -44,7 +44,7 @@ public class SpellIntegrationTests
         Player.GetComponent<PlayerMover>().startHexR = 5;
 
         //turning off VMs which is not used in this test
-        var vms = Player.GetComponentsInChildren<StackMachineVM>();
+        var vms = Player.GetComponentsInChildren<StackMachine>();
         foreach (var vm in vms)
         {
             if(vm != null) vm.enabled = false;

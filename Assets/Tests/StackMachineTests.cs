@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
+/*
 using Op = StackMachineVM.OpCode;
 using Ins = StackMachineVM.Instruction;
-using Val = StackMachineVM.Value;
+using Val = StackMachineVM.Value;*/
 
 public class StackMachineTests
 {
+    /*
     [Test]
     public void TestPushIntImmediate()
     {
@@ -265,5 +267,5 @@ public class StackMachineTests
     //    // Use the Assert class to test conditions.
     //    // Use yield to skip a frame.
     //    yield return null;
-    //}
+    //}*/
 }

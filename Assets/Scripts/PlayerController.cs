@@ -12,34 +12,59 @@ public class PlayerController : MonoBehaviour
     public GameObject spell2;
     public GameObject spell3;
     public GameObject selectedSpell;
+    public TurnManager turnManager;
     public HexTile selectedHex;
-    public bool hasCastSpell=false;
+    public bool hasCastSpell = false;
+    public bool hasMoved;
+    public TurnState myTurn;
+    public bool turnStarted = false;
 
 
 
     void Update()
     {
-        if (mana < 50){
+        if (mana < 50)
+        {
             mana += 10;
         }
-        /*
-        if (isMyTurn)
+        
+        if (turnManager.currentTurn==myTurn)
         {
-            //do stuff
-            TurnManager.EndTurn();
+            if (turnStarted == false)
+            {
+                turnStarted = true;
+                hasCastSpell = false;
+                hasMoved = false;
+            }
+            if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            {
+                selectedSpell = spell1;
+            }
+            else if (Keyboard.current.digit2Key.wasPressedThisFrame)
+            {
+                selectedSpell = spell2;
+            }
+            else if (Keyboard.current.digit3Key.wasPressedThisFrame)
+            {
+                selectedSpell = spell3;
+            }
+
+            if (!hasCastSpell && selectedHex!=null)
+            {
+                selectedSpell.GetComponent<StackMachine>().RunTurn();
+            }
+            if(hasMoved && hasCastSpell)
+            {
+                turnManager.EndTurn();
+            }
+            
         }
-        */
+        
     }
     /*
         writing code here to avoid merge conflicts
         if (isMyTurn){
-            if(Input.GetKeyUp("1")){
-                selectedSpell=spell1;
-            }else if(Input.GetKeyUp("2")){
-                selectedSpell=spell2;
-            }else if(Input.GetKeyUp("3")){
-                selectedSpell=spell3;
-            }
+            
         }
     */
 

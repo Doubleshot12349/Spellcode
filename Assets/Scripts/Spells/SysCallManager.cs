@@ -17,7 +17,7 @@ public class SysCallManager : MonoBehaviour
     private Renderer portalSprite2;
     private static GameObject map;
 
-    private StackMachineVM weaver;
+    private StackMachine weaver;
     //weaver contains the spell code instructions and is responsible for executing them
     public ActiveSpells activeSpells;
     public GameObject player;
@@ -34,7 +34,7 @@ public class SysCallManager : MonoBehaviour
         (iceSprite = iceSpike.GetComponent<Renderer>()).enabled = false;
         (portalSprite1 = portal.GetComponent<Portal>().portal1.GetComponent<Renderer>()).enabled = false;;
         (portalSprite2 = portal.GetComponent<Portal>().portal2.GetComponent<Renderer>()).enabled = false;
-        weaver = this.GetComponent<StackMachineVM>();
+        weaver = this.GetComponent<StackMachine>();
         playerStats = player.GetComponent<PlayerController>();
         map = GameObject.Find("HexGrid");
     }
@@ -46,7 +46,7 @@ public class SysCallManager : MonoBehaviour
 
     public void Cast()
     {
-        weaver.Execute();
+        weaver.RunTurn();
     }
 
     public int GetPlayerMana()

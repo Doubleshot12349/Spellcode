@@ -5,6 +5,11 @@ public class HexInputController : MonoBehaviour
 {
     public Camera cam;
     public PlayerMover player;
+    public PlayerMover player1;
+    public PlayerMover player2;
+    public GameObject Player1Obj;
+    public GameObject Player2Obj;
+    public TurnManager turnManager;
 
     private HexTile hovered;
     private HexTile selected;
@@ -12,16 +17,27 @@ public class HexInputController : MonoBehaviour
     private void Awake()
     {
         if (cam == null) cam = Camera.main;
+        player1 = Player1Obj.GetComponent<PlayerMover>();
+        player2 = Player2Obj.GetComponent<PlayerMover>();
     }
 
     private void Update()
     {
+        if (turnManager.currentTurn == TurnState.Player1Turn)
+        {
+            player = player1;
+        }
+        else
+        {
+            player = player2;
+        }
         UpdateHover();
 
         // Left click (new input system)
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             LeftClickSelect();
+        //right click
         }else if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
             RightClickSelect();

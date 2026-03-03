@@ -169,7 +169,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1229939184451707076, guid: a2479e5932210884db23043d7e9698bc, type: 3}
   m_PrefabInstance: {fileID: 8344865277071178943}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 368784039}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a46ba2191df642a469b7a71feecfaf39, type: 3}
@@ -265,6 +265,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   spells: []
+--- !u!1 &368784039 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+  m_PrefabInstance: {fileID: 8344865277071178943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &767781564
 GameObject:
   m_ObjectHideFlags: 0
@@ -296,6 +301,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HexInputController
   cam: {fileID: 1590170571}
   player: {fileID: 284784649}
+  player1: {fileID: 0}
+  player2: {fileID: 0}
+  Player1Obj: {fileID: 368784039}
+  Player2Obj: {fileID: 2126273971}
+  turnManager: {fileID: 1237935281}
 --- !u!4 &767781566
 Transform:
   m_ObjectHideFlags: 0
@@ -391,6 +401,10 @@ PrefabInstance:
       propertyPath: startHexR
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: turnManager
+      value: 
+      objectReference: {fileID: 1237935281}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: portal
       value: 
@@ -1625,7 +1639,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1237935280}
-  - component: {fileID: 1237935279}
+  - component: {fileID: 1237935281}
   m_Layer: 0
   m_Name: TurnManager
   m_TagString: Untagged
@@ -1633,19 +1647,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1237935279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1237935278}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09f23bcf2c27e984793368c36eb03cb5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: TestAssembly::TurnManager
-  currentTurn: 0
 --- !u!4 &1237935280
 Transform:
   m_ObjectHideFlags: 0
@@ -1661,6 +1662,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1237935281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237935278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14969b8bfd30f0c44a67e45759ce8ab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TestAssembly::TurnManager
+  currentTurn: 0
 --- !u!1 &1496645524
 GameObject:
   m_ObjectHideFlags: 0
@@ -5400,6 +5414,10 @@ PrefabInstance:
       propertyPath: grid
       value: 
       objectReference: {fileID: 1798582444}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: turnManager
+      value: 
+      objectReference: {fileID: 1237935281}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
@@ -5420,6 +5438,10 @@ PrefabInstance:
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
+    - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: halted
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
