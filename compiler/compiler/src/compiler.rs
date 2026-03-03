@@ -111,6 +111,22 @@ impl Compiler {
                     return_type: None
                 },
                 definition: vec![Instruction::Copy(2), Instruction::Syscall(Syscall::PrintChar), Instruction::Return]
+            },
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "spawn_effect".to_owned(),
+                    args: vec![("type".to_owned(), CompType::Int)],
+                    return_type: Some(CompType::Int)
+                },
+                definition: vec![Instruction::Copy(3), Instruction::Syscall(Syscall::SpawnEffect), Instruction::Set(2), Instruction::Return]
+            },
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "move_effect".to_owned(),
+                    args: vec![("q".to_owned(), CompType::Int), ("r".to_owned(), CompType::Int), ("instance_id".to_owned(), CompType::Int)],
+                    return_type: None
+                },
+                definition: vec![Instruction::Copy(2), Instruction::Copy(4), Instruction::Copy(6), Instruction::Syscall(Syscall::MoveEffect), Instruction::Return]
             }
         ];
         Compiler {
