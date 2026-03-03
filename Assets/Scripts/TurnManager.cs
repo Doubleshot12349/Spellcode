@@ -20,15 +20,16 @@ public class TurnManager : MonoBehaviour
     void StartTurn()
     {
         Debug.Log("Turn Started: " + currentTurn);
+        currentTurn = TurnState.Player1Turn;
     }
 
     public void EndTurn()
     {
         if (currentTurn == TurnState.Player1Turn)
             currentTurn = TurnState.Player2Turn;
-        else if (currentTurn == TurnState.Player2Turn)
+        else
             currentTurn = TurnState.Player1Turn;
 
-        StartTurn();
+        Debug.Log("Current Turn: " + currentTurn);
     }
 }
