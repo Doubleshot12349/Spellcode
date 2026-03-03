@@ -26,14 +26,17 @@ public class SubPortal : MonoBehaviour,ISpell
     public void OnTriggerEnter2D(Collider2D col)
     {
         //avoiding infinite portal shenanigans
-        if ((!col.gameObject.CompareTag("Portal") && !col.gameObject.CompareTag("Tile") &&
-            col.gameObject.GetComponent<ISpell>().LastPortal != this.linkedPortal) ||
-            (col.gameObject.CompareTag("Player") && col.gameObject.GetComponent<PlayerController>().LastPortal != this.linkedPortal))
+        
+        if (col.gameObject.CompareTag("Harmful")&&col.gameObject.GetComponent<ISpell>().LastPortal!=this.linkedPortal)
         {
             //move to the connected portal without retriggering that portals condition
             col.gameObject.GetComponent<ISpell>().LastPortal = this.linkedPortal;
             col.gameObject.transform.SetParent(linkedPortal.transform.parent.transform);
             col.gameObject.transform.position = linkedPortal.transform.position;
+        }
+        if (col.gameObject.CompareTag("Player"))
+        {
+            col.gameObject.GetComponent<PlayerController>().LastPortal = this.linkedPortal;
         }
     }
 

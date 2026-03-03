@@ -384,11 +384,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 6.7211
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 6.99158
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -740,6 +740,7 @@ PrefabInstance:
     - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8590121604022899366, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -1969,7 +1970,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1237935280}
   - component: {fileID: 1237935281}
-  - component: {fileID: 1237935279}
   m_Layer: 0
   m_Name: TurnManager
   m_TagString: Untagged
@@ -1977,19 +1977,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1237935279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1237935278}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09f23bcf2c27e984793368c36eb03cb5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: TestAssembly::TurnManager
-  currentTurn: 0
 --- !u!4 &1237935280
 Transform:
   m_ObjectHideFlags: 0
@@ -2018,6 +2005,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TestAssembly::TurnManager
   currentTurn: 0
+  activeSpells: {fileID: 359587104}
 --- !u!1001 &1445205503
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2100,11 +2088,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 6.7211
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 6.99158
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -6083,6 +6071,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8590121604022899366, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -6094,10 +6086,6 @@ PrefabInstance:
     - target: {fileID: 8930804497580754664, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

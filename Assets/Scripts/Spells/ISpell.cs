@@ -56,6 +56,7 @@ using System.Collections;
             transform.position = end;
             CurrentTile = target;
             gameObject.transform.SetParent(target.transform);
+            //post move routine
 
         }
 
