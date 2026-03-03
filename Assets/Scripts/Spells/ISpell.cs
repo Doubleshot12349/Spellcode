@@ -61,7 +61,7 @@ using System.Collections;
 
         public GameObject Conjure(GameObject target)
         {
-            GameObject newSpell = GameObject.Instantiate(Prefab, target.transform);
+        GameObject newSpell = GameObject.Instantiate(Prefab, target.transform);
             gameObject.transform.position = target.transform.position;
             
             if (newSpell == null)
@@ -71,6 +71,7 @@ using System.Collections;
             }
             else
             {
+                newSpell.SetActive(true);
                 newSpell.GetComponent<ISpell>().CurrentTile = target;
                 return newSpell;
             }

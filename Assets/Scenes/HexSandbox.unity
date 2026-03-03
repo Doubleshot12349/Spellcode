@@ -402,6 +402,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: myTurn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
       objectReference: {fileID: 1237935281}
@@ -5438,6 +5442,10 @@ PrefabInstance:
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
+    - target: {fileID: 7667635368959839386, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: program
       value: print("AAAAAA");
