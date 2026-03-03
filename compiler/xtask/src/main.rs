@@ -123,6 +123,9 @@ fn dist_binary() -> Result<(), DynError> {
     build_binary(&target)?;
     copy_binary(&target)?;
 
+    build_binary(&WEB)?;
+    copy_binary(&WEB)?;
+
     Ok(())
 }
 

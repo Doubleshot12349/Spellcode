@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum TurnState
 {
@@ -30,5 +31,6 @@ public class TurnManager : MonoBehaviour
     {
         Debug.Log("GameOver");
         currentTurn = TurnState.GameOver;
+        SceneManager.LoadSceneAsync(1);
     }
 }
