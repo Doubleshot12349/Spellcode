@@ -764,9 +764,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2126273977}
-    - targetCorrespondingSourceObject: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2126273983}
   m_SourcePrefab: {fileID: 100100000, guid: a2479e5932210884db23043d7e9698bc, type: 3}
 --- !u!1 &876377097 stripped
 GameObject:
@@ -1990,7 +1987,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f23bcf2c27e984793368c36eb03cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TestAssembly::TurnManager
-  currentTurn: 0
 --- !u!4 &1237935280
 Transform:
   m_ObjectHideFlags: 0
@@ -5809,7 +5805,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 3
-      m_TileSpriteIndex: 3
+      m_TileSpriteIndex: 10
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6589,7 +6585,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 0
+      m_TileSpriteIndex: 5
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -6748,18 +6744,18 @@ Tilemap:
   - m_RefCount: 0
     m_Data: {fileID: 0}
   m_TileSpriteArray:
-  - m_RefCount: 1
-    m_Data: {fileID: -1906728706, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 0
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 1
-    m_Data: {fileID: 1631420629, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 3
     m_Data: {fileID: -1794146499, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: -1906728706, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 2
     m_Data: {fileID: 1688144741, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 1
@@ -6768,8 +6764,8 @@ Tilemap:
     m_Data: {fileID: -177788883, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 3
     m_Data: {fileID: -28756127, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: 1631420629, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 471640272, guid: 0eaf7b71846e86d4a95bb1ad941e98b5, type: 3}
   - m_RefCount: 3
@@ -7086,19 +7082,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 38912410800217675, guid: a2479e5932210884db23043d7e9698bc, type: 3}
   m_PrefabInstance: {fileID: 876377096}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2126273983
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2126273971}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ec1d0c7fa6f383478455219ab411881, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: TestAssembly::AnchorToParent
-  targetParent: {fileID: 0}
 --- !u!1001 &2986248670512061228
 PrefabInstance:
   m_ObjectHideFlags: 0
