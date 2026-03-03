@@ -117,7 +117,9 @@ public class StackMachine: MonoBehaviour {
                 Compiler.pop_int(id, out int instance_id);
                 Debug.Log($"moving spell {instance_id} to {r2} {q2}");
                 await manager.MoveSpell(instance_id, q2, r2);
-                return SyscallResult.Nothing;
+                //temporary fix for beta testing
+                return SyscallResult.SleepTurn;
+                //return SyscallResult.Nothing;
                 
             default:
                 Debug.Log("Invalid opcode\n");

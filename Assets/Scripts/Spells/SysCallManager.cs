@@ -58,14 +58,14 @@ public class SysCallManager : MonoBehaviour
     {
         //TODO: need to define syscall to pull q,r,s coord to place in right spot
 
-        GameObject target = HexGridManager.GetHex(1, 0);
+        GameObject target = HexGridManager.GetHex(player.GetComponent<PlayerMover>().currentTile.coords.q,player.GetComponent<PlayerMover>().currentTile.coords.r);
 
         if (playerStats.mana < 5)
         {
             Debug.Log("Insufficient Mana");
             return -1;
         }
-
+        
         playerStats.mana -= 5;
         int instID;
 

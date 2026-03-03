@@ -402,6 +402,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: health
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: myTurn
       value: 1
       objectReference: {fileID: 0}
@@ -5450,7 +5454,7 @@ PrefabInstance:
       propertyPath: program
       value: while true {     var pos = get_click();     print('A');     var effect
         = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1],
-        effect);     } }
+        effect);    } }
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

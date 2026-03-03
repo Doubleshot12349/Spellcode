@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
         
         if (!turnStarted)
         {
+            gameObject.GetComponent<Collider2D>().enabled = false;
             turnStarted = true;
             hasCastSpell = false;
             hasMoved = false;
@@ -65,10 +66,11 @@ public class PlayerController : MonoBehaviour
         }
 
         if ((hasMoved && hasCastSpell) || Keyboard.current.spaceKey.wasPressedThisFrame)
-    {
-        turnStarted = false;
-        turnManager.EndTurn();
-    }
+        {
+            turnStarted = false;
+            gameObject.GetComponent<Collider2D>().enabled = true;
+            turnManager.EndTurn();
+        }
             
     }
         

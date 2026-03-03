@@ -13,6 +13,7 @@ public class HexInputController : MonoBehaviour
 
     private HexTile hovered;
     private HexTile selected;
+    private bool isProcessingClick = false;
 
     private void Awake()
     {
@@ -27,9 +28,13 @@ public class HexInputController : MonoBehaviour
         {
             player = player1;
         }
-        else
+        else if(turnManager.currentTurn ==TurnState.Player2Turn)
         {
             player = player2;
+        }
+        else
+        {
+            return;
         }
         UpdateHover();
 
@@ -37,10 +42,17 @@ public class HexInputController : MonoBehaviour
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             LeftClickSelect();
+
+        }
         //right click
-        }else if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && !isProcessingClick)
         {
+            isProcessingClick = true;
             RightClickSelect();
+        }
+        if (Mouse.current.rightButton.wasReleasedThisFrame)
+        {
+            isProcessingClick = false;
         }
     }
 
@@ -91,7 +103,9 @@ public class HexInputController : MonoBehaviour
 
         if (!player.CanCastOn(hovered))
             return;
+        Debug.Log($"[Input] {player.name} right-clicked on {hovered.name}");
         player.GetComponent<PlayerController>().selectedHex = hovered;
+    
     }
 
     private HexTile RaycastTileUnderMouse()
