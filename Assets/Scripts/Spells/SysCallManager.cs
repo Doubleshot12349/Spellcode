@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System.Threading.Tasks;
 
 public class SysCallManager : MonoBehaviour
 {
@@ -120,19 +121,18 @@ public class SysCallManager : MonoBehaviour
         return;
     }
 
-    public void MoveSpell()
-    {
-        //using placeholder inputs for now
-        
-        GameObject target = HexGridManager.GetHex(6,6);
-        
-        
-        ISpell selected = activeSpells.GetSpellByID(0).GetComponent<ISpell>();
-        if (selected == null)
+    public void MoveSpell(int inst,int r, int q)
+    {        
+        GameObject target = HexGridManager.GetHex(q,r);
+
+
+        GameObject selectedObj = activeSpells.GetSpellByID(inst);
+        if (selectedObj == null)
         {
             Debug.Log("Unable to find spell to move");
             return;
         }
+        ISpell selected = selectedObj.GetComponent<ISpell>();
 
     //if using ISpell default behavior, run the coroutine
         if (selected.OverrideMoveSpell(target))
@@ -149,9 +149,15 @@ public class SysCallManager : MonoBehaviour
         return (0, 0);
     }
 
-    public (int, int) GetEnemyLocation()
+    public async Task<(int,int)> GetClickedLocation()
     {
-        return (0, 0);
+        var controller = gameObject.transform.parent.GetComponent<PlayerController>();
+        while (controller.selectedHex==null)
+        {
+            await Awaitable.NextFrameAsync();
+        }
+        HexTile location = HexGridManager.GetHex(controller.selectedHex.coords).GetComponent<HexTile>();
+        return (location.coords.q,location.coords.r);
     }
 
     public void Pause()
@@ -161,6 +167,7 @@ public class SysCallManager : MonoBehaviour
 
     public void Print(string s)
     {
+        
         return;
     }
 }

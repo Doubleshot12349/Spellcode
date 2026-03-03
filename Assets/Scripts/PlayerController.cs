@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem; // IMPORTANT (new input system)
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,11 +12,16 @@ public class PlayerController : MonoBehaviour
     public GameObject spell2;
     public GameObject spell3;
     public GameObject selectedSpell;
+    public HexTile selectedHex;
+    public bool hasCastSpell=false;
 
 
 
     void Update()
     {
+        if (mana < 50){
+            mana += 10;
+        }
         /*
         if (isMyTurn)
         {
@@ -36,9 +42,11 @@ public class PlayerController : MonoBehaviour
             }
         }
     */
-    
+
     public void Cast(int spellNum)
     {
-        GameObject []spells = { spell1, spell2, spell3 };
+        GameObject[] spells = { spell1, spell2, spell3 };
+        //spells[spellNum].GetComponent<StackMachineVM>().cast;//TODO double check
+        hasCastSpell = true;
     }
 }

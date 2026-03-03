@@ -21,7 +21,10 @@ public class HexInputController : MonoBehaviour
         // Left click (new input system)
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            ClickSelect();
+            LeftClickSelect();
+        }else if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            RightClickSelect();
         }
     }
 
@@ -41,12 +44,15 @@ public class HexInputController : MonoBehaviour
         if (hovered == null) return;
         if (hovered == selected) return;
 
-        bool valid = player != null && player.CanMoveTo(hovered);
-        if (valid) hovered.SetHoverValid();
+        bool validMove = player != null && player.CanMoveTo(hovered);
+        bool validSpell = player!=null && player.CanCastOn(hovered);
+        if (validMove) hovered.SetHoverValid();
+        else if (validSpell) hovered.SetHoverSpellValid();
         else hovered.SetHoverInvalid();
+
     }
 
-    private void ClickSelect()
+    private void LeftClickSelect()
     {
         if (hovered == null || player == null) return;
 
@@ -60,6 +66,16 @@ public class HexInputController : MonoBehaviour
         selected.SetSelected(true);
 
         player.MoveTo(selected);
+    }
+
+    private void RightClickSelect()
+    {
+        if (hovered == null || player == null) return;
+
+        if (!player.CanCastOn(hovered))
+            return;
+
+        player.GetComponent<PlayerController>().selectedHex = selected;
     }
 
     private HexTile RaycastTileUnderMouse()

@@ -29,6 +29,12 @@ public class PlayerMover : MonoBehaviour
         return grid != null && grid.AreAdjacent(currentTile.coords, target.coords);
     }
 
+    public bool CanCastOn(HexTile target)
+    {
+        //implement spell ranges later
+        return gameObject.GetComponent<PlayerController>().hasCastSpell;
+    }
+
     public void MoveTo(HexTile target)
     {
         if (isMoving) return;

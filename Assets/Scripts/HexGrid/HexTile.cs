@@ -10,6 +10,7 @@ public class HexTile : MonoBehaviour
     public Color hoverValidColor = new Color(0.4f, 1f, 0.4f, 0.7f);   // green
     public Color hoverInvalidColor = new Color(1f, 0.4f, 0.4f, 0.7f); // red
     public Color selectedColor = new Color(1f, 1f, 0.3f, 0.8f);       // yellow
+    public Color hoverSpellValidColor = new Color(.4f,.4f,1f,.7f);     //blue
 
     [Header("Refs")]
     [SerializeField] private SpriteRenderer highlightSR; // assign Highlight sprite renderer here
@@ -47,6 +48,12 @@ public class HexTile : MonoBehaviour
     {
         if (highlightSR == null || isSelected) return;
         highlightSR.color = hoverInvalidColor;
+    }
+
+    public void SetHoverSpellValid()
+    {
+        if (highlightSR == null || isSelected) return;
+        highlightSR.color = hoverSpellValidColor;
     }
 
     public void SetSelected(bool selected)

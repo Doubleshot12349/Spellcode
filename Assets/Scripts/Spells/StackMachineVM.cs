@@ -22,7 +22,7 @@ public class StackMachineVM : MonoBehaviour
         if (RunOnStart)
             Execute();
     }
-    public void SyscallHandler(int code, StackMachineVM VM)
+    public async void SyscallHandler(int code, StackMachineVM VM)
     {
         switch (code)
         {
@@ -31,7 +31,7 @@ public class StackMachineVM : MonoBehaviour
                 //TODO
                 // temporarily using as move instruction
                 // taking an instance ID and an array of coords
-                spellMachine.MoveSpell();
+                spellMachine.MoveSpell(0,6,6);
                 
                 break;
             case 1:
@@ -55,11 +55,9 @@ public class StackMachineVM : MonoBehaviour
                 VM.stack.Add(Value.FromInt(q));
                 break;
             case 5:
-                //get opponent location
-                int x, y;
-                (x, y) = spellMachine.GetEnemyLocation();
-                VM.stack.Add(Value.FromInt(y));
-                VM.stack.Add(Value.FromInt(x));
+                //get clicked location
+                (int, int) location = await spellMachine.GetClickedLocation();
+                //VM.stack.Add(Value.FromArray());
                 break;
             case 6:
                 //sleep a turn
