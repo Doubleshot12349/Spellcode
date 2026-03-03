@@ -123,7 +123,7 @@ public class SysCallManager : MonoBehaviour
         return instID;
     }
 
-    public void MoveSpell(int inst,int q, int r)
+    public async Task MoveSpell(int inst,int q, int r)
     {        
         GameObject target = HexGridManager.GetHex(q,r);
 

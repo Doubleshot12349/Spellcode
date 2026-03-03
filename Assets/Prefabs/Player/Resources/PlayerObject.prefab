@@ -134,6 +134,8 @@ MonoBehaviour:
   spell2: {fileID: 0}
   spell3: {fileID: 0}
   selectedSpell: {fileID: 0}
+  selectedHex: {fileID: 0}
+  hasCastSpell: 0
 --- !u!58 &3947304419332037508
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -558,14 +560,6 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1030189204272206848}
-    - target: {fileID: 4820911546867222477, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
-      propertyPath: portal
-      value: 
-      objectReference: {fileID: 6296382788895776571}
-    - target: {fileID: 4932286043542490028, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
-      propertyPath: RunOnStart
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4932286043542490028, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
       propertyPath: Program.Array.data[0].A
       value: 0
@@ -586,10 +580,5 @@ PrefabInstance:
 --- !u!4 &5423010834768805968 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2542938868185345557, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
-  m_PrefabInstance: {fileID: 7496297595808378437}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &6296382788895776571 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4569196745271144830, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
   m_PrefabInstance: {fileID: 7496297595808378437}
   m_PrefabAsset: {fileID: 0}

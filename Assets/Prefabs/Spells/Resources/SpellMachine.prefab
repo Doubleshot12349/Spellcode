@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2542938868185345557}
-  - component: {fileID: 4932286043542490028}
   - component: {fileID: 4820911546867222477}
+  - component: {fileID: 558802077523567238}
   m_Layer: 0
   m_Name: SpellMachine
   m_TagString: Untagged
@@ -37,33 +37,6 @@ Transform:
   - {fileID: 5470467134188418709}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4932286043542490028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9194411692354027716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e72ee61228c1aee4e92f81df02dba886, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StackMachineVM
-  Program:
-  - Op: 0
-    A: 3
-    D: 0
-    ElementType: 0
-  - Op: 30
-    A: 3
-    D: 0
-    ElementType: 0
-  - Op: 30
-    A: 0
-    D: 0
-    ElementType: 0
-  RunOnStart: 0
-  GcInterval: 256
 --- !u!114 &4820911546867222477
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,6 +56,20 @@ MonoBehaviour:
   portal: {fileID: 4569196745271144830}
   activeSpells: {fileID: 0}
   player: {fileID: 0}
+--- !u!114 &558802077523567238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9194411692354027716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b2e6b6638391d7498b21033dee4eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TestAssembly::StackMachine
+  id: 0
+  halted: 0
 --- !u!1001 &755206160557626919
 PrefabInstance:
   m_ObjectHideFlags: 0

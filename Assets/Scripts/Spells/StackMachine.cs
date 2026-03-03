@@ -1,0 +1,125 @@
+using UnityEngine;
+using System.Threading.Tasks;
+
+public enum SyscallResult {
+    Halt, SleepTurn, Nothing
+}
+
+public class StackMachine: MonoBehaviour {
+    public long id;
+    public SysCallManager manager;
+    public bool halted = false;
+    public string program;
+
+    public void Start()
+    {
+        manager = gameObject.GetComponent<SysCallManager>();
+        RunTurn();
+    }
+
+    public void Awake()
+    {
+        Compiler.compile(program, out CompileResult res);
+        id = res.id;
+        Debug.Log(res.error);
+    }
+
+    public async void RunTurn()
+    {
+        if (halted) return;
+
+        int total_allowance = 10000;
+        int num_executed = 0;
+        bool running = true;
+        while (running)
+        {
+            int syscall = Compiler.run_to_syscall_or_n(id, total_allowance - num_executed, ref num_executed);
+            if (syscall < 0) return;
+
+            SyscallResult res = await SyscallHandler(syscall);
+            switch (res) {
+                case SyscallResult.Nothing:
+                    break;
+                case SyscallResult.SleepTurn:
+                    running = false;
+                    break;
+                case SyscallResult.Halt:
+                    running = false;
+                    halted = true;
+                    break;
+            }
+
+
+            if (num_executed >= total_allowance)
+            {
+                break;
+            }
+        }
+    }
+
+    public async Task<SyscallResult> SyscallHandler(int code)
+    {
+        switch (code)
+        {
+            case 0:
+                //nop
+               
+                return SyscallResult.Nothing;
+            case 1:
+                //push mana
+                Compiler.push_int(id, manager.GetPlayerMana());
+                return SyscallResult.Nothing;
+            case 2:
+                //push env ID (water,fire, field, space, etc.)
+                Compiler.push_int(id, manager.GetEnv());
+                return SyscallResult.Nothing;
+            case 3:
+                //spawn effect (fireball, lightning, etc.)
+                Compiler.pop_int(id, out int val);
+                manager.Effect(val);
+                //need to put instance ID on stack
+                return SyscallResult.Nothing;
+            case 4:
+                //get player location (q,r)
+                int q, r;
+                (q, r) = manager.GetPlayerLocation();
+                Compiler.push_int(id, r);
+                Compiler.push_int(id, q);
+                return SyscallResult.Nothing;
+            case 5:
+                //get clicked location
+                (int, int) location = await manager.GetClickedLocation();
+                // FIXME
+                //VM.stack.Add(Value.FromArray());
+                return SyscallResult.Nothing;
+            case 6:
+                //sleep a turn
+                return SyscallResult.SleepTurn;
+            case 7:
+                //print ascii character
+                //manager.Print(Convert.ToString(VM.Pop()));
+                Compiler.pop_int(id, out int r1);
+                Debug.Log("printed char");
+                Debug.Log(r1);
+                return SyscallResult.Nothing;
+            case 8:
+                // halt
+                return SyscallResult.Halt;
+            case 9:
+                // runtime exception
+                return SyscallResult.Halt;
+            case 10:
+                // move effect
+                Compiler.pop_int(id, out int r2);
+                Compiler.pop_int(id, out int q2);
+                Compiler.pop_int(id, out int instance_id);
+                await manager.MoveSpell(instance_id, q2, r2);
+                return SyscallResult.Nothing;
+                
+            default:
+                Debug.Log("Invalid opcode\n");
+                return SyscallResult.Halt;
+        }
+    }
+}
+

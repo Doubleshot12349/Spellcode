@@ -1,4 +1,4 @@
-//using UnityEngine;
+using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 
@@ -16,7 +16,6 @@ public static class Compiler {
 //#else
     private const string dllName = "compiler";
 //#endif
-
 
     [DllImport(dllName)]
     public static extern int add(int a, int b);
