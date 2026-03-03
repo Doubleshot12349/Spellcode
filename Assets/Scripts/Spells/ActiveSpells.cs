@@ -38,7 +38,7 @@ public class ActiveSpells : MonoBehaviour
             }
             else if(spell.GetComponent<ISpell>().Type == "Fire")
             {
-                GameObject.Destroy(spell);
+                //GameObject.Destroy(spell);
             }
 
         }
