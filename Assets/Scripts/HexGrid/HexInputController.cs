@@ -70,13 +70,17 @@ public class HexInputController : MonoBehaviour
         }
 
         if (hovered == null) return;
-        if (hovered == selected) return;
+        if (hovered == selected)
+        {
+            hovered.SetSelected(true);
+        }
 
         bool validMove = player != null && player.CanMoveTo(hovered);
         bool validSpell = player!=null && player.CanCastOn(hovered);
         if (validMove) hovered.SetHoverValid();
         else if (validSpell) hovered.SetHoverSpellValid();
         else hovered.SetHoverInvalid();
+
 
     }
 
