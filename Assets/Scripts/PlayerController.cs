@@ -18,60 +18,66 @@ public class PlayerController : MonoBehaviour
     public bool hasMoved;
     public TurnState myTurn;
     public bool turnStarted = false;
+    public GameObject LastPortal;
 
-
+    public void Start()
+    {
+        selectedSpell = spell1;
+    }
 
     void Update()
     {
-        if (mana < 50)
+        if (this.health <= 0 && turnManager.currentTurn != TurnState.GameOver)
         {
-            mana += 10;
+            turnManager.GameOver();
+        }
+        if (turnManager.currentTurn != myTurn)
+        {
+            turnStarted = false;
+            return;
         }
         
-        if (turnManager.currentTurn==myTurn)
+        if (!turnStarted)
         {
-            if (turnStarted == false)
+            gameObject.GetComponent<Collider2D>().enabled = false;
+            turnStarted = true;
+            hasCastSpell = false;
+            hasMoved = false;
+            if (mana < 50)
             {
-                turnStarted = true;
-                hasCastSpell = false;
-                hasMoved = false;
-            }
-            if (Keyboard.current.digit1Key.wasPressedThisFrame)
-            {
-                selectedSpell = spell1;
-            }
-            else if (Keyboard.current.digit2Key.wasPressedThisFrame)
-            {
-                selectedSpell = spell2;
-            }
-            else if (Keyboard.current.digit3Key.wasPressedThisFrame)
-            {
-                selectedSpell = spell3;
-            }
-
-            if (!hasCastSpell && selectedHex!=null)
-            {
-                selectedSpell.GetComponent<StackMachine>().RunTurn();
-            }
-            if(hasMoved && hasCastSpell)
-            {
-                turnManager.EndTurn();
+                mana += 10;
             }
             
         }
-        
-    }
-    /*
-        writing code here to avoid merge conflicts
-        if (isMyTurn){
-            
+        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        {
+            selectedSpell = spell1;
         }
-    */
+        else if (Keyboard.current.digit2Key.wasPressedThisFrame)
+        {
+            selectedSpell = spell2;
+        }
+        else if (Keyboard.current.digit3Key.wasPressedThisFrame)
+        {
+            selectedSpell = spell3;
+        }
 
-    public void Cast(int spellNum)
-    {
-        GameObject[] spells = { spell1, spell2, spell3 };
-        //spells[spellNum].GetComponent<StackMachineVM>().cast;//TODO double check
-        hasCastSpell = true;
+        if (!hasCastSpell && selectedHex != null)
+        {
+            Debug.Log("Spell cast");
+            selectedSpell.GetComponent<StackMachine>().RunTurn();
+            selectedHex = null;
+            hasCastSpell = true;
+        }
+
+        if ((hasMoved && hasCastSpell) || Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            turnStarted = false;
+            gameObject.GetComponent<Collider2D>().enabled = true;
+            turnManager.EndTurn();
+        }
+            
     }
+        
+    
 }

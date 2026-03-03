@@ -521,14 +521,48 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 252799959049624930, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 252799959049624930, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(3);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 416275931574651989, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 442400539246812475, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 495211180327637166, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 727892883067733216, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Name
       value: Player2
       objectReference: {fileID: 0}
     - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
     - target: {fileID: 1229939184451707076, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: grid
       value: 
@@ -541,10 +575,60 @@ PrefabInstance:
       propertyPath: startHexR
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: health
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: myTurn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: spell3
+      value: 
+      objectReference: {fileID: 1474703065}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
       objectReference: {fileID: 1237935281}
+    - target: {fileID: 1486884019337989042, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677354535366597340, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1698189430288821889, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710178270721267529, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2062416010384778780, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2785655200771470948, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3048653717033978237, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: portal
       value: 
@@ -556,6 +640,90 @@ PrefabInstance:
     - target: {fileID: 3205211585290331625, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: RunOnStart
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3289493050850803449, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471835998540420248, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4263342615927836314, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4739785264034010768, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
+    - target: {fileID: 5791461393881455842, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6033195430249188748, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(1);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 6296382788895776571, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: activeSpells
+      value: 
+      objectReference: {fileID: 359587104}
+    - target: {fileID: 7039386533247856730, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7373149004443702593, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7605939361378508276, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7667635368959839386, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7691847877710592199, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7878678125677629251, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 8130260817162401725, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Color.b
@@ -572,6 +740,17 @@ PrefabInstance:
     - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Enabled
       value: 0
+    - target: {fileID: 8590121604022899366, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8924585275697266464, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930804497580754664, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -1951,6 +2130,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 423654124}
   m_SourcePrefab: {fileID: 100100000, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
+--- !u!1 &1474703065 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8924585275697266464, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+  m_PrefabInstance: {fileID: 876377096}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1496645524
 GameObject:
   m_ObjectHideFlags: 0
@@ -5719,9 +5903,39 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 252799959049624930, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 252799959049624930, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(3);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 416275931574651989, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 442400539246812475, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 495211180327637166, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 727892883067733216, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
@@ -5731,10 +5945,48 @@ PrefabInstance:
       propertyPath: grid
       value: 
       objectReference: {fileID: 1798582444}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
       objectReference: {fileID: 1237935281}
+    - target: {fileID: 1486884019337989042, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677354535366597340, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1698189430288821889, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1710178270721267529, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2062416010384778780, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2785655200771470948, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3048653717033978237, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
@@ -5747,17 +5999,101 @@ PrefabInstance:
       propertyPath: Program.Array.data[0].A
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3289493050850803449, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3471835998540420248, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4263342615927836314, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4739785264034010768, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
+    - target: {fileID: 5791461393881455842, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6033195430249188748, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: id
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: program
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(1);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 6296382788895776571, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
+    - target: {fileID: 7039386533247856730, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7373149004443702593, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7605939361378508276, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7667635368959839386, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7667635368959839386, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7691847877710592199, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7878678125677629251, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: program
-      value: print("AAAAAA");
+      value: while true {     var pos = get_click();     print('A');     var effect
+        = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1],
+        effect);    } }
+      objectReference: {fileID: 0}
+    - target: {fileID: 8130260817162401725, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8590121604022899366, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8924585275697266464, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8930804497580754664, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Enabled

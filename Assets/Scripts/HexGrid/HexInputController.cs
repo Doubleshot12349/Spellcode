@@ -13,6 +13,7 @@ public class HexInputController : MonoBehaviour
 
     private HexTile hovered;
     private HexTile selected;
+    private bool isProcessingClick = false;
 
     private void Awake()
     {
@@ -27,9 +28,13 @@ public class HexInputController : MonoBehaviour
         {
             player = player1;
         }
-        else
+        else if(turnManager.currentTurn ==TurnState.Player2Turn)
         {
             player = player2;
+        }
+        else
+        {
+            return;
         }
         UpdateHover();
 
@@ -37,10 +42,17 @@ public class HexInputController : MonoBehaviour
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             LeftClickSelect();
+
+        }
         //right click
-        }else if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && !isProcessingClick)
         {
+            isProcessingClick = true;
             RightClickSelect();
+        }
+        if (Mouse.current.rightButton.wasReleasedThisFrame)
+        {
+            isProcessingClick = false;
         }
     }
 
@@ -58,13 +70,17 @@ public class HexInputController : MonoBehaviour
         }
 
         if (hovered == null) return;
-        if (hovered == selected) return;
+        if (hovered == selected)
+        {
+            hovered.SetSelected(true);
+        }
 
         bool validMove = player != null && player.CanMoveTo(hovered);
         bool validSpell = player!=null && player.CanCastOn(hovered);
         if (validMove) hovered.SetHoverValid();
         else if (validSpell) hovered.SetHoverSpellValid();
         else hovered.SetHoverInvalid();
+
 
     }
 
@@ -82,6 +98,7 @@ public class HexInputController : MonoBehaviour
         selected.SetSelected(true);
 
         player.MoveTo(selected);
+        player.gameObject.GetComponent<PlayerController>().hasMoved = true;
     }
 
     private void RightClickSelect()
@@ -90,8 +107,9 @@ public class HexInputController : MonoBehaviour
 
         if (!player.CanCastOn(hovered))
             return;
-
-        player.GetComponent<PlayerController>().selectedHex = selected;
+        Debug.Log($"[Input] {player.name} right-clicked on {hovered.name}");
+        player.GetComponent<PlayerController>().selectedHex = hovered;
+    
     }
 
     private HexTile RaycastTileUnderMouse()

@@ -7,14 +7,9 @@ public class SysCallManager : MonoBehaviour
 {
     public new string name;
     public GameObject fireball;
-    private Renderer fireSprite;
     public GameObject lightning;
-    private Renderer lightSprite;
     public GameObject iceSpike;
-    private Renderer iceSprite;
     public GameObject portal;
-    private Renderer portalSprite1;
-    private Renderer portalSprite2;
     private static GameObject map;
 
     private StackMachine weaver;
@@ -28,12 +23,11 @@ public class SysCallManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        //Loading Sprites to enable/disable
-        (fireSprite = fireball.GetComponent<Renderer>()).enabled = false;
-        (lightSprite = lightning.GetComponent<Renderer>()).enabled = false;
-        (iceSprite = iceSpike.GetComponent<Renderer>()).enabled = false;
-        (portalSprite1 = portal.GetComponent<Portal>().portal1.GetComponent<Renderer>()).enabled = false;;
-        (portalSprite2 = portal.GetComponent<Portal>().portal2.GetComponent<Renderer>()).enabled = false;
+        //Disable Prefab spells so they don't trigger things
+        fireball.SetActive(false);
+        lightning.SetActive(false);
+        iceSpike.SetActive(false);
+        portal.SetActive(false);
         weaver = this.GetComponent<StackMachine>();
         playerStats = player.GetComponent<PlayerController>();
         map = GameObject.Find("HexGrid");
@@ -64,14 +58,14 @@ public class SysCallManager : MonoBehaviour
     {
         //TODO: need to define syscall to pull q,r,s coord to place in right spot
 
-        GameObject target = HexGridManager.GetHex(1, 0);
+        GameObject target = HexGridManager.GetHex(player.GetComponent<PlayerMover>().currentTile.coords.q,player.GetComponent<PlayerMover>().currentTile.coords.r);
 
         if (playerStats.mana < 5)
         {
             Debug.Log("Insufficient Mana");
             return -1;
         }
-
+        
         playerStats.mana -= 5;
         int instID;
 
@@ -81,39 +75,29 @@ public class SysCallManager : MonoBehaviour
             case 0:
                 //fireball
                 Debug.Log("Fireball");
-                fireSprite.enabled = true;
                 GameObject summonedFireball = fireball.GetComponent<ISpell>().Conjure(target);
                 instID = activeSpells.AddSpell(summonedFireball);
-                fireSprite.enabled = false;
                 break;
             case 1:
                 //lightning
                 Debug.Log("Lightning");
-                lightSprite.enabled = true;
                 GameObject summonedLightning = lightning.GetComponent<ISpell>().Conjure(target);
                 instID = activeSpells.AddSpell(summonedLightning);
-                lightSprite.enabled = false;
                 break;
             case 2:
                 //ice_spike
                 Debug.Log("Ice Spike");
-                iceSprite.enabled = true;
                 GameObject summonedIceSpike = iceSpike.GetComponent<ISpell>().Conjure(target);
                 instID = activeSpells.AddSpell(summonedIceSpike);
-                iceSprite.enabled = false;
+
                 break;
             case 3:
                 //portal
                 Debug.Log("Portal");
-                portalSprite1.enabled = true;
-                portalSprite2.enabled = true;
-                GameObject portals = portal.GetComponent<ISpell>().Conjure(target);
-
-                instID = activeSpells.AddSpell(portals.GetComponent<Portal>().portal1);
-                activeSpells.AddSpell(portals.GetComponent<Portal>().portal2);
+                GameObject summonedPortals = portal.GetComponent<ISpell>().Conjure(target);
+                instID = activeSpells.AddSpell(summonedPortals.GetComponent<Portal>().portal1);
+                activeSpells.AddSpell(summonedPortals.GetComponent<Portal>().portal2);
                 
-                portalSprite1.enabled = false;
-                portalSprite2.enabled = false;
                 break;
             default:
                 instID = -1;

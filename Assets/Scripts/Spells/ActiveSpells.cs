@@ -7,8 +7,9 @@ public class ActiveSpells : MonoBehaviour
     //private int iterator=0;
     public int AddSpell(GameObject spell)
     {
+        int id = spells.Count;
         spells.Add(spell);
-        return spells.Count;
+        return id;
     }
 
     public GameObject GetSpellByID(int id)
