@@ -23,4 +23,10 @@ public class TurnManager : MonoBehaviour
         else if (currentTurn == TurnState.Player2Turn)
             currentTurn = TurnState.Player1Turn;
     }
+
+    public void GameOver()
+    {
+        Debug.Log("GameOver");
+        currentTurn = TurnState.GameOver;
+    }
 }

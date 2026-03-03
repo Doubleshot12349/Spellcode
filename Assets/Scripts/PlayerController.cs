@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public bool hasMoved;
     public TurnState myTurn;
     public bool turnStarted = false;
+    public GameObject LastPortal;
 
     public void Start()
     {
@@ -26,6 +27,10 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (this.health <= 0 && turnManager.currentTurn != TurnState.GameOver)
+        {
+            turnManager.GameOver();
+        }
         if (turnManager.currentTurn != myTurn)
         {
             turnStarted = false;
@@ -59,7 +64,7 @@ public class PlayerController : MonoBehaviour
 
         if (!hasCastSpell && selectedHex != null)
         {
-            
+            Debug.Log("Spell cast");
             selectedSpell.GetComponent<StackMachine>().RunTurn();
             selectedHex = null;
             hasCastSpell = true;

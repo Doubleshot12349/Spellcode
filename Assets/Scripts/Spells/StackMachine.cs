@@ -14,7 +14,6 @@ public class StackMachine: MonoBehaviour {
     public void Start()
     {
         manager = gameObject.GetComponent<SysCallManager>();
-        RunTurn();
     }
 
     public void Awake()
@@ -26,6 +25,7 @@ public class StackMachine: MonoBehaviour {
 
     public async void RunTurn()
     {
+        Debug.Log("Running turn");
         if (halted) return;
 
         int total_allowance = 10000;
