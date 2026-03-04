@@ -11,6 +11,7 @@ public enum TurnState
 public class TurnManager : MonoBehaviour
 {
     public TurnState currentTurn;
+    public ActiveSpells activeSpells;
 
     public void Start()
     {
@@ -19,6 +20,7 @@ public class TurnManager : MonoBehaviour
 
     public void EndTurn()
     {
+        activeSpells.Clean();
         if (currentTurn == TurnState.Player1Turn)
             currentTurn = TurnState.Player2Turn;
         else if (currentTurn == TurnState.Player2Turn)

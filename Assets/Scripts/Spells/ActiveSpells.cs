@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class ActiveSpells : MonoBehaviour
 {
@@ -22,6 +23,24 @@ public class ActiveSpells : MonoBehaviour
         else
         {
             return spells[id];
+        }
+    }
+    public void Clean()
+    {
+        Debug.Log("Cleaning");
+        foreach (var spell in spells)
+        {
+            if (spell == null)
+            {
+                //probably can't do this as indicies would be updated which may affect SpellMachine
+                //spells.Remove(spell);
+
+            }
+            else if(spell.GetComponent<ISpell>().Type == "Fire")
+            {
+                //GameObject.Destroy(spell);
+            }
+
         }
     }
     

@@ -619,11 +619,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 6.7211
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 6.99158
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5697883577419187425, guid: 420c9e2d4f8084ea68e81a6ff465b947, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2683,6 +2683,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TestAssembly::TurnManager
   currentTurn: 0
+  activeSpells: {fileID: 359587104}
 --- !u!1001 &1445205503
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2765,11 +2766,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 6.7211
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 6.99158
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 243978157336016762, guid: 3bf4c54d34f844ab5ad8f561d24b0052, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
