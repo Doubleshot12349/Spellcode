@@ -1,7 +1,0 @@
-#[target.wasm32-unknown-emscripten]
-#linker = "/home/foo/Unity/Hub/Editor/6000.3.10f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/Emscripten/llvm/clangAAA"
-#linker = "oiwsjioejfoi"
-[build]
-#linker = "/home/foo/Unity/Hub/Editor/6000.3.10f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/Emscripten/llvm/clangAAA"
-#rustflags = ["-Clinker=/home/foo/Unity/Hub/Editor/6000.3.10f1/Editor/Data/PlaybackEngines/WebGLSupport/BuildTools/Emscripten/llvm/clangAAAA"]
-
