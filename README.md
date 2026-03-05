@@ -1,9 +1,9 @@
 # Wizard’s Spell-Code
 ## Beta Testing
 Follow this link to build for development purposes (requires a free Unity account)
-[Build instructions](https://github.com/Doubleshot12349/Spellcode/blob/main/BUILD.md))
+[Build instructions](https://github.com/Doubleshot12349/Spellcode/blob/main/BUILD.md)
 Follow this link for instructions on installing and running the game
-[Installation Instructions](https://github.com/Doubleshot12349/Spellcode/blob/main/INSTALLATION.md))
+[Installation Instructions](https://github.com/Doubleshot12349/Spellcode/blob/main/INSTALLATION.md)
 
 ## Team Info
 - Brett Thompson, programmer, music producer
