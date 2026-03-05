@@ -17,11 +17,11 @@ public ref struct CompileResult {
 
 public static class Compiler {
 
-//#if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
-//    private const string dllName = "__Internal";
-//#else
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
+    private const string dllName = "__Internal";
+#else
     private const string dllName = "compiler";
-//#endif
+#endif
 
     [DllImport(dllName)]
     public static extern int add(int a, int b);
