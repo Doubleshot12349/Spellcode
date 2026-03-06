@@ -332,6 +332,7 @@ impl VM {
     }
 
     fn garbage_collect(&mut self) {
+        return;
         for obj in self.heap.iter_mut() {
             obj.1.mark = false;
         }
