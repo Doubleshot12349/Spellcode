@@ -332,14 +332,15 @@ impl VM {
     }
 
     fn garbage_collect(&mut self) {
-        return;
         for obj in self.heap.iter_mut() {
             obj.1.mark = false;
         }
 
         let mut items_to_mark = self.stack.clone();
         while !items_to_mark.is_empty() {
-            for item in items_to_mark.clone() {
+            let old = items_to_mark.clone();
+            items_to_mark.clear();
+            for item in old {
                 if let StackItem::Array(_, id) = &item {
                     let heap_item = self.heap.get_mut(id).unwrap();
                     heap_item.mark = true;
