@@ -1,6 +1,6 @@
 #![feature(box_patterns)]
 
-use std::{ffi::{CStr, CString}, sync::Mutex};
+use std::{ffi::{CStr, CString}, hint::black_box, sync::Mutex};
 
 use crate::{compiler::Compiler, stack_machine::{StackItem, VM}};
 
@@ -180,6 +180,8 @@ pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) 
 
 #[unsafe(no_mangle)]
 pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
+    //let mut items = vec![0; 100];
+    //black_box(|| { drop(items); });
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();
     let res = unsafe { &mut *output };
     res.id = -1;

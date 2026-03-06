@@ -20,32 +20,37 @@ struct Target {
     triple: Option<&'static str>,
     crate_type: Option<&'static str>,
     output: Option<&'static str>,
-    unity_path: &'static str
+    unity_path: &'static str,
+    rust_flags: Option<&'static str>
 }
 
 const LINUX: Target = Target {
     triple: Some("x86_64-unknown-linux-gnu"),
     crate_type: None,
     output: Some("target/x86_64-unknown-linux-gnu/release/libcompiler.so"),
-    unity_path: "linux"
+    unity_path: "linux",
+    rust_flags: None
 };
 const WINDOWS_MINGW: Target = Target {
     triple: Some("x86_64-pc-windows-gnu"),
     crate_type: None,
     output: Some("target/x86_64-pc-windows-gnu/release/compiler.dll"),
-    unity_path: "windows"
+    unity_path: "windows",
+    rust_flags: None
 };
 const WINDOWS_MSVC: Target = Target {
     triple: Some("x86_64-pc-windows-msvc"),
     crate_type: None,
     output: Some("target/x86_64-pc-windows-msvc/release/compiler.dll"),
-    unity_path: "windows"
+    unity_path: "windows",
+    rust_flags: None
 };
 const WEB: Target = Target {
-    triple: Some("wasm32-wasip1"),
+    triple: Some("wasm32-unknown-emscripten"),
     crate_type: Some("staticlib"),
-    output: Some("target/wasm32-wasip1/release/libcompiler.a"),
-    unity_path: "web"
+    output: Some("target/wasm32-unknown-emscripten/release/libcompiler.a"),
+    unity_path: "web",
+    rust_flags: Some("-Ctarget-cpu=mvp")
 };
 
 #[cfg(unix)]
@@ -82,7 +87,7 @@ fn dist() -> Result<(), DynError> {
     Ok(())
 }
 
-fn build_binary(Target { triple, crate_type, .. }: &Target) -> Result<(), DynError> {
+fn build_binary(Target { triple, crate_type, rust_flags, .. }: &Target) -> Result<(), DynError> {
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
     let mut args = vec![];
     if let Some(v) = crate_type {
@@ -90,6 +95,7 @@ fn build_binary(Target { triple, crate_type, .. }: &Target) -> Result<(), DynErr
         args.push("-p");
         args.push("compiler");
         args.push("--lib");
+        args.push("-Zbuild-std=panic_abort,std");
         args.push("--crate-type");
         args.push(v);
     } else {
@@ -100,9 +106,18 @@ fn build_binary(Target { triple, crate_type, .. }: &Target) -> Result<(), DynErr
         args.push("--target");
         args.push(v);
     }
-    let status = Command::new(cargo)
-        .current_dir(project_root())
-        .args(args).status()?;
+
+    let mut cmd = Command::new(cargo);
+    // RUSTFLAGS=-Ctarget-cpu=mvp cargo rustc --release --lib --crate-type staticlib -Zbuild-std=panic_abort,std --target wasm32-unknown-emscripten
+    if let Some(flags) = rust_flags {
+        println!("rustflags = {flags}");
+        cmd.env("RUSTFLAGS", flags);
+    }
+
+    cmd.current_dir(project_root());
+    cmd.args(args);
+
+    let status = cmd.status()?;
 
     if !status.success() {
         Err("cargo build failed")?;
