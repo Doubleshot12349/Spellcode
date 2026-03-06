@@ -494,9 +494,9 @@ impl Compiler {
                 self.program.push(Instruction::Pop(condition_pop));
                 for _ in 0..condition_pop { self.stack.pop(); }
             }
-            Statement::Return(expression) => {
-                let Some(func) = self.current_function.clone() else { return Err(CompErr { error: CompilerError::NotInFunction, location: todo!() }); };
-                if let Some(ret) = expression {
+            Statement::Return { keyword, expr } => {
+                let Some(func) = self.current_function.clone() else { return Err(CompErr { error: CompilerError::NotInFunction, location: keyword.loc.clone() }); };
+                if let Some(ret) = expr {
                     let tpe = self.compile_expression(ret, CompStackI::Temp)?;
                     if Some(tpe) != func.return_type {
                         return Err(CompErr { error: CompilerError::TypeMismatch, location: ret.loc.clone() });

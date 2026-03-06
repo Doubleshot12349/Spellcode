@@ -7,6 +7,8 @@ public ref struct CompileResult {
     public long id;
     [MarshalAs(UnmanagedType.LPStr)]
     public string error;
+    public long error_start;
+    public long error_end;
 }
 
 //[StructLayout(LayoutKind.Sequential)]

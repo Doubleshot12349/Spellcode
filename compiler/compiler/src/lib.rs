@@ -1,6 +1,6 @@
 #![feature(box_patterns)]
 
-use std::{ffi::{CStr, CString}, hint::black_box, sync::Mutex};
+use std::{ffi::{CStr, CString}, sync::Mutex};
 
 use crate::{compiler::Compiler, stack_machine::{StackItem, VM}};
 
@@ -19,7 +19,9 @@ static VMS: Mutex<VMs> = Mutex::new(VMs { vms: vec![], next_id: 0 });
 #[repr(C)]
 pub struct CompileResult {
     id: i64,
-    error: *mut i8
+    error: *mut i8,
+    error_start: i64,
+    error_end: i64
 }
 
 
@@ -180,11 +182,11 @@ pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) 
 
 #[unsafe(no_mangle)]
 pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
-    //let mut items = vec![0; 100];
-    //black_box(|| { drop(items); });
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();
     let res = unsafe { &mut *output };
     res.id = -1;
+    res.error_start = -1;
+    res.error_end = -1;
 
     let parsed = match parser::spellcode::program(&inp) {
         Ok(v) => v,
@@ -197,7 +199,9 @@ pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
         
     let mut compiler = Compiler::new();
     if let Err(e) = compiler.compile_program(&parsed) {
-        let error = CString::new(format!("{e:?}")).unwrap();
+        res.error_start = e.location.start as i64;
+        res.error_end = e.location.end as i64;
+        let error = CString::new(format!("{:?}", e.error)).unwrap();
         res.error = error.into_raw();
         return;
     }
@@ -211,32 +215,9 @@ pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
 }
 
 
-//#[unsafe(no_mangle)]
-//pub extern "C" fn execute(left: u64, right: u64) -> u64 {
-//}
-
 #[unsafe(no_mangle)]
 pub extern "C" fn add(left: i32, right: i32) -> i32 {
     left + right
-}
-
-fn main() {
-    let inp = r#"
-    println("Hello, world!")
-    println(123456)
-    "#;
-    let parsed = parser::spellcode::program(inp).unwrap();
-    let mut compiler = Compiler::new();
-    compiler.compile_program(&parsed).unwrap();
-    println!("{:?}", compiler.program);
-    let mut vm = VM::new(compiler.program);
-    loop {
-        //println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
-        if let Err(e) = vm.tick() {
-            println!("exited with error {e:?}");
-            break;
-        }
-    }
 }
 
 //#[cfg(test)]

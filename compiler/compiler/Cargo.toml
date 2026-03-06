@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [[bin]]
 name = "compiler-bin"
-path = "src/lib.rs"
+path = "src/main.rs"
 
 [dependencies]
 peg = "0.8.5"

@@ -1,10 +1,6 @@
 use peg;
 use std::{ops::{Range, Deref}, fmt::Debug};
 
-fn btg<T>(value: T, left: usize, right: usize) -> BTag<T> {
-    Box::new(Tag { item: value, loc: left..right })
-}
-
 fn math_tag(left: Tag<Expression>, op: Tag<Op>, right: Tag<Expression>) -> Tag<Expression> {
     let range = left.loc.start..right.loc.end;
     Tag { item: Expression::Math(Box::new(left), op, Box::new(right)), loc: range }
@@ -135,7 +131,7 @@ peg::parser! {
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
 
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
-              "return" _ value:expression()? { Statement::Return(value) } /
+              keyword:t(<"return" { () }>) _ expr:expression()? { Statement::Return { keyword, expr  } } /
               v:expression() { Statement::ExprS(v) }
 
         pub rule program() -> Vec<Statement> = _ v:statement() ** (_ ";"? _) _ ";"? _ { v }
@@ -186,7 +182,7 @@ pub enum Statement {
     CFor { init: Box<Option<Statement>>, condition: Tag<Expression>, increment: Box<Option<Statement>>, block: Vec<Statement> },
     ForEach { variable: Tag<String>, array: Tag<Expression>, block: Vec<Statement> },
     While { condition: Tag<Expression>, block: Vec<Statement> },
-    Return(Option<Tag<Expression>>),
+    Return { keyword: Tag<()>, expr: Option<Tag<Expression>> },
     FunctionDef { name: Tag<String>, arguments: Vec<(Tag<String>, Tag<TypeName>)>, return_type: Option<Tag<TypeName>>, block: Vec<Statement> }
 }
 
@@ -214,19 +210,6 @@ impl<T : Debug> Debug for Tag<T> {
 impl<T> Tag<T> {
     fn new(item: T, loc: Range<usize>) -> Tag<T> {
         Tag { item, loc }
-    }
-
-    fn map<R>(self, func: fn(T) -> R) -> Tag<R> {
-        Tag { item: func(self.item), loc: self.loc }
-    }
-}
-
-impl<T> Tag<Option<T>> {
-    fn ok_ora<E>(self, e: E) -> Result<Tag<T>, E> {
-        match self.item {
-            Some(v) => Ok(Tag::new(v, self.loc)),
-            None => Err(e)
-        }
     }
 }
 

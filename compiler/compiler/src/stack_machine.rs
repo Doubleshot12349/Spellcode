@@ -21,6 +21,7 @@ pub enum Tpe {
 }
 
 #[derive(Debug, Clone)]
+#[allow(unused)]
 pub enum Instruction {
     ImmediateInt(i32),
     ImmediateDouble(f64),
@@ -108,7 +109,8 @@ pub struct VM {
     pub program: Vec<Instruction>,
     pub program_counter: usize,
     pub heap: HashMap<usize, HeapItem>,
-    pub next_heap_addr: usize
+    pub next_heap_addr: usize,
+    executed: usize
 }
 
 // Only present in this debugging runtime, not in the real one
@@ -133,7 +135,8 @@ impl VM {
             program,
             program_counter: 0,
             heap: HashMap::new(),
-            next_heap_addr: 0
+            next_heap_addr: 0,
+            executed: 0
         }
     }
 
@@ -151,6 +154,7 @@ impl VM {
             Ok(())
     }
 
+    #[allow(unused)]
     pub fn tick(&mut self) -> Result<(), ExecutionException> {
         match self.tick_nohandle() {
             Ok(()) => Ok(()),
@@ -164,10 +168,14 @@ impl VM {
 
     pub fn tick_nohandle(&mut self) -> Result<(), ExecutionException> {
         let ins = self.program.get(self.program_counter)
-            .ok_or(ExecutionException::IllegalJumpAddress)?;
+            .ok_or(ExecutionException::IllegalJumpAddress)?.clone();
         let mut next_addr = self.program_counter + 1;
+        self.executed += 1;
+        if self.executed % 100 == 0 {
+            self.garbage_collect();
+        }
 
-        match ins {
+        match &ins {
             Instruction::ImmediateInt(v) => self.stack.push(StackItem::Int(*v)),
             Instruction::ImmediateDouble(v) => self.stack.push(StackItem::Double(*v)),
             Instruction::Pop(n) => {
@@ -321,6 +329,36 @@ impl VM {
 
         self.program_counter = next_addr;
         Ok(())
+    }
+
+    fn garbage_collect(&mut self) {
+        for obj in self.heap.iter_mut() {
+            obj.1.mark = false;
+        }
+
+        let mut items_to_mark = self.stack.clone();
+        while !items_to_mark.is_empty() {
+            for item in items_to_mark.clone() {
+                if let StackItem::Array(_, id) = &item {
+                    let heap_item = self.heap.get_mut(id).unwrap();
+                    heap_item.mark = true;
+                    for it in &heap_item.value {
+                        items_to_mark.push(it.clone());
+                    }
+                }
+            }
+        }
+
+        let mut to_free = vec![];
+        for obj in &self.heap {
+            if obj.1.mark == false {
+                to_free.push(*obj.0);
+            }
+        }
+
+        for item in to_free {
+            self.heap.remove(&item);
+        }
     }
 }
 

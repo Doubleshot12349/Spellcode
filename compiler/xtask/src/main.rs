@@ -31,6 +31,7 @@ const LINUX: Target = Target {
     unity_path: "linux",
     rust_flags: None
 };
+#[allow(unused)]
 const WINDOWS_MINGW: Target = Target {
     triple: Some("x86_64-pc-windows-gnu"),
     crate_type: None,
@@ -38,6 +39,7 @@ const WINDOWS_MINGW: Target = Target {
     unity_path: "windows",
     rust_flags: None
 };
+#[allow(unused)]
 const WINDOWS_MSVC: Target = Target {
     triple: Some("x86_64-pc-windows-msvc"),
     crate_type: None,
@@ -94,7 +96,6 @@ fn build_binary(Target { triple, crate_type, rust_flags, .. }: &Target) -> Resul
         args.push("rustc");
         args.push("-p");
         args.push("compiler");
-        args.push("--lib");
         args.push("-Zbuild-std=panic_abort,std");
         args.push("--crate-type");
         args.push(v);
@@ -102,15 +103,14 @@ fn build_binary(Target { triple, crate_type, rust_flags, .. }: &Target) -> Resul
         args.push("build");
     }
     args.push("--release");
+    args.push("--lib");
     if let Some(v) = triple {
         args.push("--target");
         args.push(v);
     }
 
     let mut cmd = Command::new(cargo);
-    // RUSTFLAGS=-Ctarget-cpu=mvp cargo rustc --release --lib --crate-type staticlib -Zbuild-std=panic_abort,std --target wasm32-unknown-emscripten
     if let Some(flags) = rust_flags {
-        println!("rustflags = {flags}");
         cmd.env("RUSTFLAGS", flags);
     }
 
