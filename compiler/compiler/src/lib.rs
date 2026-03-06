@@ -212,6 +212,15 @@ pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) 
 
 /// Compiles the given program, and spawns a VM to execute it.  The
 /// VM is not automatically started.
+///
+/// On successful compilation, output.error is set to "success", and the error
+/// start and end are set to -1.  ID is set to the VM's ID, and it can be run
+/// using run_to_syscall_or_n.
+///
+/// On failed compilation, output.error describes the problem, and the error
+/// start and end indices indicate where the error is.  The ID is set to -1.
+///
+/// After every invocation, call free_compileresult.
 #[unsafe(no_mangle)]
 pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();

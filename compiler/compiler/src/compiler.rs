@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::Range};
 
-use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall, Tpe}};
+use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName, UnaryOp}, stack_machine::{self, Instruction, Syscall, Tpe}};
 
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
@@ -43,7 +43,7 @@ pub enum CompilerError {
     WrongNumberOfArguments,
     PropertyNotFound
 }
-
+#[allow(unused)]
 #[derive(Debug)]
 pub struct CompErr {
     pub error: CompilerError,
@@ -519,6 +519,17 @@ impl Compiler {
         Ok(())
     }
 
+
+    fn get_unary_op(&self, op: Tag<UnaryOp>, inner: &CompType) -> Result<OpEvaluation, CompErr> {
+        match (&*op, inner) {
+            (UnaryOp::UnaryMinus, CompType::Int) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateInt(-1), Instruction::MulI], tpe: CompType::Int }),
+            (UnaryOp::UnaryMinus, CompType::Double) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateDouble(-1.0), Instruction::MulI], tpe: CompType::Double }),
+            (UnaryOp::BitwiseNot, CompType::Int) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::NotI], tpe: CompType::Int }),
+            (UnaryOp::BooleanNot, CompType::Bool) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateInt(1), Instruction::XorI], tpe: CompType::Bool }),
+            _ => Err(CompErr { error: CompilerError::TypeMismatch, location: op.loc.clone() })
+        }
+    }
+
     fn get_op(&self, left: &CompType, op: Tag<Op>, right: &CompType) -> Result<OpEvaluation, CompErr> {
         let (ins, tpe) = match (left, op.item, right) {
             (CompType::Int, Op::Plus, CompType::Int) => (Instruction::AddI, CompType::Int),
@@ -616,6 +627,7 @@ impl Compiler {
                 let r = self.get_type(right)?;
                 self.get_op(&l, op.clone(), &r)?.tpe
             }
+            Expression::UnaryOperation(op, inner) => self.get_unary_op(op.clone(), &self.get_type(inner)?)?.tpe,
             Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
                 let signature = FunctionSignature {
                     name: name.clone(),
@@ -702,6 +714,18 @@ impl Compiler {
                 for _ in 0..res.pop { self.stack.pop(); }
                 self.stack.extend(res.push);
 
+                self.stack.push((out, res.tpe.clone()));
+
+                Ok(res.tpe)
+            }
+            Expression::UnaryOperation(op, inner) => {
+                let v = self.compile_expression(inner, CompStackI::Temp)?;
+                self.stack.pop();
+                let res = self.get_unary_op(op.clone(), &v)?;
+                self.program.extend(res.instructions);
+                for _ in 0..res.pop { self.stack.pop(); }
+                self.stack.extend(res.push);
+                
                 self.stack.push((out, res.tpe.clone()));
 
                 Ok(res.tpe)

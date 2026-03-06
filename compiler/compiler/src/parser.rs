@@ -11,7 +11,7 @@ peg::parser! {
         rule _ = [' ' | '\n']*
 
         rule t<T>(x: rule<T>) -> Tag<T> = l:position!() v:x() r:position!() { Tag { item: v, loc: l..r } }
-        rule t_op<T>(x: rule<T>, v: Op) -> Tag<Op> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
+        rule t_v<T, V>(x: rule<T>, v: V) -> Tag<V> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
 
         rule integer() -> i32
             = "0x" v:$(['0'..='9' | 'a'..='f' | 'A'..='F']+) {? i32::from_str_radix(v, 16).or(Err("invalid hexadecimal int")) } /
@@ -57,33 +57,37 @@ peg::parser! {
             = l:position!() v:$(['A'..='Z' | 'a'..='z'] ['A'..='Z' | 'a'..='z' | '0'..='9' | '_']*) r:position!() { Tag::new(v.to_owned(), l..r) }
 
         pub rule expression() -> Tag<Expression> = precedence! {
-            x:(@) _ op:t_op(<"||">, Op::BoolOr) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"||">, Op::BoolOr) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"&&">, Op::BoolAnd) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"&&">, Op::BoolAnd) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"<">, Op::Lt) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"<=">, Op::Le) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"==">, Op::Eq) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"!=">, Op::Ne) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<">">, Op::Gt) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<">=">, Op::Ge) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"<">, Op::Lt) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"<=">, Op::Le) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"==">, Op::Eq) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"!=">, Op::Ne) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<">">, Op::Gt) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<">=">, Op::Ge) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"|">, Op::Or) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"|">, Op::Or) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"^">, Op::Xor) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"^">, Op::Xor) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"&">, Op::And) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"&">, Op::And) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"<<">, Op::Shl) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<">>">, Op::Shr) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<">>>">, Op::Shrl) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"<<">, Op::Shl) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<">>">, Op::Shr) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<">>>">, Op::Shrl) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"+">, Op::Plus) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"-">, Op::Minus) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"+">, Op::Plus) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"-">, Op::Minus) _ y:@ { math_tag(x, op, y) }
             --
-            x:(@) _ op:t_op(<"*">, Op::Times) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"/">, Op::Divide) _ y:@ { math_tag(x, op, y) }
-            x:(@) _ op:t_op(<"%">, Op::Mod) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"*">, Op::Times) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"/">, Op::Divide) _ y:@ { math_tag(x, op, y) }
+            x:(@) _ op:t_v(<"%">, Op::Mod) _ y:@ { math_tag(x, op, y) }
+            --
+            v:t(<operation:t_v(<"!">, UnaryOp::BooleanNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
+            v:t(<operation:t_v(<"~">, UnaryOp::BitwiseNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
+            v:t(<operation:t_v(<"-">, UnaryOp::UnaryMinus) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
             --
             v:t(<"(" _ v:expression() _ ")" { v }>) { Tag { item: v.item.item, loc: v.loc } }
             --
@@ -157,6 +161,11 @@ pub enum Op {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum UnaryOp {
+    UnaryMinus, BitwiseNot, BooleanNot
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Lit(Tag<Literal>),
     Math(BTag<Expression>, Tag<Op>, BTag<Expression>),
@@ -165,7 +174,8 @@ pub enum Expression {
     Ternary { condition: BTag<Expression>, if_true: BTag<Expression>, if_false: BTag<Expression> },
     ArrayAccess { array: BTag<Expression>, index: BTag<Expression> },
     VarAccess(Tag<String>),
-    NewArray(Tag<TypeName>, BTag<Expression>)
+    NewArray(Tag<TypeName>, BTag<Expression>),
+    UnaryOperation(Tag<UnaryOp>, BTag<Expression>)
 }
 
 #[derive(Debug, Clone, PartialEq)]
