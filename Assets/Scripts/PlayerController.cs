@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     public bool turnStarted = false;
     public GameObject LastPortal;
 
+
     public void Start()
     {
         selectedSpell = spell1;
@@ -78,6 +79,6 @@ public class PlayerController : MonoBehaviour
         }
             
     }
-        
+ 
     
 }
