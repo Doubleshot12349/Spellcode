@@ -26,9 +26,6 @@ public static class Compiler {
 #endif
 
     [DllImport(dllName)]
-    public static extern int add(int a, int b);
-
-    [DllImport(dllName)]
     public static extern void init();
 
     [DllImport(dllName)]

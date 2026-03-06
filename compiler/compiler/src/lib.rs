@@ -13,18 +13,23 @@ struct VMs {
     next_id: i64
 }
 
+// global list of all currently active stack machines, in a struct so it can be
+// locked together with the next ID in line
 static VMS: Mutex<VMs> = Mutex::new(VMs { vms: vec![], next_id: 0 });
 
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct CompileResult {
+    // the VM id, or -1 if compilation failed
     id: i64,
+    // the error string, or "success"
     error: *mut i8,
+    // the start and end (exclusive) of the error, or both -1 if there isn't one
     error_start: i64,
     error_end: i64
 }
 
-
+/// Frees the error string from a CompileResult, must be called after compile()
 #[unsafe(no_mangle)]
 pub extern "C" fn free_compileresult(inp: *const CompileResult) {
     let v = unsafe { *inp };
@@ -36,7 +41,8 @@ pub extern "C" fn free_compileresult(inp: *const CompileResult) {
     }
 }
 
-
+/// Reinitializes the global stack machine registry, deleting all existing VMs
+/// Mostly useful for testing
 #[unsafe(no_mangle)]
 pub extern "C" fn init() {
     let mut vms = VMS.lock().unwrap();
@@ -45,6 +51,17 @@ pub extern "C" fn init() {
 }
 
 
+/// Runs the specified VM until it halts, has an exception, runs past
+/// max_instructions, or reaches a syscall.  Returns the syscall number, or a
+/// code representing why it stopped
+///  -4: halt
+///  -5: wrong type
+///  -6: empty stack
+///  -7: out of memory
+///  -8: raised exception
+///  -9: illegal jump address
+/// -10: array index out of bounds
+/// -11: illegal syscall argument
 #[unsafe(no_mangle)]
 pub extern "C" fn run_to_syscall_or_n(id: i64, max_instructions: i32, executed: *mut i32) -> i32 {
     let mut vms = VMS.lock().unwrap();
@@ -67,6 +84,7 @@ pub extern "C" fn run_to_syscall_or_n(id: i64, max_instructions: i32, executed: 
     return -1;
 }
 
+/// Pushes an integer onto the specified VM's stack.  Returns true on success
 #[unsafe(no_mangle)]
 pub extern "C" fn push_int(id: i64, value: i32) -> bool {
     let mut vms = VMS.lock().unwrap();
@@ -75,6 +93,7 @@ pub extern "C" fn push_int(id: i64, value: i32) -> bool {
     return true;
 }
 
+/// Pushes a double onto the specified VM's stack.  Returns true on success
 #[unsafe(no_mangle)]
 pub extern "C" fn push_double(id: i64, value: f64) -> bool {
     let mut vms = VMS.lock().unwrap();
@@ -83,6 +102,8 @@ pub extern "C" fn push_double(id: i64, value: f64) -> bool {
     return true;
 }
 
+/// Pops an int from the specified VM's stack, and puts it in out.  Returns
+/// true on success
 #[unsafe(no_mangle)]
 pub extern "C" fn pop_int(id: i64, out: *mut i32) -> bool {
     unsafe { *out = -1; }
@@ -97,6 +118,8 @@ pub extern "C" fn pop_int(id: i64, out: *mut i32) -> bool {
     }
 }
 
+/// Pops a double from the specified VM's stack, and puts it in out.  Returns
+/// true on success
 #[unsafe(no_mangle)]
 pub extern "C" fn pop_double(id: i64, out: *mut f64) -> bool {
     unsafe { *out = 0.0; }
@@ -126,6 +149,8 @@ fn ptr_to_vec<T : Copy>(inp: *mut T, size: u64) -> Vec<T> {
     out
 }
 
+/// Pushes an integer array to the specified VM's stack.  Returns true on
+/// success.  The caller is responsible for freeing the array.
 #[unsafe(no_mangle)]
 pub extern "C" fn push_int_array(id: i64, data: *mut i32, length: u64) -> bool {
     let mut vms = VMS.lock().unwrap();
@@ -139,6 +164,7 @@ pub extern "C" fn push_int_array(id: i64, data: *mut i32, length: u64) -> bool {
     return true;
 }
 
+/// Frees an int array from pop_int_array
 #[unsafe(no_mangle)]
 pub extern "C" fn free_int_array(data: *mut i32, length: u64) {
     let slice = unsafe { std::slice::from_raw_parts_mut(data, length as usize) };
@@ -147,6 +173,10 @@ pub extern "C" fn free_int_array(data: *mut i32, length: u64) {
     }
 }
 
+/// Pops an int array from the specified VM's stack.  Returns true on success,
+/// and stores the array base pointer into data and the length into length.
+/// The array must be freed with free_int_array.  On failure, it will set
+/// data and length to hold an empty array, which must still be freed.
 #[unsafe(no_mangle)]
 pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) -> bool {
     let mut vms = VMS.lock().unwrap();
@@ -180,6 +210,8 @@ pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) 
     }
 }
 
+/// Compiles the given program, and spawns a VM to execute it.  The
+/// VM is not automatically started.
 #[unsafe(no_mangle)]
 pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     let inp = unsafe { CStr::from_ptr(program) }.to_string_lossy();
@@ -213,15 +245,4 @@ pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     vms.next_id += 1;
     vms.vms.push((id, VM::new(compiler.program)));
 }
-
-
-#[unsafe(no_mangle)]
-pub extern "C" fn add(left: i32, right: i32) -> i32 {
-    left + right
-}
-
-//#[cfg(test)]
-//mod tests {
-//    use super::*;
-//}
 
