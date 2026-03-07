@@ -99,6 +99,7 @@ InitTestScene*.unity*
 .vscode
 *.slnx
 
+/Assets/Plugins/**/*.meta
 /Assets/Plugins/**/*.so
 /Assets/Plugins/**/*.so.meta
 /Assets/Plugins/**/*.a

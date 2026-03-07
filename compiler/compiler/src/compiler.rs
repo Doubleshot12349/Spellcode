@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::Range};
 
-use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName}, stack_machine::{self, Instruction, Syscall, Tpe}};
+use crate::{parser::{Expression, Literal, Op, Statement, Tag, TypeName, UnaryOp}, stack_machine::{self, Instruction, Syscall, Tpe}};
 
 pub struct Compiler {
     pub stack: Vec<(CompStackI, CompType)>,
@@ -43,7 +43,7 @@ pub enum CompilerError {
     WrongNumberOfArguments,
     PropertyNotFound
 }
-
+#[allow(unused)]
 #[derive(Debug)]
 pub struct CompErr {
     pub error: CompilerError,
@@ -103,7 +103,7 @@ struct OpEvaluation {
 
 impl Compiler {
     pub fn new() -> Compiler {
-        let predefined = vec![
+        let predefined: Vec<RawFunction> = vec![
             RawFunction {
                 func: DeclaredFunction {
                     name: "putc".to_owned(),
@@ -127,10 +127,6 @@ impl Compiler {
                     args: vec![("q".to_owned(), CompType::Int), ("r".to_owned(), CompType::Int), ("instance_id".to_owned(), CompType::Int)],
                     return_type: None
                 },
-                // q, r, id, return address
-                // q, r, id, return address, id
-                // q, r, id, return address, id, r
-                // q, r, id, return address, id, r, q
                 definition: vec![Instruction::Copy(2), Instruction::Copy(4), Instruction::Copy(6), Instruction::Syscall(Syscall::MoveEffect), Instruction::Return]
             },
             RawFunction {
@@ -371,7 +367,10 @@ impl Compiler {
                 self.program[jump_after] = Instruction::Brz(self.program.len());
 
                 self.program.push(Instruction::Pop(condition_pop));
-                for _ in 0..condition_pop { self.stack.pop(); }
+                //for _ in 0..condition_pop { self.stack.pop(); }
+                while self.stack.len() > stack_len_start {
+                    self.stack.pop();
+                }
             }
             Statement::ForEach { variable, array, block } => {
                 let inner = match self.compile_expression(array, CompStackI::Temp)? {
@@ -465,8 +464,6 @@ impl Compiler {
                 self.program[branch_idx] = Instruction::Brz(self.program.len());
             }
             Statement::While { condition, block } => {
-                let stack_len_start = self.stack.len();
-
                 let stack_len_cond = self.stack.len();
                 let start = self.program.len();
 
@@ -478,7 +475,7 @@ impl Compiler {
                 let jump_after = self.program.len();
                 self.program.push(Instruction::Brz(0));
                 self.stack.pop();
-                let condition_pop = self.stack.len() - stack_len_start;
+                let condition_pop = self.stack.len() - stack_len_cond;
                 
                 for st in block {
                     self.compile_statement(st)?;
@@ -492,11 +489,10 @@ impl Compiler {
                 self.program[jump_after] = Instruction::Brz(self.program.len());
 
                 self.program.push(Instruction::Pop(condition_pop));
-                for _ in 0..condition_pop { self.stack.pop(); }
             }
-            Statement::Return(expression) => {
-                let Some(func) = self.current_function.clone() else { return Err(CompErr { error: CompilerError::NotInFunction, location: todo!() }); };
-                if let Some(ret) = expression {
+            Statement::Return { keyword, expr } => {
+                let Some(func) = self.current_function.clone() else { return Err(CompErr { error: CompilerError::NotInFunction, location: keyword.loc.clone() }); };
+                if let Some(ret) = expr {
                     let tpe = self.compile_expression(ret, CompStackI::Temp)?;
                     if Some(tpe) != func.return_type {
                         return Err(CompErr { error: CompilerError::TypeMismatch, location: ret.loc.clone() });
@@ -507,16 +503,27 @@ impl Compiler {
                 }
                 let num_pop = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).unwrap().0 - 1;
                 self.program.push(Instruction::Pop(num_pop));
-                for _ in 0..num_pop {
-                    self.stack.pop();
-                }
+                //for _ in 0..num_pop {
+                //    self.stack.pop();
+                //}
                 self.program.push(Instruction::Return);
-                self.stack.pop();
+                //self.stack.pop();
             }
             Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.clone() })
         }
 
         Ok(())
+    }
+
+
+    fn get_unary_op(&self, op: Tag<UnaryOp>, inner: &CompType) -> Result<OpEvaluation, CompErr> {
+        match (&*op, inner) {
+            (UnaryOp::UnaryMinus, CompType::Int) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateInt(-1), Instruction::MulI], tpe: CompType::Int }),
+            (UnaryOp::UnaryMinus, CompType::Double) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateDouble(-1.0), Instruction::MulI], tpe: CompType::Double }),
+            (UnaryOp::BitwiseNot, CompType::Int) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::NotI], tpe: CompType::Int }),
+            (UnaryOp::BooleanNot, CompType::Bool) => Ok(OpEvaluation { pop: 0, push: vec![], instructions: vec![Instruction::ImmediateInt(1), Instruction::XorI], tpe: CompType::Bool }),
+            _ => Err(CompErr { error: CompilerError::TypeMismatch, location: op.loc.clone() })
+        }
     }
 
     fn get_op(&self, left: &CompType, op: Tag<Op>, right: &CompType) -> Result<OpEvaluation, CompErr> {
@@ -595,6 +602,16 @@ impl Compiler {
                     tpe: CompType::Bool
                 })
             }
+            (CompType::Char, Op::Eq, CompType::Char) => (Instruction::EqI, CompType::Bool),
+            (CompType::Char, Op::Ne, CompType::Char) => {
+                return Ok(OpEvaluation {
+                    pop: 0,
+                    push: vec![],
+                    instructions: vec![Instruction::EqI, Instruction::ImmediateInt(1), Instruction::XorI],
+                    tpe: CompType::Bool
+                })
+            }
+
 
             _ => return Err(CompErr { location: op.loc, error: CompilerError::TypeMismatch })
         };
@@ -616,6 +633,7 @@ impl Compiler {
                 let r = self.get_type(right)?;
                 self.get_op(&l, op.clone(), &r)?.tpe
             }
+            Expression::UnaryOperation(op, inner) => self.get_unary_op(op.clone(), &self.get_type(inner)?)?.tpe,
             Expression::FunctionCall { name: Tag { item: name, loc }, args } => {
                 let signature = FunctionSignature {
                     name: name.clone(),
@@ -692,8 +710,12 @@ impl Compiler {
                 Ok(tpe)
             }
             Expression::Math(left, op, right) => {
-                let v1 = self.compile_expression(left, CompStackI::Temp)?;
                 let v2 = self.compile_expression(right, CompStackI::Temp)?;
+                let pos = self.stack.len() - 1;
+                let v1 = self.compile_expression(left, CompStackI::Temp)?;
+                self.program.push(Instruction::Copy(self.stack.len() - pos));
+                self.stack.push((CompStackI::Temp, v2.clone()));
+
                 self.stack.pop();
                 self.stack.pop();
                 let res = self.get_op(&v1, op.clone(), &v2)?;
@@ -702,6 +724,18 @@ impl Compiler {
                 for _ in 0..res.pop { self.stack.pop(); }
                 self.stack.extend(res.push);
 
+                self.stack.push((out, res.tpe.clone()));
+
+                Ok(res.tpe)
+            }
+            Expression::UnaryOperation(op, inner) => {
+                let v = self.compile_expression(inner, CompStackI::Temp)?;
+                self.stack.pop();
+                let res = self.get_unary_op(op.clone(), &v)?;
+                self.program.extend(res.instructions);
+                for _ in 0..res.pop { self.stack.pop(); }
+                self.stack.extend(res.push);
+                
                 self.stack.push((out, res.tpe.clone()));
 
                 Ok(res.tpe)

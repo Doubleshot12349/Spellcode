@@ -7,6 +7,8 @@ public ref struct CompileResult {
     public long id;
     [MarshalAs(UnmanagedType.LPStr)]
     public string error;
+    public long error_start;
+    public long error_end;
 }
 
 //[StructLayout(LayoutKind.Sequential)]
@@ -17,14 +19,11 @@ public ref struct CompileResult {
 
 public static class Compiler {
 
-//#if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
-//    private const string dllName = "__Internal";
-//#else
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
+    private const string dllName = "__Internal";
+#else
     private const string dllName = "compiler";
-//#endif
-
-    [DllImport(dllName)]
-    public static extern int add(int a, int b);
+#endif
 
     [DllImport(dllName)]
     public static extern void init();

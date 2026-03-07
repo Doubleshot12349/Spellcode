@@ -21,8 +21,8 @@ fun print(inp: int) {
         v = v / 10;
         i = i + 1;
     }
-
-    for (i = i - 1; i >= 0; i = i - 1) {
+    i = i - 1
+    for (; i >= 0; i = i - 1) {
         putc(out[i]);
     }
 }
