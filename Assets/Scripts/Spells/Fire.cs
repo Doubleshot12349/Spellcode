@@ -1,3 +1,4 @@
+using deVoid.Utils;
 using UnityEngine;
 
 public class Fire : MonoBehaviour,ISpell,IGameObjectSource
@@ -25,15 +26,32 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
         Damage = currentDamage;
+        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
     }
-    public void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.gameObject.CompareTag("Player"))
-        {
-            Debug.Log("Collison");
-            col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
 
-            Destroy(gameObject);
-        }
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.gameObject.CompareTag("Tile"))
+            return;
+        
+        Debug.Log($"Fire triggered by {col.gameObject.name}");
+        Signals.Get<DamageSignal>().Dispatch(Damage, gameObject);
     }
+
+    public void OnTeleport(GameObject target)
+    {
+        //handle teleport
+        if (this.Type != "Portal" && target != this.LastPortal)
+        {
+            transform.position = target.transform.position;
+            CurrentTile = target.GetComponent<ISpell>().CurrentTile;
+            this.LastPortal = target;
+        }
+        Debug.Log($"{gameObject} was teleported to {target}");
+    }
+
+    private void OnDestroy()
+    {
+        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
+    } 
 }

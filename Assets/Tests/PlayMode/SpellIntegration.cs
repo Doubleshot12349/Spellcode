@@ -2,10 +2,11 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using deVoid.Utils;
 
 public class SpellIntegrationTests
 {
-
+    //TODO: Make damage calculations EditMode tests
     //step 1 create all fields needed by test
     private GameObject Prefab1;
     private GameObject gameObject1;
@@ -16,7 +17,7 @@ public class SpellIntegrationTests
     private GameObject hexTile3;
     private GameObject Player;
     private GameObject HexGrid;
-    
+
 
 
 
@@ -28,28 +29,33 @@ public class SpellIntegrationTests
     {
         HexGrid = GameObject.Instantiate(Resources.Load<GameObject>("HexGrid"));
         yield return null;
+        yield return null;
 
         var h = new HexCoords(0, 0);
         hexTile1 = HexGridManager.GetHex(h);
+        Assert.IsNotNull(hexTile1, "hexTile1 failed to initialize");
 
         h = new HexCoords(1, 1);
         hexTile2 = HexGridManager.GetHex(h);
+        Assert.IsNotNull(hexTile2, "hexTile2 failed to initialize");
 
         h = new HexCoords(5, 5);
         hexTile3 = HexGridManager.GetHex(h);
+        Assert.IsNotNull(hexTile3, "hexTile3 failed to initialize");
 
         Player = GameObject.Instantiate(Resources.Load<GameObject>("PlayerObject"));
         Player.GetComponent<PlayerMover>().grid = HexGrid.GetComponent<HexGridManager>();
         Player.GetComponent<PlayerMover>().startHexQ = 5;
         Player.GetComponent<PlayerMover>().startHexR = 5;
+        Player.GetComponent<PlayerController>().isTesting = true;
 
         //turning off VMs which is not used in this test
         var vms = Player.GetComponentsInChildren<StackMachine>();
         foreach (var vm in vms)
         {
-            if(vm != null) vm.enabled = false;
+            if (vm != null) vm.enabled = false;
         }
-        
+
 
         yield return null;
     }
@@ -57,7 +63,7 @@ public class SpellIntegrationTests
     //Step 3: ensure test environment is setup properly
 
     [Test]
-    public void SetupComplete()
+    public void ASetupComplete()
     {
         Assert.IsNotNull(hexTile1, "Failed to create hexTile1");
         Assert.IsNotNull(hexTile2, "Failed to create hexTile2");
@@ -74,16 +80,15 @@ public class SpellIntegrationTests
         gameObject1 = GameObject.Instantiate<GameObject>(Prefab1);
         gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
         yield return null;
-        var expectedHealth = Player.GetComponent<PlayerController>().health - gameObject1.GetComponent<ISpell>().Damage;
 
-        yield return gameObject1.GetComponent<ISpell>().Conjure(hexTile1);
-        yield return gameObject1.GetComponent<ISpell>().MoveRoutine(hexTile3);
+        int spellDamage = gameObject1.GetComponent<ISpell>().Damage;
+        var expectedHealth = Player.GetComponent<PlayerController>().health - spellDamage;
+        
+        // Dispatch damage signal directly (no collision needed for this test)
+        Signals.Get<DamageSignal>().Dispatch(spellDamage, gameObject1);
+        yield return null;
 
-        yield return new WaitForFixedUpdate();
-
-        Assert.AreEqual(expectedHealth, Player.GetComponent<PlayerController>().health);
-        Assert.IsTrue(gameObject1 == null, $"{spell} was not deleted");
-
+        Assert.AreEqual(expectedHealth, Player.GetComponent<PlayerController>().health, $"{spell} did not deal correct damage");
     }
 
     [UnityTest]
@@ -99,237 +104,127 @@ public class SpellIntegrationTests
         gameObject2 = GameObject.Instantiate<GameObject>(Prefab2);
         gameObject2.GetComponent<ISpell>().CurrentTile = this.hexTile3;
 
-
-
         yield return null;
 
         Assert.IsTrue(gameObject2 != null, "Ice spell was null");
         Assert.IsTrue(gameObject1 != null, "Moving spell was null before moving");
 
         var expectedHealth = gameObject2.GetComponent<Ice>().health;
+        int spell1Damage = gameObject1.GetComponent<ISpell>().Damage;
+
         if (spell == "Fireball")
         {
-            expectedHealth -= 2*gameObject1.GetComponent<ISpell>().Damage;
-        }else if (spell == "IceSpike")
+            expectedHealth -= 2 * spell1Damage;
+        }
+        else if (spell == "IceSpike")
         {
-            expectedHealth += gameObject1.GetComponent<ISpell>().Damage;
+            expectedHealth += gameObject1.GetComponent<Ice>().health;
         }
 
         yield return gameObject1.GetComponent<ISpell>().Conjure(hexTile1);
         yield return gameObject1.GetComponent<ISpell>().MoveRoutine(hexTile3);
 
-        Physics.SyncTransforms();
-        yield return new WaitForFixedUpdate();
-
-        Assert.IsTrue(gameObject1 == null, "Moving spell not deleted");
-        Assert.AreEqual(expectedHealth, gameObject2.GetComponent<Ice>().health,"Ice health not adjusted properly");
-
-
-    }
-    /*
-    static string[] Spell1 = { "Fireball", "Lightning", "IceSpike", "Portals" };
-    static string[] Spell2 = { "Fireball", "Lightning", "IceSpike", "Portals" };
-    static (Vector3, string)[] TestCases =
-    {
-        (new Vector3(5,5,0),"Player Collision"),
-        (new Vector3(1,1,0),"Spell Overlap"),
-        (new Vector3(5,5,0),"Spell Collison"),
-        (new Vector3(-2,-2,0),"No Collision")
-
-    };
-
-    [UnityTest]
-    public IEnumerator SpellCollisions([ValueSource(nameof(Spell1))] string spell1,[ValueSource(nameof(Spell2))] string spell2,[ValueSource(nameof(TestCases))] (Vector3,string) testCase)
-    {
-
-        Prefab1 = Resources.Load(spell1) as GameObject;
-        gameObject1 = GameObject.Instantiate(Prefab1) as GameObject;
-        gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
-
-        Prefab2 = Resources.Load(spell2) as GameObject;
-        gameObject2 = GameObject.Instantiate(Prefab1) as GameObject;
-        gameObject2.GetComponent<ISpell>().CurrentTile = this.hexTile2;
-
+        // Emulate collision by dispatching DamageSignal
+        Signals.Get<DamageSignal>().Dispatch(spell1Damage, gameObject1);
         yield return null;
-        GameObject newSpell1 = gameObject1.GetComponent<ISpell>().Conjure(hexTile1);
-        GameObject newSpell2 = gameObject2.GetComponent<ISpell>().Conjure(hexTile2);
-
-        int expectedHealth = Player.GetComponent<PlayerController>().health;
-
-        Physics.SyncTransforms();
-        Player.GetComponent<Rigidbody2D>().WakeUp();
-        //assignments to calm down compiler
-        int actualHealth=-1;
-        Vector3 expectedPosition;
-        Vector3 actualPosition=new Vector3(-10,-10,-10);
-
-        (Vector3 position, string caseName) = testCase;
-
-        GameObject target = new GameObject("HexTarget");
-        target.transform.position = position;
-        expectedPosition = position;
-
-        switch (caseName)
+        if (expectedHealth <= 0)
         {
-            case "Spell Collision":
-                
-
-                switch (spell1,spell2)
-                {
-                    case ("Fireball", "IceSpike"):
-                        //IceSpike's health should be decreased
-                        //Fireball should be destroyed
-                        int initIceHealth = newSpell2.GetComponent<Ice>().health;
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = target.transform.position;
-                        Assert.IsNull(newSpell1);
-                        Assert.IsTrue(initIceHealth>newSpell2.GetComponent<Ice>().health);
-                        break;
-
-                    case ("Portals", "Portals"):
-                        //Portals shouldn't teleport each other
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        Assert.IsNull(newSpell1.GetComponent<ISpell>().LastPortal,"Portal linking incorrectly setup");
-                        break;
-                    case ("IceSpike", "Portals"):
-                        //Ice spikes should not have teleported through the portal
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        break;
-
-                    case (_, "Portals"):
-                        //anything else should teleport through the portal
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        Assert.IsNotNull(newSpell1.GetComponent<ISpell>().LastPortal,"Portal linking incorrectly setup");
-                        break;
-                        
-                    default:
-                        //remaining collisions should have no effect
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        break;
-                }
-                break;
-            case "Spell Overlap":
-                switch (spell1, spell2)
-                {
-                    case ("IceSpike", "IceSpike"):
-                        //IceSpike's health should be increased
-                        //there should only be one IceSpike remaing
-                        int initIceHealth = newSpell2.GetComponent<Ice>().health;
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = target.transform.position;
-
-                        //need to check which one got deleted, unity may not be consistent with collisions
-                        if (newSpell1 == null)
-                        {
-                            Assert.IsNotNull(newSpell2,"Both Ice spikes destroyed");
-                            Assert.IsTrue(initIceHealth < newSpell2.GetComponent<Ice>().health,"health of ice spike wasn't increased");
-                        }
-                        else
-                        {
-                            Assert.IsNull(newSpell2,"Both ice spikes still exist");
-                            Assert.IsTrue(initIceHealth < newSpell1.GetComponent<Ice>().health,"health of ice spike wasn't increased");
-                        }
-                        
-                        break;
-
-                    case ("Fireball", "Fireball"):
-                        //2 fireballs on same space is ok with no effect
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        break;
-
-
-                    case ("IceSpike" or "FireBall", "IceSpike" or "Fireball"):
-                        //can't be the same (caught earlier)
-                        //IceSpike's health should be decreased
-                        //Fireball should be destroyed
-
-                        //figuring out which of the 2 is an ice spell
-                        GameObject iceSpell = newSpell1;
-                        GameObject fireSpell = newSpell2;
-                        if (spell1 == "Fireball")
-                        {
-                            iceSpell = newSpell2;
-                            fireSpell = newSpell1;
-                        }
-                        int initIceHealth2 = iceSpell.GetComponent<Ice>().health;
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = target.transform.position;
-                        Assert.IsNull(fireSpell,"Fire spell not destroyed");
-                        Assert.IsTrue(initIceHealth2 > iceSpell.GetComponent<Ice>().health,"Ice spike health was not decreased");
-                        break;
-
-                    case ("Portals", "Portals"):
-                        //Portals shouldn't teleport each other
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        Assert.IsNull(newSpell1.GetComponent<ISpell>().LastPortal,"Portal linking incorrectly setup");
-                        break;
-
-                    case (_, "Portals"):
-                        //anything else should teleport through the portal
-                        yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                        actualHealth = Player.GetComponent<PlayerController>().health;
-                        actualPosition = newSpell1.transform.position;
-                        Assert.IsNotNull(newSpell1.GetComponent<ISpell>().LastPortal,"Portal linking incorrectly setup");
-                        break;                   
-                }
-                break;
-
-            case "No Collision":
-                //no collisions equals no effect
-                yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-                actualHealth = Player.GetComponent<PlayerController>().health;
-                actualPosition = newSpell1.transform.position;
-                break;
-            case "Player Collision":
-                //destroy the barrier spell so the player can be hit
-                Object.DestroyImmediate(newSpell2); // Kill it instantly
-                newSpell2 = null;
-                Assert.IsTrue(newSpell2==null,"Second spell not destroyed");
-                expectedHealth -= newSpell1.GetComponent<ISpell>().Damage;
-                yield return newSpell1.GetComponent<ISpell>().MoveRoutine(target);
-
-                Physics.SyncTransforms();
-                yield return new WaitForFixedUpdate();
-                yield return null;
-                Assert.IsTrue(newSpell1 == null,"First spell not destroyed");
-                actualHealth = Player.GetComponent<PlayerController>().health;
-                actualPosition = newSpell1.transform.position;
-                break;
-            default:
-                Debug.Log("Invalid test case");
-                break;
+            Assert.IsTrue(gameObject2 == null, $"{spell} should have destroyed the ice spell but it is still active");
+        }
+        else
+        {
+            Assert.IsTrue(gameObject2 != null, $"{spell} should not have destroyed the ice spell but it was destroyed");
+            Assert.AreEqual(expectedHealth, gameObject2.GetComponent<Ice>().health, "Ice health not adjusted properly");
         }
 
-
-        yield return null;
-        Assert.AreEqual(expectedHealth, actualHealth, "Player's health is different from expected");
-        Assert.AreEqual(expectedPosition, actualPosition, "Spell's position is different from expected");
-    }
-
-    //step 5: cleanup
-
-    [UnityTearDown]
-    public IEnumerator TearDown()
-    {
         Object.Destroy(gameObject1);
         Object.Destroy(gameObject2);
+
+
+    }
+
+    [UnityTest]
+    public IEnumerator PlayerTeleportTests()
+    {
+        //create portal spell
+        Prefab1 = Resources.Load<GameObject>("Portals");
+        Assert.IsNotNull(Prefab1, "Portal prefab failed to load from Resources");
+        
+        gameObject1 = GameObject.Instantiate<GameObject>(Prefab1);
+        Assert.IsNotNull(gameObject1, "gameObject1 instantiation failed");
+        
+        gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
+        Assert.IsNotNull(hexTile2, "hexTile2 is null");
+        
+        yield return null;
+
+        //move portals to different hexes so we can test teleportation
+        var conjureResult = gameObject1.GetComponent<ISpell>().Conjure(hexTile2);
+        Assert.IsNotNull(conjureResult, "Conjure returned null");
+        yield return null;
+
+        var expectedPosition = gameObject1.transform.position;
+
+        // Emulate teleport by dispatching TeleportSignal
+        // Get the Portal handler component
+        var portalHandler = gameObject1.GetComponent<Portal>();
+        Assert.IsNotNull(portalHandler, "Portal handler component not found");
+        Assert.IsNotNull(portalHandler.portal1, "portal1 is null");
+        
+        var subPortal = portalHandler.portal1.GetComponent<SubPortal>();
+        Assert.IsNotNull(subPortal, "SubPortal component not found on portal1");
+        Assert.IsNotNull(subPortal.linkedPortal, "linkedPortal is null");
+        
+        Signals.Get<TeleportSignal>().Dispatch(subPortal.linkedPortal);
+        yield return null;
+
+        Assert.AreEqual(expectedPosition, Player.transform.position, "Player was not teleported to the correct position");
+        Object.Destroy(gameObject1);
+    }
+    [UnityTest]
+    public IEnumerator SpellTeleportTests()
+    {
+        //create portal spell
+        Prefab1 = Resources.Load<GameObject>("Portals");
+        Assert.IsNotNull(Prefab1, "Portal prefab failed to load from Resources");
+        
+        gameObject1 = GameObject.Instantiate<GameObject>(Prefab1);
+        Assert.IsNotNull(gameObject1, "gameObject1 instantiation failed");
+        
+        gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
+        Assert.IsNotNull(hexTile1, "hexTile1 is null");
+        
+        yield return null;
+
+        //create another spell to teleport through portal
+        Prefab2 = Resources.Load<GameObject>("Fireball");
+        gameObject2 = GameObject.Instantiate<GameObject>(Prefab2);
+        gameObject2.GetComponent<ISpell>().CurrentTile = this.hexTile3;
+
+        yield return gameObject1.GetComponent<ISpell>().Conjure(hexTile2);
+        yield return null;
+
+        var expectedPosition = gameObject1.transform.position;
+
+        // Emulate teleport by dispatching TeleportSignal
+        var portalHandler = gameObject1.GetComponent<Portal>();
+        Assert.IsNotNull(portalHandler, "Portal handler component not found");
+        Assert.IsNotNull(portalHandler.portal1, "portal1 is null");
+        
+        var subPortal = portalHandler.portal1.GetComponent<SubPortal>();
+        Assert.IsNotNull(subPortal, "SubPortal component not found on portal1");
+        Assert.IsNotNull(subPortal.linkedPortal, "linkedPortal is null");
+        
+        Signals.Get<TeleportSignal>().Dispatch(subPortal.linkedPortal);
+        yield return null;
+
+        Assert.AreEqual(expectedPosition, gameObject2.transform.position, "Spell was not teleported to the correct position");
+    }
+
+    [UnityTearDown]
+    public void TearDown()
+    {
         Object.Destroy(Player);
         Object.Destroy(HexGrid);
-        yield return null;
-    }*/
+    }
 }

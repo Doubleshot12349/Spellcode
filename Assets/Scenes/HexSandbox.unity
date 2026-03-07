@@ -8598,7 +8598,7 @@ Rigidbody2D:
     serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 0
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 0
 --- !u!4 &2126273982 stripped
@@ -8818,6 +8818,10 @@ PrefabInstance:
     - target: {fileID: 4263342615927836314, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4277511960805276067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: m_SleepingMode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4739785264034010768, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer

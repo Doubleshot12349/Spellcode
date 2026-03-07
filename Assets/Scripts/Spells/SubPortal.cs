@@ -1,3 +1,4 @@
+using deVoid.Utils;
 using UnityEngine;
 
 public class SubPortal : MonoBehaviour,ISpell
@@ -21,25 +22,33 @@ public class SubPortal : MonoBehaviour,ISpell
     {
         MoveSpeed = 6;
         Damage = 0;
+        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
         //animate me
     }
-    public void OnTriggerEnter2D(Collider2D col)
+
+    private void OnTriggerEnter2D(Collider2D col)
     {
-        //avoiding infinite portal shenanigans
-        Debug.Log("Spell Collision");
-        if (col.gameObject.CompareTag("Harmful")&&col.gameObject.GetComponent<ISpell>().LastPortal!=this.linkedPortal)
+        if (col.gameObject.CompareTag("Tile"))
+            return;
+        
+        Debug.Log($"SubPortal triggered by {col.gameObject.name}");
+        Signals.Get<TeleportSignal>().Dispatch(linkedPortal);
+    }
+
+    public void OnTeleport(GameObject target)
+    {
+        //handle teleport
+        if (this.Type != "Portal" && target != this.LastPortal)
         {
-            //move to the connected portal without retriggering that portals condition
-            col.gameObject.GetComponent<ISpell>().LastPortal = this.linkedPortal;
-            col.gameObject.transform.SetParent(linkedPortal.transform.parent.transform);
-            col.gameObject.transform.position = linkedPortal.transform.position;
+            transform.position = target.transform.position;
+            CurrentTile = target.GetComponent<ISpell>().CurrentTile;
         }
-        if (col.gameObject.CompareTag("Player"))
-        {
-            col.gameObject.GetComponent<PlayerController>().LastPortal = this.linkedPortal;
-            col.gameObject.transform.SetParent(linkedPortal.transform.parent.transform);
-            col.gameObject.transform.position = linkedPortal.transform.position;
-        }
+        Debug.Log($"{gameObject} was teleported to {target}");
+    }
+
+    private void OnDestroy()
+    {
+        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
     }
 
     //adjacency matrix

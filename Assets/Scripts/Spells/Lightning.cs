@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using deVoid.Utils;
 
 
 public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
@@ -143,14 +144,35 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
         Damage = currentDamage;
+        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
     }
-    public void OnTriggerEnter2D(Collider2D col)
+
+    private void OnTriggerEnter2D(Collider2D col)
     {
+        if (col.gameObject.CompareTag("Tile"))
+            return;
+        
         if (col.gameObject.tag == "Player")
         {
             col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
         }
         //dissapate
+    }
+
+    public void OnTeleport(GameObject target)
+    {
+        //handle teleport
+        if (this.Type != "Portal" && target != this.LastPortal)
+        {
+            transform.position = target.transform.position;
+            CurrentTile = target.GetComponent<ISpell>().CurrentTile;
+        }
+        Debug.Log($"{gameObject} was teleported to {target}");
+    }
+
+    private void OnDestroy()
+    {
+        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
     }
 
     public bool OverrideMoveSpell(GameObject target)

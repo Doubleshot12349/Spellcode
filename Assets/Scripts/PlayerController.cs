@@ -1,7 +1,8 @@
 using System.Runtime.Serialization;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem; // IMPORTANT (new input system)
+using UnityEngine.InputSystem;
+using deVoid.Utils; // IMPORTANT (new input system)
 
 public class PlayerController : MonoBehaviour
 {
@@ -19,14 +20,42 @@ public class PlayerController : MonoBehaviour
     public TurnState myTurn;
     public bool turnStarted = false;
     public GameObject LastPortal;
+    public bool isTesting = false;
 
+    public void Awake()
+    {
+        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
+        Signals.Get<DamageSignal>().AddListener(OnDamage);
+    }
     public void Start()
     {
         selectedSpell = spell1;
     }
+    private void OnDamage(int damage, GameObject source)
+    {
+        if (source.GetComponent<ISpell>() != null)
+        {
+            health -= damage;
+            if (health <= 0 && !isTesting)
+            {
+                turnManager.GameOver();
+            }
+        }
+    }
+    private void OnTeleport(GameObject target)
+    {
+        //handle teleport
+        if (target != this.LastPortal)
+        {
+            transform.position = target.transform.position;
+            selectedHex = target.GetComponent<HexTile>();
+        }
+        Debug.Log($"{gameObject} was teleported to {target}");
+    }
 
     void Update()
     {
+        if (isTesting) return; //disables update function for integration testing
         if (this.health <= 0 && turnManager.currentTurn != TurnState.GameOver)
         {
             turnManager.GameOver();
@@ -36,7 +65,7 @@ public class PlayerController : MonoBehaviour
             turnStarted = false;
             return;
         }
-        
+
         if (!turnStarted)
         {
             gameObject.GetComponent<Collider2D>().enabled = false;
@@ -47,7 +76,7 @@ public class PlayerController : MonoBehaviour
             {
                 mana += 10;
             }
-            
+
         }
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
@@ -76,7 +105,13 @@ public class PlayerController : MonoBehaviour
             gameObject.GetComponent<Collider2D>().enabled = true;
             turnManager.EndTurn();
         }
-            
+
+    }
+    
+    private void OnDestroy()
+    {
+        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
+        Signals.Get<DamageSignal>().RemoveListener(OnDamage);
     }
         
     
