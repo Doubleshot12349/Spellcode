@@ -27,6 +27,22 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         Prefab = prefab;
         Damage = currentDamage;
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
+        
+        // Disable collider initially to prevent collisions during instantiation/setup
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+    }
+    
+    public void EnableCollider()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = true;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -35,7 +51,30 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
             return;
         
         Debug.Log($"Fire triggered by {col.gameObject.name}");
-        Signals.Get<DamageSignal>().Dispatch(Damage, gameObject);
+        
+        // Handle ice spell collision
+        Ice ice = col.GetComponent<Ice>();
+        if (ice != null)
+        {
+            ice.TakeDamage(Damage, "Fire");
+            Destroy(gameObject);
+            return;
+        }
+        
+        // Handle player collision
+        PlayerController player = col.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            player.health -= Damage;
+            if (player.health <= 0 && !player.isTesting)
+            {
+                player.turnManager.GameOver();
+            }
+            Destroy(gameObject);
+            return;
+        }
+        
+        Destroy(gameObject);
     }
 
     public void OnTeleport(GameObject target)

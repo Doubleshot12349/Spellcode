@@ -53,14 +53,17 @@ public class ConjureTests
 
         Assert.IsNotNull(Prefab, $"Failed to load: {testCase}");
         Assert.IsNotNull(gameObject, "Instantiated prefab is null");
-        Assert.AreEqual(gameObject.transform.position, target.transform.position, $"{testCase} spell failed to snap to hex");
+        Assert.IsNotNull(newSpell, $"Conjure failed to return new spell for {testCase}");
+        Assert.AreEqual(newSpell.transform.position, target.transform.position, $"{testCase} spell failed to snap to hex");
 
         if (testCase == "Portal")
         {
-            Assert.IsNotNull(gameObject.GetComponent<Portal>().portal1);
-            Assert.IsNotNull(gameObject.GetComponent<Portal>().portal2);
+            Assert.IsNotNull(newSpell.GetComponent<Portal>().portal1);
+            Assert.IsNotNull(newSpell.GetComponent<Portal>().portal2);
         }
 
+        // Clean up the new spell since we're managing it separately
+        Object.Destroy(newSpell);
 
         yield return null;
     }

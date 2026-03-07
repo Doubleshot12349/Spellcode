@@ -145,13 +145,22 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         Prefab = prefab;
         Damage = currentDamage;
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
-    }
-
-    private void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.gameObject.CompareTag("Tile"))
-            return;
         
+        // Disable collider initially to prevent collisions during instantiation/setup
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+    }
+    
+    public void EnableCollider()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = true;
+        }
         if (col.gameObject.tag == "Player")
         {
             col.gameObject.GetComponent<PlayerController>().health -= currentDamage;

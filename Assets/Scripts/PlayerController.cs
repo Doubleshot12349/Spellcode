@@ -72,6 +72,7 @@ public class PlayerController : MonoBehaviour
             turnStarted = true;
             hasCastSpell = false;
             hasMoved = false;
+            SubPortal.ResetTeleportationTracking();
             if (mana < 50)
             {
                 mana += 10;

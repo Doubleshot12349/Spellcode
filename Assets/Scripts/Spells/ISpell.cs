@@ -16,6 +16,7 @@ public interface ISpell : IGameObjectSource
     {
         return true;
     }
+    public void EnableCollider() { }
     public IEnumerator MoveRoutine(GameObject target)
     {
         Vector3 start = transform.position;
@@ -57,9 +58,12 @@ public interface ISpell : IGameObjectSource
 
     public GameObject Conjure(GameObject target)
     {
-        gameObject.SetActive(true);
-        GameObject newSpell = GameObject.Instantiate(Prefab, target.transform);
-        gameObject.transform.position = target.transform.position;
+        GameObject newSpell = GameObject.Instantiate(Prefab);
+        newSpell.transform.position = target.transform.position;
+        newSpell.transform.SetParent(target.transform);
+        newSpell.SetActive(true);
+        newSpell.GetComponent<ISpell>().EnableCollider();
+        
 
         if (newSpell == null)
         {
@@ -68,7 +72,6 @@ public interface ISpell : IGameObjectSource
         }
         else
         {
-            gameObject.SetActive(false);
             newSpell.GetComponent<ISpell>().CurrentTile = target;
             return newSpell;
         }

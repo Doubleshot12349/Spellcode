@@ -1,5 +1,6 @@
 using deVoid.Utils;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class SubPortal : MonoBehaviour,ISpell
 {
@@ -18,38 +19,73 @@ public class SubPortal : MonoBehaviour,ISpell
     }
     public GameObject LastPortal { get; set; }
     
+    // Track objects teleported this turn to prevent bounce-back
+    private static HashSet<GameObject> teleportedThisTurn = new HashSet<GameObject>();
+    
     public void Awake()
     {
         MoveSpeed = 6;
         Damage = 0;
-        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
         //animate me
     }
 
-    private void OnTriggerEnter2D(Collider2D col)
+    public void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.CompareTag("Tile"))
             return;
         
         Debug.Log($"SubPortal triggered by {col.gameObject.name}");
-        Signals.Get<TeleportSignal>().Dispatch(linkedPortal);
-    }
-
-    public void OnTeleport(GameObject target)
-    {
-        //handle teleport
-        if (this.Type != "Portal" && target != this.LastPortal)
+        
+        // Prevent teleporting the same object multiple times in the same turn
+        if (teleportedThisTurn.Contains(col.gameObject))
         {
-            transform.position = target.transform.position;
-            CurrentTile = target.GetComponent<ISpell>().CurrentTile;
+            return;
         }
-        Debug.Log($"{gameObject} was teleported to {target}");
+        
+        // Directly teleport the colliding object instead of broadcasting
+        ISpell spell = col.GetComponent<ISpell>();
+        if (spell != null)
+        {
+            col.gameObject.transform.position = linkedPortal.transform.position;
+            spell.CurrentTile = linkedPortal.GetComponent<ISpell>().CurrentTile;
+            spell.LastPortal = gameObject;
+            
+            // Track this teleportation this turn
+            teleportedThisTurn.Add(col.gameObject);
+        }
+        
+        // Also handle player teleportation
+        PlayerController player = col.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            col.gameObject.transform.position = linkedPortal.transform.position;
+            
+            // Update PlayerMover's currentTile for movement adjacency checks
+            GameObject destinationTile = linkedPortal.GetComponent<ISpell>().CurrentTile;
+            if (destinationTile != null)
+            {
+                HexTile destinationHexTile = destinationTile.GetComponent<HexTile>();
+                
+                PlayerMover playerMover = col.GetComponent<PlayerMover>();
+                if (playerMover != null)
+                {
+                    playerMover.currentTile = destinationHexTile;
+                }
+            }
+            
+            player.LastPortal = gameObject;
+            
+            // Track this teleportation this turn
+            teleportedThisTurn.Add(col.gameObject);
+        }
+    }
+    
+    // Call this at the start of each turn to reset the teleportation tracking
+    public static void ResetTeleportationTracking()
+    {
+        teleportedThisTurn.Clear();
     }
 
-    private void OnDestroy()
-    {
-        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
-    }
 
     //adjacency matrix
 }

@@ -43,5 +43,40 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
         }
 
     }
+
+    public GameObject Conjure(GameObject target)
+    {
+        GameObject newSpell = GameObject.Instantiate(Prefab);
+        newSpell.transform.position = target.transform.position;
+        newSpell.transform.SetParent(target.transform);
+        newSpell.SetActive(true);
+        newSpell.GetComponent<ISpell>().EnableCollider();
+
+        if (newSpell == null)
+        {
+            Debug.Log("Error conjuring spell");
+            return null;
+        }
+        else
+        {
+            newSpell.GetComponent<ISpell>().CurrentTile = target;
+            
+            // Position the portal children after CurrentTile is set
+            Portal portalComponent = newSpell.GetComponent<Portal>();
+            if (portalComponent != null)
+            {
+                portalComponent.portal1.transform.SetParent(target.transform);
+                portalComponent.portal1.transform.position = target.transform.position;
+                portalComponent.portal2.transform.SetParent(target.transform);
+                portalComponent.portal2.transform.position = target.transform.position;
+                
+                // Set CurrentTile on portal1 and portal2 SubPortal components
+                portalComponent.portal1.GetComponent<SubPortal>().CurrentTile = target;
+                portalComponent.portal2.GetComponent<SubPortal>().CurrentTile = target;
+            }
+            
+            return newSpell;
+        }
+    }
     
 }

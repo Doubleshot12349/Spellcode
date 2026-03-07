@@ -30,8 +30,23 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
         MoveSpeed = moveSpeed;
         Prefab = prefab;
         Damage = currentDamage;
-        Signals.Get<DamageSignal>().AddListener(OnDamage);
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
+        
+        // Disable collider initially to prevent collisions during instantiation/setup
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+    }
+    
+    public void EnableCollider()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = true;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -40,12 +55,34 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
             return;
         
         Debug.Log($"Ice triggered by {col.gameObject.name}");
-        Signals.Get<DamageSignal>().Dispatch(Damage, gameObject);
+        
+        // Handle collision with other ice spell
+        Ice otherIce = col.GetComponent<Ice>();
+        if (otherIce != null && !this.blockDestroy)
+        {
+            health += otherIce.health;
+            this.blockDestroy = true;
+            Destroy(otherIce.gameObject);
+            return;
+        }
+        
+        // Handle collision with player
+        PlayerController player = col.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            player.health -= Damage;
+            if (player.health <= 0 && !player.isTesting)
+            {
+                player.turnManager.GameOver();
+            }
+            Destroy(gameObject);
+            return;
+        }
     }
 
-    private void OnDamage(int damage, GameObject source)
+    public void TakeDamage(int damage, string sourceType)
     {
-        if (source.GetComponent<ISpell>() != null && source.GetComponent<ISpell>().Type == "Fire")
+        if (sourceType == "Fire")
         {
             health -= 2 * damage;
             if (health <= 0)
@@ -53,14 +90,6 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
                 Destroy(gameObject);
             }
         }
-        else if (source.GetComponent<ISpell>() != null && source.GetComponent<ISpell>().Type == "Ice" && !this.blockDestroy)
-        {
-            health += ((Ice)source.GetComponent<ISpell>()).health;
-            this.blockDestroy = true; //prevent both ice spells from being destroyed in the same collision
-            Destroy(source);
-        }
-        
-        
     }
 
     public void OnTeleport(GameObject target)
@@ -76,7 +105,6 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
 
     private void OnDestroy()
     {
-        Signals.Get<DamageSignal>().RemoveListener(OnDamage);
         Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
     }
 
