@@ -98,6 +98,9 @@ public class PlayerController : MonoBehaviour
             selectedSpell.GetComponent<StackMachine>().RunTurn();
             selectedHex = null;
             hasCastSpell = true;
+
+            int playerNumber = myTurn == TurnState.Player1Turn ? 1 : 2;
+            GameMessageUI.Instance.ShowMessage("Player " + playerNumber + " cast a spell");
         }
 
         if ((hasMoved && hasCastSpell) || Keyboard.current.spaceKey.wasPressedThisFrame)
