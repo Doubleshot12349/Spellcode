@@ -25,26 +25,24 @@ public class TurnManager : MonoBehaviour
         if (currentTurn == TurnState.Player1Turn)
         {
             currentTurn = TurnState.Player2Turn;
-            wait();
             GameMessageUI.Instance.ShowMessage("Player 2's Turn");
         }
         else if (currentTurn == TurnState.Player2Turn)
         {
             currentTurn = TurnState.Player1Turn;
-            wait();
             GameMessageUI.Instance.ShowMessage("Player 1's Turn");
         }
     }
 
-    IEnumerator wait()
-    {
-        yield return new WaitForSeconds(3f);
-    }
 
-    public void GameOver()
+
+    public void GameOver(int winningPlayerNumber)
     {
         Debug.Log("GameOver");
         currentTurn = TurnState.GameOver;
-        SceneManager.LoadSceneAsync(1);
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.ShowGameOver(winningPlayerNumber);
+        }
     }
 }

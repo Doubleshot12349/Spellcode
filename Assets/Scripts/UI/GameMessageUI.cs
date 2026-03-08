@@ -11,7 +11,10 @@ public class GameMessageUI : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
     }
 
     public void ShowMessage(string message)

@@ -12,6 +12,9 @@ public class HexGridManager : MonoBehaviour
 
     public float hexSize = 1f; // "radius" in word units
 
+    public Vector2 cameraCenterOffset = Vector2.zero;
+    public float cameraPadding = 1.2f;
+
     private static Dictionary<HexCoords, HexTile> tiles =
         new Dictionary<HexCoords, HexTile>();
 
@@ -65,7 +68,7 @@ public class HexGridManager : MonoBehaviour
                 tiles[axial] = tile;
             }
         }
-        CenterCameraOnGrid(Camera.main, 1.2f);
+        CenterCameraOnGrid(Camera.main, cameraPadding);
     }
 
     public static Vector3 AxialToWorld(HexCoords c, float size)
@@ -147,7 +150,11 @@ public class HexGridManager : MonoBehaviour
             maxY = Mathf.Max(maxY, p.y);
         }
 
-        Vector3 center = new Vector3((minX + maxX) / 2f, (minY + maxY) / 2f, cam.transform.position.z);
+        Vector3 center = new Vector3(
+            (minX + maxX) / 2f + cameraCenterOffset.x,
+            (minY + maxY) / 2f + cameraCenterOffset.y,
+            cam.transform.position.z
+            );
         cam.transform.position = center;
 
         if (cam.orthographic)
