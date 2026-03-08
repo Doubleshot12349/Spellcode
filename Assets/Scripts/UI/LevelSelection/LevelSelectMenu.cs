@@ -29,6 +29,18 @@ public class LevelSelectMenu : MonoBehaviour
         SceneManager.LoadScene(gameplaySceneName);
     }
 
+    public void LoadWaterLevel()
+    {
+        LevelSelectionData.selectedLevel = "Water";
+        SceneManager.LoadScene(gameplaySceneName);
+    }
+
+    public void LoadSkyLevel()
+    {
+        LevelSelectionData.selectedLevel = "Sky";
+        SceneManager.LoadScene(gameplaySceneName);
+    }
+
     public void BackToMainMenu()
     {
         SceneManager.LoadScene("MainMenu");

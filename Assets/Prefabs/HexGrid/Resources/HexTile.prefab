@@ -176,7 +176,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2135585597343286014, guid: 5aa8b770bc43046bc8d993d0d5b7f4a5, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -257,4 +257,5 @@ MonoBehaviour:
   hoverValidColor: {r: 0.4, g: 1, b: 0.4, a: 0.19607843}
   hoverInvalidColor: {r: 1, g: 0.4, b: 0.4, a: 0.19607843}
   selectedColor: {r: 1, g: 1, b: 0.3, a: 0.09803922}
+  hoverSpellValidColor: {r: 0.4, g: 0.4, b: 1, a: 0.7}
   highlightSR: {fileID: 0}
