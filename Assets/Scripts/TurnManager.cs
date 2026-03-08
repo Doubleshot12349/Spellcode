@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public enum TurnState
 {
@@ -22,15 +23,26 @@ public class TurnManager : MonoBehaviour
     {
         activeSpells.Clean();
         if (currentTurn == TurnState.Player1Turn)
+        {
             currentTurn = TurnState.Player2Turn;
+            GameMessageUI.Instance.ShowMessage("Player 2's Turn");
+        }
         else if (currentTurn == TurnState.Player2Turn)
+        {
             currentTurn = TurnState.Player1Turn;
+            GameMessageUI.Instance.ShowMessage("Player 1's Turn");
+        }
     }
 
-    public void GameOver()
+
+
+    public void GameOver(int winningPlayerNumber)
     {
         Debug.Log("GameOver");
         currentTurn = TurnState.GameOver;
-        SceneManager.LoadSceneAsync(1);
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.ShowGameOver(winningPlayerNumber);
+        }
     }
 }

@@ -65,6 +65,9 @@ public class PlayerMover : MonoBehaviour
         transform.position = end;
         currentTile = target;
 
+        int playerNumber = GetComponent<PlayerController>().myTurn == TurnState.Player1Turn ? 1 : 2;
+        GameMessageUI.Instance.ShowMessage("Player " + playerNumber + " moved");
+
         isMoving = false;
     }
 

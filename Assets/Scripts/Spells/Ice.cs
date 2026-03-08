@@ -71,10 +71,6 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
         if (player != null)
         {
             player.health -= Damage;
-            if (player.health <= 0 && !player.isTesting)
-            {
-                player.turnManager.GameOver();
-            }
             Destroy(gameObject);
             return;
         }

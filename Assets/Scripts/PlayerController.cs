@@ -9,6 +9,9 @@ public class PlayerController : MonoBehaviour
     public int health;
     public int mana;
 
+    public int maxHealth = 100;
+    public int maxMana = 50;
+
     public GameObject spell1;
     public GameObject spell2;
     public GameObject spell3;
@@ -29,6 +32,8 @@ public class PlayerController : MonoBehaviour
     }
     public void Start()
     {
+        health = maxHealth;
+        mana = maxMana;
         selectedSpell = spell1;
     }
     private void OnDamage(int damage, GameObject source)
@@ -38,7 +43,12 @@ public class PlayerController : MonoBehaviour
             health -= damage;
             if (health <= 0 && !isTesting)
             {
-                turnManager.GameOver();
+                health = 0;
+                if (!isTesting && turnManager.currentTurn != TurnState.GameOver)
+                {
+                    int winningPlayer = (myTurn == TurnState.Player1Turn) ? 2 : 1;
+                    turnManager.GameOver(winningPlayer);
+                }
             }
         }
     }
@@ -58,7 +68,8 @@ public class PlayerController : MonoBehaviour
         if (isTesting) return; //disables update function for integration testing
         if (this.health <= 0 && turnManager.currentTurn != TurnState.GameOver)
         {
-            turnManager.GameOver();
+            int winningPlayer = (myTurn == TurnState.Player1Turn) ? 2 : 1;
+            turnManager.GameOver(winningPlayer);
         }
         if (turnManager.currentTurn != myTurn)
         {
@@ -98,6 +109,9 @@ public class PlayerController : MonoBehaviour
             selectedSpell.GetComponent<StackMachine>().RunTurn();
             selectedHex = null;
             hasCastSpell = true;
+
+            int playerNumber = myTurn == TurnState.Player1Turn ? 1 : 2;
+            GameMessageUI.Instance.ShowMessage("Player " + playerNumber + " cast a spell");
         }
 
         if ((hasMoved && hasCastSpell) || Keyboard.current.spaceKey.wasPressedThisFrame)
