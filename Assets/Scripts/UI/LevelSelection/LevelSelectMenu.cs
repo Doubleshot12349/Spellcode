@@ -23,6 +23,12 @@ public class LevelSelectMenu : MonoBehaviour
         SceneManager.LoadScene(gameplaySceneName);
     }
 
+    public void LoadFireLevel()
+    {
+        LevelSelectionData.selectedLevel = "Fire";
+        SceneManager.LoadScene(gameplaySceneName);
+    }
+
     public void BackToMainMenu()
     {
         SceneManager.LoadScene("MainMenu");

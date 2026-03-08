@@ -6,6 +6,7 @@ public class LevelManager : MonoBehaviour
     public GameObject grassLevel;
     public GameObject iceLevel;
     public GameObject rockLevel;
+    public GameObject fireLevel;
 
     private void Start()
     {
@@ -17,6 +18,7 @@ public class LevelManager : MonoBehaviour
         if (grassLevel != null) grassLevel.SetActive(false);
         if (iceLevel != null) iceLevel.SetActive(false);
         if (rockLevel != null) rockLevel.SetActive(false);
+        if (fireLevel != null) rockLevel.SetActive(false);
 
         switch (level)
         {
@@ -30,6 +32,10 @@ public class LevelManager : MonoBehaviour
 
             case "Rock":
                 if (rockLevel != null) rockLevel.SetActive(true);
+                break;
+
+            case "Fire":
+                if (fireLevel != null) fireLevel.SetActive(true);
                 break;
 
             default:
