@@ -402,6 +402,11 @@ Transform:
   - {fileID: 1496645525}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &343195410 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8278346050366200049, guid: 09f74bde9ac76ec498e6a3d1b9f56b82, type: 3}
+  m_PrefabInstance: {fileID: 2986248670512061228}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &359587102
 GameObject:
   m_ObjectHideFlags: 0
@@ -951,6 +956,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 723570259}
   m_CullTransparentMesh: 1
+--- !u!1 &736569453
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 736569455}
+  - component: {fileID: 736569454}
+  m_Layer: 0
+  m_Name: LeyLineMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &736569454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 736569453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53348e9bb541487449cc9779b6537269, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  hexGrid: {fileID: 343195410}
+  generated: 0
+--- !u!4 &736569455
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 736569453}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.73883, y: 1.41681, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &752856688
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1466,6 +1517,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -1528,6 +1583,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 876377097}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -1551,6 +1610,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
@@ -1577,6 +1640,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
@@ -11131,7 +11198,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5345966981206502210, guid: 09f74bde9ac76ec498e6a3d1b9f56b82, type: 3}
   m_PrefabInstance: {fileID: 2986248670512061228}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 343195410}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7eed277e8db2554aaddaf9c3fd833ee, type: 3}
@@ -12905,6 +12972,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 1213981484826737136, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -12955,6 +13026,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 3093800802592778632, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -12987,6 +13062,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 5090248713061906473, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
@@ -13012,6 +13091,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: LeyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 6323234052528963534, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: activeSpells
       value: 
@@ -13101,3 +13184,4 @@ SceneRoots:
   - {fileID: 1721743116}
   - {fileID: 1587472370}
   - {fileID: 2093688058}
+  - {fileID: 736569455}

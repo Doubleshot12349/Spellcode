@@ -14,6 +14,7 @@ public class HexGridManager : MonoBehaviour
 
     public Vector2 cameraCenterOffset = Vector2.zero;
     public float cameraPadding = 1.2f;
+    public static bool hasGenerated = false;
 
     private static Dictionary<HexCoords, HexTile> tiles =
         new Dictionary<HexCoords, HexTile>();
@@ -69,6 +70,7 @@ public class HexGridManager : MonoBehaviour
             }
         }
         CenterCameraOnGrid(Camera.main, cameraPadding);
+        hasGenerated = true;
     }
 
     public static Vector3 AxialToWorld(HexCoords c, float size)
@@ -78,7 +80,7 @@ public class HexGridManager : MonoBehaviour
         return new Vector3(x, y, 0f);
     }
 
-    public List<HexTile> GetNeighbors(HexCoords c)
+    public static List<HexTile> GetNeighbors(HexCoords c)
     {
         var result = new List<HexTile>(6);
         foreach (var dir in NeighborDirs)

@@ -17,6 +17,7 @@ public class SysCallManager : MonoBehaviour
     public ActiveSpells activeSpells;
     public GameObject player;
     private PlayerController playerStats;
+    public LeyLineGen LeyLineMap;
 
 
 
@@ -153,7 +154,12 @@ public class SysCallManager : MonoBehaviour
 
     public void Print(string s)
     {
-        
+
         return;
+    }
+    
+    public Dictionary<(HexTile,HexTile),LeyLineGen.LeyLine> GetLeyLineMap()
+    {
+        return LeyLineMap.leyLines;
     }
 }
