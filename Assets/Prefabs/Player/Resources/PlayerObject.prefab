@@ -132,14 +132,16 @@ MonoBehaviour:
   mana: 20
   spell1: {fileID: 1698189430288821889}
   spell2: {fileID: 3289493050850803449}
-  spell3: {fileID: 7691847877710592199}
+  spell3: {fileID: 8924585275697266464}
   selectedSpell: {fileID: 0}
   turnManager: {fileID: 0}
   selectedHex: {fileID: 0}
   hasCastSpell: 0
   hasMoved: 0
-  myTurn: 0
+  myTurn: 1
   turnStarted: 0
+  LastPortal: {fileID: 0}
+  isTesting: 0
 --- !u!58 &3947304419332037508
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -306,6 +308,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4569196745271144830, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
   m_PrefabInstance: {fileID: 307198868576550884}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &8924585275697266464 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9194411692354027716, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
+  m_PrefabInstance: {fileID: 307198868576550884}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1524453476245829635
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -407,11 +414,6 @@ GameObject:
 --- !u!4 &3921974681208706582 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2542938868185345557, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
-  m_PrefabInstance: {fileID: 1524453476245829635}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &7691847877710592199 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9194411692354027716, guid: 518e21cac38e4e841befe10c73596be7, type: 3}
   m_PrefabInstance: {fileID: 1524453476245829635}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5926662583521525309
