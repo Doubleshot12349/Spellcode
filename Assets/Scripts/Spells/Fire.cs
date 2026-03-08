@@ -1,5 +1,7 @@
 using deVoid.Utils;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 {
@@ -20,12 +22,16 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     }
     public GameObject LastPortal { get; set; }
     
+    public List<GameObject> path;
+    [SerializeField] private float delayBetweenHexes =.2f;
+    
     public void Awake()
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
         Damage = currentDamage;
+        path = new List<GameObject>();
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
         
         // Disable collider initially to prevent collisions during instantiation/setup
@@ -43,6 +49,62 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         {
             col.enabled = true;
         }
+    }
+
+    public void Cast()
+    {
+        if (path == null || path.Count == 0)
+            return;
+
+        StartCoroutine(ChainRoutine());
+    }
+
+    private IEnumerator ChainRoutine()
+    {
+        for (int i = 0; i < path.Count; i++)
+        {
+            GameObject target = path[i];
+
+            // Move fire to hex
+            transform.position = target.transform.position;
+            CurrentTile = target;
+            ApplyLeyLineEffect(path[i]);
+
+            yield return new WaitForSeconds(delayBetweenHexes);
+        }
+
+        Destroy(this.gameObject);
+    }
+    
+    private void ApplyLeyLineEffect(GameObject hex){
+        
+    }
+
+    public void AddPath(int q, int r)
+    {
+        // Add hex to path for fire to follow
+        try
+        {
+            path.Add(HexGridManager.GetHex(q, r));
+        }
+        catch
+        {
+            Debug.Log("Unable to add to path");
+        }
+    }
+
+    public bool OverrideMoveSpell(GameObject target)
+    {
+        // Generate hex-by-hex path from Fire's current position to target
+        List<GameObject> hexPath = HexGridManager.GetLine(CurrentTile.GetComponent<HexTile>().coords,target.GetComponent<HexTile>().coords);
+        
+        if (hexPath.Count > 0)
+        {
+            path = hexPath;
+            StartCoroutine(ChainRoutine());
+            return false; // Don't use default MoveRoutine
+        }     
+        return true; // Fall back to default if path generation fails
     }
 
     private void OnTriggerEnter2D(Collider2D col)

@@ -63,7 +63,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 lightning.transform.SetParent(target.transform);
                 lightning.transform.position -= new Vector3(0.5f, 0, 0);
                 lightning.GetComponent<Animator>().speed = .25f;
-
+                ApplyLeyLineEffect(path[i]);
                 GetVectorAngle(initial, final, lightning.transform);
                 Destroy(lightning, .52f);
 
@@ -91,20 +91,20 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     }
 
     //gets the angle between 2 adjacent hexes and sets the apropriate transformation
-    public void GetVectorAngle(HexCoords initial,HexCoords final,Transform lightningTrans)
+    public void GetVectorAngle(HexCoords initial, HexCoords final, Transform lightningTrans)
     {
 
         int dq = final.q - initial.q;
         int dr = final.r - initial.r;
         //each s coord = s=-q-r
         int ds = (-1 * final.q - final.r) - (-1 * initial.q - initial.r);
-        
-        Vector3 rotPoint = new Vector3(0,0,0);
-        rotPoint=lightningTrans.position;
+
+        Vector3 rotPoint = new Vector3(0, 0, 0);
+        rotPoint = lightningTrans.position;
         rotPoint.x += .5f;
-        
+
         Vector3 axis = new Vector3(0, 0, 1);
-        
+
         switch (dq, dr, ds)
         {
             case var _ when dq > 0 && true && ds < 0:
@@ -112,7 +112,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 //0 degree rotation
                 break;
             case var _ when dq > 0 && dr < 0 && true:
-                 //(1,-1,0)
+                //(1,-1,0)
                 if (lightningTrans != null) lightningTrans.RotateAround(rotPoint, axis, 120);
                 break;
             case var _ when true && dr < 0 && ds > 0:
@@ -137,6 +137,10 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 break;
         }
         return;
+    }
+    
+    private void ApplyLeyLineEffect(GameObject hex){
+        
     }
     public void Awake()
     {

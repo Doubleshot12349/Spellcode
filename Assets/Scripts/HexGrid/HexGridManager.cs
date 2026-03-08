@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using static UnityEngine.Mathf;
+using System.Linq;
 
 public class HexGridManager : MonoBehaviour
 {
@@ -174,18 +175,21 @@ public class HexGridManager : MonoBehaviour
 
     public static float HexDistance(HexCoords a,HexCoords b)
     {
-        return Sqrt(Pow((float)(b.q - a.q), 2f)+Pow((float)(b.r-a.r),2f)+Pow((float)(-1f*b.q-b.r)-(float)(-1f*a.q-a.r),2f));
+        return (float)Abs(b.q - a.q)+(float)Abs(b.r-a.r)+Abs((float)(-1f*b.q-b.r)-(float)(-1f*a.q-a.r))/2;
     }
     //AI gen
     public static List<GameObject> GetLine(HexCoords a, HexCoords b)
     {
         int N = FloorToInt(HexDistance(a, b));
         var results = new List<GameObject>();
-
+        
         for (int i = 0; i <= N; i++)
         {
             float t = N == 0 ? 0 : (1f / N) * i;
-            results.Add(HexRound(HexLerp(a, b, t)));
+            //hexes are occasionally getting skipped if the next hex is perfectly on the diagonal
+            // so the coordinates need to be offset to get off the diagonal
+            // it all gets rounded at the end so it's fine
+            results.Add(HexRound(HexLerp(a.q+.25f,a.r-.25f, b.q+.25f,b.r-.25f, t)));
         }
 
         return results;
@@ -202,24 +206,25 @@ public class HexGridManager : MonoBehaviour
     }
 
     //AI gen
-    private static HexCoords HexLerp(HexCoords a, HexCoords b, float t)
+    private static (float q,float r) HexLerp(float aq,float ar, float bq,float br, float t)
     {
-        return new HexCoords(
-            FloorToInt(Mathf.Lerp((float)a.q, (float)b.q, t)),
-            FloorToInt(Mathf.Lerp((float)a.r, (float)b.r, t))
+        return (
+            Mathf.Lerp((float)aq, (float)bq, t),
+            Mathf.Lerp((float)ar, (float)br, t)
         );
     }
 
     //AI gen
-    static GameObject HexRound(HexCoords h)
+    static GameObject HexRound((float ,float )coords)
     {
-        int rq = Mathf.RoundToInt(h.q);
-        int rr = Mathf.RoundToInt(h.r);
-        int rs = Mathf.RoundToInt(0-h.r-h.q);
+        var (q, r) = coords;
+        int rq = Mathf.RoundToInt(q);
+        int rr = Mathf.RoundToInt(r);
+        int rs = Mathf.RoundToInt(0-r-q);
 
-        float qDiff = Mathf.Abs(rq - h.q);
-        float rDiff = Mathf.Abs(rr - h.r);
-        float sDiff = Mathf.Abs(rs - 0-h.r-h.q);
+        float qDiff = Mathf.Abs(rq - q);
+        float rDiff = Mathf.Abs(rr - r);
+        float sDiff = Mathf.Abs(rs - 0-r-q);
 
         if (qDiff > rDiff && qDiff > sDiff)
             rq = -rr - rs;

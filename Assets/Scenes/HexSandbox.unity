@@ -10584,6 +10584,10 @@ PrefabInstance:
         effect);    } }
       objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: myTurn
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
       objectReference: {fileID: 1237935281}

@@ -63,7 +63,7 @@ public interface ISpell : IGameObjectSource
         newSpell.transform.SetParent(target.transform);
         newSpell.SetActive(true);
         newSpell.GetComponent<ISpell>().EnableCollider();
-        
+
 
         if (newSpell == null)
         {
