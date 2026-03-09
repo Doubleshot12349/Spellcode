@@ -52,6 +52,22 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void TakeEnvironmentDamage(int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            health = 0;
+
+            if (!isTesting && turnManager != null && turnManager.currentTurn != TurnState.GameOver)
+            {
+                int winningPlayer = (myTurn == TurnState.Player1Turn) ? 2 : 1;
+                turnManager.GameOver(winningPlayer);
+            }
+        }
+    }
     private void OnTeleport(GameObject target)
     {
         //handle teleport
