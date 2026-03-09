@@ -8,7 +8,7 @@ public class SubPortal : MonoBehaviour,ISpell
     public float MoveSpeed { get; set; }
     public GameObject Prefab { get; set; }
     public GameObject CurrentTile { get; set; }
-    public int Damage { get; set; }
+    public float Damage { get; set; }
     public string type = "Portal";
     public string Type
     {

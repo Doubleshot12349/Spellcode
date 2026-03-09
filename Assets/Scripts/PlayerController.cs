@@ -6,10 +6,10 @@ using deVoid.Utils; // IMPORTANT (new input system)
 
 public class PlayerController : MonoBehaviour
 {
-    public int health;
+    public float health;
     public int mana;
 
-    public int maxHealth = 100;
+    public float maxHealth = 100;
     public int maxMana = 50;
 
     public GameObject spell1;
@@ -25,18 +25,13 @@ public class PlayerController : MonoBehaviour
     public GameObject LastPortal;
     public bool isTesting = false;
 
-    public void Awake()
-    {
-        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
-        Signals.Get<DamageSignal>().AddListener(OnDamage);
-    }
     public void Start()
     {
         health = maxHealth;
         mana = maxMana;
         selectedSpell = spell1;
     }
-    private void OnDamage(int damage, GameObject source)
+    public void OnDamage(int damage, GameObject source)
     {
         if (source.GetComponent<ISpell>() != null)
         {
@@ -69,6 +64,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     private void OnTeleport(GameObject target)
+    public void OnTeleport(GameObject target)
     {
         //handle teleport
         if (target != this.LastPortal)
@@ -137,12 +133,6 @@ public class PlayerController : MonoBehaviour
             turnManager.EndTurn();
         }
 
-    }
-    
-    private void OnDestroy()
-    {
-        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
-        Signals.Get<DamageSignal>().RemoveListener(OnDamage);
     }
         
     

@@ -164,6 +164,11 @@ Transform:
   - {fileID: 1549507400}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &41228943 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7691847877710592199, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+  m_PrefabInstance: {fileID: 8344865277071178943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &113434282
 GameObject:
   m_ObjectHideFlags: 0
@@ -1800,6 +1805,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 475099222447892771, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 495211180327637166, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -1808,6 +1817,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1022658452125820717, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Name
       value: Player2
@@ -1870,6 +1883,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 2062416010384778780, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -1906,6 +1923,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3748886857142859605, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 4263342615927836314, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -1926,6 +1947,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5830819836327635194, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 6033195430249188748, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -1972,6 +1997,14 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 7700228980489582722, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 7700228980489582722, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 7878678125677629251, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -3769,6 +3802,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: TestAssembly::TurnManager
   currentTurn: 0
   activeSpells: {fileID: 359587104}
+  hgm: {fileID: 1798582444}
+  llg: {fileID: 736569454}
+  player1: {fileID: 284784649}
+  player2: {fileID: 2126273986}
 --- !u!1 &1247195143
 GameObject:
   m_ObjectHideFlags: 0
@@ -13192,6 +13229,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5fa86f3fdfadd843a79b5110c11d354, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &2126273986 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1229939184451707076, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+  m_PrefabInstance: {fileID: 876377096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126273971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a46ba2191df642a469b7a71feecfaf39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1 &2139142543
 GameObject:
   m_ObjectHideFlags: 0
@@ -13398,6 +13446,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 475099222447892771, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 495211180327637166, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13406,6 +13458,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1022658452125820717, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 1030189204272206848, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Name
       value: Player
@@ -13441,6 +13497,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: spell3
+      value: 
+      objectReference: {fileID: 41228943}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
       objectReference: {fileID: 1237935281}
@@ -13460,6 +13520,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 2062416010384778780, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13496,6 +13560,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3748886857142859605, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 4263342615927836314, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13520,6 +13588,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5830819836327635194, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 6033195430249188748, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13570,6 +13642,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 7700228980489582722, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMapObj
+      value: 
+      objectReference: {fileID: 736569453}
     - target: {fileID: 7878678125677629251, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13584,6 +13660,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8295339005553848683, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 8520584237194141355, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Enabled
       value: 0
