@@ -12,12 +12,13 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject Prefab { get; set; }
     public GameObject prefab;
     public GameObject Player;
+    public LeyLineGen leyLineMap;
     
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public List<GameObject> path;
-    public int Damage { get; set; }
-    public int currentDamage;
+    public float Damage { get; set; }
+    public float currentDamage;
     public string type = "Lightning";
     public string Type
     {
@@ -63,7 +64,9 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 lightning.transform.SetParent(target.transform);
                 lightning.transform.position -= new Vector3(0.5f, 0, 0);
                 lightning.GetComponent<Animator>().speed = .25f;
-
+                lightning.GetComponent<ISpell>().EnableCollider();
+                
+                ApplyLeyLineEffect(prev,target.GetComponent<HexTile>());
                 GetVectorAngle(initial, final, lightning.transform);
                 Destroy(lightning, .52f);
 
@@ -76,6 +79,8 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         Debug.Log("Chain complete");
         Destroy(this.gameObject);
     }
+
+    
     public void AddPath(int q, int r)
     {
         //Redefine the path for lightning to follow
@@ -91,20 +96,20 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     }
 
     //gets the angle between 2 adjacent hexes and sets the apropriate transformation
-    public void GetVectorAngle(HexCoords initial,HexCoords final,Transform lightningTrans)
+    public void GetVectorAngle(HexCoords initial, HexCoords final, Transform lightningTrans)
     {
 
         int dq = final.q - initial.q;
         int dr = final.r - initial.r;
         //each s coord = s=-q-r
         int ds = (-1 * final.q - final.r) - (-1 * initial.q - initial.r);
-        
-        Vector3 rotPoint = new Vector3(0,0,0);
-        rotPoint=lightningTrans.position;
+
+        Vector3 rotPoint = new Vector3(0, 0, 0);
+        rotPoint = lightningTrans.position;
         rotPoint.x += .5f;
-        
+
         Vector3 axis = new Vector3(0, 0, 1);
-        
+
         switch (dq, dr, ds)
         {
             case var _ when dq > 0 && true && ds < 0:
@@ -112,7 +117,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 //0 degree rotation
                 break;
             case var _ when dq > 0 && dr < 0 && true:
-                 //(1,-1,0)
+                //(1,-1,0)
                 if (lightningTrans != null) lightningTrans.RotateAround(rotPoint, axis, 120);
                 break;
             case var _ when true && dr < 0 && ds > 0:
@@ -138,6 +143,15 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         }
         return;
     }
+    
+    private void ApplyLeyLineEffect(HexTile hexA,HexTile hexB){
+        LeyLineGen.LeyLine l = leyLineMap.GetLeyLine(hexA, hexB);
+        if (l == null) return;
+        float mod = l.weight;
+        Debug.Log($"The weight of the leyline {hexA},{hexB} is: {mod}");
+        this.Damage = Damage * (1f - mod / 200f);
+        Debug.Log($"Damage is: {this.Damage}");
+    }
     public void Awake()
     {
         //read fields from inspector
@@ -153,7 +167,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
             col.enabled = false;
         }
     }
-    
+
     public void EnableCollider()
     {
         Collider2D col = GetComponent<Collider2D>();
@@ -161,9 +175,13 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         {
             col.enabled = true;
         }
+
+    }
+    public void OnTriggerEnter2D(Collider2D col)
+    {
         if (col.gameObject.tag == "Player")
         {
-            col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
+            col.gameObject.GetComponent<PlayerController>().health -= Damage;
         }
         //dissapate
     }

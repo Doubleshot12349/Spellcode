@@ -19,30 +19,35 @@ public class LeyLineGen : MonoBehaviour
             weight = 0;
         }
     }
-    public Dictionary<(HexTile,HexTile),LeyLine> leyLines = new Dictionary<(HexTile, HexTile), LeyLine>();
+    private Dictionary<(HexTile,HexTile),LeyLine> leyLines = new Dictionary<(HexTile, HexTile), LeyLine>();
 
-    public bool LeyLineExists(HexTile tile1,HexTile tile2)
+    public bool LeyLineExists(HexTile tile1, HexTile tile2)
     {
+        if (leyLines.Count==0) {
+            Debug.Log("LeyLines have not been generated yet");
+            return false;
+        }
         //Using a 2 element key where the order doesn't matter, have to check both combos
-        return leyLines.ContainsKey((tile2, tile1))||leyLines.ContainsKey((tile1, tile2));
-        
+        return leyLines.ContainsKey((tile2, tile1)) || leyLines.ContainsKey((tile1, tile2));
+
+    }
+    
+    public LeyLine GetLeyLine(HexTile tile1, HexTile tile2)
+    {
+        if (LeyLineExists(tile1, tile2))
+        {
+            return leyLines[(tile1, tile2)];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public void Awake()
     {
         min = 1;
         max = 20;
-    }
-    //continuously checking if the grid has been generated before making leylines
-    public void Update()
-    {
-        if (!generated)
-        {
-            if (HexGridManager.hasGenerated) return;
-            GenerateLeyLines();
-            WeightLeyLines();
-            generated = true;
-        }
     }
 
     public void GenerateLeyLines()
@@ -60,6 +65,8 @@ public class LeyLineGen : MonoBehaviour
                 }
             }
         }
+        WeightLeyLines();
+        generated = true;
     }
 
     public void WeightLeyLines()

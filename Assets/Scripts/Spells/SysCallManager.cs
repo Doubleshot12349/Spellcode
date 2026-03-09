@@ -160,6 +160,6 @@ public class SysCallManager : MonoBehaviour
     
     public Dictionary<(HexTile,HexTile),LeyLineGen.LeyLine> GetLeyLineMap()
     {
-        return LeyLineMap.leyLines;
+        return null; //LeyLineMap.leyLines;
     }
 }

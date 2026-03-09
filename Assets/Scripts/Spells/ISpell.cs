@@ -9,8 +9,9 @@ public interface ISpell : IGameObjectSource
     GameObject CurrentTile { get; set; }
     GameObject Prefab { get; set; }
     string Type { get; }
-    int Damage { get; set; }
+    float Damage { get; set; }
     GameObject LastPortal { get; set; }
+    
 
     public bool OverrideMoveSpell(GameObject target)
     {
@@ -63,7 +64,7 @@ public interface ISpell : IGameObjectSource
         newSpell.transform.SetParent(target.transform);
         newSpell.SetActive(true);
         newSpell.GetComponent<ISpell>().EnableCollider();
-        
+
 
         if (newSpell == null)
         {

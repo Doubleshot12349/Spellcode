@@ -85,7 +85,7 @@ public class SpellIntegrationTests
         gameObject1.GetComponent<ISpell>().CurrentTile = this.hexTile1;
         yield return null;
 
-        int spellDamage = gameObject1.GetComponent<ISpell>().Damage;
+        float spellDamage = gameObject1.GetComponent<ISpell>().Damage;
         var expectedHealth = Player.GetComponent<PlayerController>().health - spellDamage;
 
         // Emulate collision with player by calling appropriate collision methods
@@ -157,7 +157,7 @@ public class SpellIntegrationTests
         Assert.IsTrue(gameObject1 != null, "Moving spell was null before moving");
 
         var expectedHealth = gameObject2.GetComponent<Ice>().health;
-        int spell1Damage = gameObject1.GetComponent<ISpell>().Damage;
+        float spell1Damage = gameObject1.GetComponent<ISpell>().Damage;
         expectedHealth -= 2 * spell1Damage;
 
         // Conjure creates a new spell and returns it - capture the return value
@@ -210,7 +210,7 @@ public class SpellIntegrationTests
         yield return null;
 
         // Store original health values before conjure
-        int sourceHealth = gameObject1.GetComponent<Ice>().health;
+        float sourceHealth = gameObject1.GetComponent<Ice>().health;
         var expectedCombinedHealth = gameObject2.GetComponent<Ice>().health + sourceHealth;
 
         // Conjure creates a new spell from gameObject1
