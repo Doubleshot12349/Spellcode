@@ -8,7 +8,7 @@ fn math_tag(left: Tag<Expression>, op: Tag<Op>, right: Tag<Expression>) -> Tag<E
 
 peg::parser! {
     pub grammar spellcode() for str {
-        rule _ = [' ' | '\n']*
+        rule _ = ([' ' | '\n'] / block_comment())*
 
         rule t<T>(x: rule<T>) -> Tag<T> = l:position!() v:x() r:position!() { Tag { item: v, loc: l..r } }
         rule t_v<T, V>(x: rule<T>, v: V) -> Tag<V> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
@@ -24,6 +24,12 @@ peg::parser! {
               v:$("-"? ['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
         rule bool() -> bool
             = "true" { true } / "false" { false }
+
+        rule block_comment() -> () 
+            = "/*" [_]* "*/"
+
+        rule line_comment() -> ()
+            = "//" [^'\n']* "\n"
 
         rule escape_sequence() -> char
             = r"\\" { '\\' } /
