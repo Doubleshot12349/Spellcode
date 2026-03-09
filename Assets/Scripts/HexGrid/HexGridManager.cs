@@ -31,12 +31,6 @@ public class HexGridManager : MonoBehaviour
         new HexCoords(0, +1),
     };
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake()
-    {
-        GenerateGrid();
-    }
-
     public void GenerateGrid()
     {
         float size = GetHexSizeFromPrefab();

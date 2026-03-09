@@ -10,9 +10,9 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
     public float MoveSpeed { get; set; }
      public GameObject Prefab { get; set; }
     public GameObject prefab;
-    public int Damage { get; set; }
-    private int currentDamage = 5;
-    public int health = 25;
+    public float Damage { get; set; }
+    private float currentDamage = 5;
+    public float health = 25;
     public bool blockDestroy = false;
     public string type = "Ice";
     public string Type
@@ -76,7 +76,7 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
         }
     }
 
-    public void TakeDamage(int damage, string sourceType)
+    public void TakeDamage(float damage, string sourceType)
     {
         if (sourceType == "Fire")
         {

@@ -13,9 +13,17 @@ public class TurnManager : MonoBehaviour
 {
     public TurnState currentTurn;
     public ActiveSpells activeSpells;
+    public HexGridManager hgm;
+    public LeyLineGen llg;
+    public PlayerMover player1;
+    public PlayerMover player2;
 
     public void Start()
     {
+        hgm.GenerateGrid();
+        player1.MoveToStartPos();
+        player2.MoveToStartPos();
+        llg.GenerateLeyLines();
         currentTurn = TurnState.Player1Turn;
     }
 

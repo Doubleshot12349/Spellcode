@@ -8,7 +8,7 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject prefab;
     public GameObject portal1;
     public GameObject portal2;
-    public int Damage { get; set; }
+    public float Damage { get; set; }
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public string type = "PortalHandler";

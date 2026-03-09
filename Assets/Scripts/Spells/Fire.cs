@@ -10,8 +10,8 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
      public GameObject prefab;
     public float moveSpeed;
     public float MoveSpeed { get; set; }
-    public int Damage { get; set; }
-    public int currentDamage = 10;
+    public float Damage { get; set; }
+    public float startDamage = 25;
     public string type = "Fire";
     public string Type
     {
@@ -21,8 +21,10 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         }
     }
     public GameObject LastPortal { get; set; }
-    
+
     public List<GameObject> path;
+    public GameObject leyLineMapObj;
+    LeyLineGen leyLineMap;
     [SerializeField] private float delayBetweenHexes =.2f;
     
     public void Awake()
@@ -30,9 +32,9 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         //read fields from inspector
         MoveSpeed = moveSpeed;
         Prefab = prefab;
-        Damage = currentDamage;
+        Damage = startDamage;
         path = new List<GameObject>();
-        Signals.Get<TeleportSignal>().AddListener(OnTeleport);
+        leyLineMap = leyLineMapObj.GetComponent<LeyLineGen>();
         
         // Disable collider initially to prevent collisions during instantiation/setup
         Collider2D col = GetComponent<Collider2D>();
@@ -61,14 +63,16 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 
     private IEnumerator ChainRoutine()
     {
+        HexTile prev = this.CurrentTile.GetComponent<HexTile>();
         for (int i = 0; i < path.Count; i++)
         {
+            
             GameObject target = path[i];
-
             // Move fire to hex
             transform.position = target.transform.position;
             CurrentTile = target;
-            ApplyLeyLineEffect(path[i]);
+            ApplyLeyLineEffect(prev, target.GetComponent<HexTile>());
+            prev = target.GetComponent<HexTile>();
 
             yield return new WaitForSeconds(delayBetweenHexes);
         }
@@ -76,7 +80,14 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         Destroy(this.gameObject);
     }
     
-    private void ApplyLeyLineEffect(GameObject hex){
+    private void ApplyLeyLineEffect(HexTile hexA,HexTile hexB)
+    {
+        LeyLineGen.LeyLine l = leyLineMap.GetLeyLine(hexA, hexB);
+        if (l == null) return;
+        float mod = l.weight;
+        Debug.Log($"The weight of the leyline {hexA},{hexB} is: {mod}");
+        this.Damage = Damage * (1f - mod / 100f);
+        Debug.Log($"Damage is: {this.Damage}");
         
     }
 
@@ -146,9 +157,4 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         }
         Debug.Log($"{gameObject} was teleported to {target}");
     }
-
-    private void OnDestroy()
-    {
-        Signals.Get<TeleportSignal>().RemoveListener(OnTeleport);
-    } 
 }

@@ -71,7 +71,7 @@ public class PlayerMover : MonoBehaviour
         isMoving = false;
     }
 
-    private void Start()
+    public void MoveToStartPos()
     {
         //AutoSnapToNearestTile();
         currentTile = HexGridManager.GetHex(startHexQ, startHexR).GetComponent<HexTile>();

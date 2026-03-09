@@ -12,12 +12,13 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject Prefab { get; set; }
     public GameObject prefab;
     public GameObject Player;
+    public LeyLineGen leyLineMap;
     
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public List<GameObject> path;
-    public int Damage { get; set; }
-    public int currentDamage;
+    public float Damage { get; set; }
+    public float currentDamage;
     public string type = "Lightning";
     public string Type
     {
@@ -63,7 +64,9 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 lightning.transform.SetParent(target.transform);
                 lightning.transform.position -= new Vector3(0.5f, 0, 0);
                 lightning.GetComponent<Animator>().speed = .25f;
-                ApplyLeyLineEffect(path[i]);
+                lightning.GetComponent<ISpell>().EnableCollider();
+                
+                ApplyLeyLineEffect(prev,target.GetComponent<HexTile>());
                 GetVectorAngle(initial, final, lightning.transform);
                 Destroy(lightning, .52f);
 
@@ -76,6 +79,8 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         Debug.Log("Chain complete");
         Destroy(this.gameObject);
     }
+
+    
     public void AddPath(int q, int r)
     {
         //Redefine the path for lightning to follow
@@ -139,8 +144,13 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         return;
     }
     
-    private void ApplyLeyLineEffect(GameObject hex){
-        
+    private void ApplyLeyLineEffect(HexTile hexA,HexTile hexB){
+        LeyLineGen.LeyLine l = leyLineMap.GetLeyLine(hexA, hexB);
+        if (l == null) return;
+        float mod = l.weight;
+        Debug.Log($"The weight of the leyline {hexA},{hexB} is: {mod}");
+        this.Damage = Damage * (1f - mod / 200f);
+        Debug.Log($"Damage is: {this.Damage}");
     }
     public void Awake()
     {
@@ -157,7 +167,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
             col.enabled = false;
         }
     }
-    
+
     public void EnableCollider()
     {
         Collider2D col = GetComponent<Collider2D>();
@@ -165,9 +175,13 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         {
             col.enabled = true;
         }
+
+    }
+    public void OnTriggerEnter2D(Collider2D col)
+    {
         if (col.gameObject.tag == "Player")
         {
-            col.gameObject.GetComponent<PlayerController>().health -= currentDamage;
+            col.gameObject.GetComponent<PlayerController>().health -= Damage;
         }
         //dissapate
     }

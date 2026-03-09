@@ -6,10 +6,10 @@ using deVoid.Utils; // IMPORTANT (new input system)
 
 public class PlayerController : MonoBehaviour
 {
-    public int health;
+    public float health;
     public int mana;
 
-    public int maxHealth = 100;
+    public float maxHealth = 100;
     public int maxMana = 50;
 
     public GameObject spell1;
