@@ -30,7 +30,7 @@ public class LeyLineGen : MonoBehaviour
             return false;
         }
         //Using a 2 element key where the order doesn't matter, have to check both combos
-        return leyLines.ContainsKey((tile2, tile1)) || leyLines.ContainsKey((tile1, tile2));
+        return leyLines.ContainsKey((tile1, tile2));
 
     }
     
@@ -42,7 +42,7 @@ public class LeyLineGen : MonoBehaviour
         }
         else
         {
-            return null;
+            return leyLines[(tile2,tile1)];;
         }
     }
 

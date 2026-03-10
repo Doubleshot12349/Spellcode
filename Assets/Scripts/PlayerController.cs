@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     {
         health = maxHealth;
         mana = maxMana;
+        
         selectedSpell = spell1;
     }
     public void OnDamage(int damage, GameObject source)

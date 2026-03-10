@@ -164,9 +164,4 @@ public class SysCallManager : MonoBehaviour
             
         return;
     }
-    
-    public Dictionary<(HexTile,HexTile),LeyLineGen.LeyLine> GetLeyLineMap()
-    {
-        return null; //LeyLineMap.leyLines;
-    }
 }
