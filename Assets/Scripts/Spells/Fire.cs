@@ -71,7 +71,14 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
             // Move fire to hex
             transform.position = target.transform.position;
             CurrentTile = target;
-            ApplyLeyLineEffect(prev, target.GetComponent<HexTile>());
+            try
+            {
+                ApplyLeyLineEffect(prev, target.GetComponent<HexTile>());
+            }
+            catch
+            {
+                Debug.Log("Error caught in fire Chain Routine");
+            }
             prev = target.GetComponent<HexTile>();
 
             yield return new WaitForSeconds(delayBetweenHexes);

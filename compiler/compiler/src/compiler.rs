@@ -136,7 +136,19 @@ impl Compiler {
                     return_type: Some(CompType::Array(Box::new(CompType::Int)))
                 },
                 definition: vec![Instruction::Syscall(Syscall::ClickLocation), Instruction::Set(2), Instruction::Return]
+            },
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "get_neighbors".to_owned(),
+                    args: vec![("q".to_owned(), CompType::Int), ("r".to_owned(), CompType::Int)],
+                    return_type: Some(CompType::Array(Box::new(CompType::Int)))
+                },
+                definition: vec![Instruction::Copy(3), Instruction::Copy(5), Instruction::Syscall(Syscall::GetNeighbors), Instruction::Set(2), Instruction::Return]
             }
+        // q, r, return value, return address
+        // q, r, return value, return address, r
+        // q, r, return value, return address, r, q
+        // q, r, return value, return address, value
         ];
         Compiler {
             stack: vec![],
@@ -498,7 +510,7 @@ impl Compiler {
                         return Err(CompErr { error: CompilerError::TypeMismatch, location: ret.loc.clone() });
                     }
                     let pos = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnValue)).unwrap();
-                    self.program.push(Instruction::Set(pos.0));
+                    self.program.push(Instruction::Set(pos.0 - 1));
                     self.stack.pop();
                 }
                 let num_pop = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).unwrap().0 - 1;

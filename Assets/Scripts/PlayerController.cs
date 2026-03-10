@@ -1,8 +1,11 @@
 using System.Runtime.Serialization;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
-using deVoid.Utils; // IMPORTANT (new input system)
+using UnityEngine.InputSystem;// IMPORTANT (new input system)
+using static LevelSelectionData;
+using static SpellSelectScript;
+using UnityEditor.PackageManager;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -29,6 +32,23 @@ public class PlayerController : MonoBehaviour
     {
         health = maxHealth;
         mana = maxMana;
+        var mySpells = TurnState.Player1Turn == myTurn ? player1Spells : player2Spells;
+        try
+        {
+            var s1 = spell1.GetComponent<StackMachine>();
+            s1.program = spells[mySpells[0]];
+            s1.Recompile();
+            var s2 = spell2.GetComponent<StackMachine>();
+            s2.program = spells[mySpells[1]];
+            s2.Recompile();
+            var s3 = spell3.GetComponent<StackMachine>();
+            s3.program = spells[mySpells[2]];
+            s3.Recompile();
+        }catch(Exception e)
+        {
+            Debug.Log("You probably are running this starting in HexSandbox scene, try switching to main menu before running the game" +
+            $"\n You can probably ignore this: {e}");
+        }
         selectedSpell = spell1;
     }
     public void OnDamage(int damage, GameObject source)

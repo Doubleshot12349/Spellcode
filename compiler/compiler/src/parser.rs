@@ -8,7 +8,7 @@ fn math_tag(left: Tag<Expression>, op: Tag<Op>, right: Tag<Expression>) -> Tag<E
 
 peg::parser! {
     pub grammar spellcode() for str {
-        rule _ = [' ' | '\n']*
+        rule _ = ([' ' | '\n'] / block_comment())*
 
         rule t<T>(x: rule<T>) -> Tag<T> = l:position!() v:x() r:position!() { Tag { item: v, loc: l..r } }
         rule t_v<T, V>(x: rule<T>, v: V) -> Tag<V> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
@@ -16,14 +16,20 @@ peg::parser! {
         rule integer() -> i32
             = "0x" v:$(['0'..='9' | 'a'..='f' | 'A'..='F']+) {? i32::from_str_radix(v, 16).or(Err("invalid hexadecimal int")) } /
               "0b" v:$(['0'..='1']+) {? i32::from_str_radix(v, 2).or(Err("invalid binary int")) } /
-              v:$("-"? ['0'..='9']+) {? v.parse().or(Err("invalid int")) }
+              v:$(['0'..='9']+) {? v.parse().or(Err("invalid int")) }
         rule double() -> f64
-            = v:$("-"? ['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? ['0'..='9']+ "." ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? ['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
+            = v:$(['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$("." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$(['0'..='9']+ "." ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$(['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
         rule bool() -> bool
             = "true" { true } / "false" { false }
+
+        rule block_comment() -> () 
+            = "/*" [_]* "*/"
+
+        rule line_comment() -> ()
+            = "//" [^'\n']* "\n"
 
         rule escape_sequence() -> char
             = r"\\" { '\\' } /
@@ -45,7 +51,9 @@ peg::parser! {
               "'" v:escape_sequence() "'" { v }
 
         rule literal_no_tag() -> Literal
-            = v:double() { Literal::DoubleL(v) } /
+            = "-" v:double() { Literal::DoubleL(-v) } /
+              v:double() { Literal::DoubleL(v) } /
+              "-" v:integer() { Literal::IntL(-v) } /
               v:integer() { Literal::IntL(v) } /
               v:bool() { Literal::BoolL(v) } /
               v:string() { Literal::StringL(v) } /
@@ -85,9 +93,9 @@ peg::parser! {
             x:(@) _ op:t_v(<"/">, Op::Divide) _ y:@ { math_tag(x, op, y) }
             x:(@) _ op:t_v(<"%">, Op::Mod) _ y:@ { math_tag(x, op, y) }
             --
-            v:t(<operation:t_v(<"!">, UnaryOp::BooleanNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
-            v:t(<operation:t_v(<"~">, UnaryOp::BitwiseNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
-            v:t(<operation:t_v(<"-">, UnaryOp::UnaryMinus) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
+            operation:t_v(<"!">, UnaryOp::BooleanNot) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
+            operation:t_v(<"~">, UnaryOp::BitwiseNot) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
+            //operation:t_v(<"-">, UnaryOp::UnaryMinus) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
             --
             v:t(<"(" _ v:expression() _ ")" { v }>) { Tag { item: v.item.item, loc: v.loc } }
             --
@@ -131,7 +139,7 @@ peg::parser! {
               "for" _ "(" _ init:statement()? _ ";" _ condition:expression() _ ";" _ increment:statement()? _ ")" _ block:block() { Statement::CFor { init: Box::new(init), condition, increment: Box::new(increment), block } } /
               "for" _ variable:ident() _ "in" _ array:expression() _ block:block() { Statement::ForEach { variable, array, block } } /
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
-              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
+              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
 
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
