@@ -25,3 +25,12 @@
     - Ensure your machine is running the targetted platform (You can use a VM if neccessary)
     - Select your platform from the list
     - Click build
+  
+# For Developers:
+  1. Install Unity hub and login/create an account
+  2. Clone the repositiory to it's own directory
+  3. In Unity Hub click "Add Project From Disk" and select the directory you cloned earlier
+  4. Open the project and follow the instructions to install the correct version of the editor
+  5. Download [6000.3.4f1] version in Unity Hub for the project
+  6. You may need to install Web,Mac,linux and/or Windows development support
+
