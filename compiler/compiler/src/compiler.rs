@@ -510,7 +510,7 @@ impl Compiler {
                         return Err(CompErr { error: CompilerError::TypeMismatch, location: ret.loc.clone() });
                     }
                     let pos = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnValue)).unwrap();
-                    self.program.push(Instruction::Set(pos.0));
+                    self.program.push(Instruction::Set(pos.0 - 1));
                     self.stack.pop();
                 }
                 let num_pop = self.find_stack_item(|x| matches!(x.0, CompStackI::ReturnAddress)).unwrap().0 - 1;
