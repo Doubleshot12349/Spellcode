@@ -11,6 +11,7 @@ public class StackMachine: MonoBehaviour {
     public SysCallManager manager;
     public bool halted = false;
     public string program;
+    public LeyLineGen leyLineMap;
 
     public void Start()
     {
@@ -141,7 +142,12 @@ public class StackMachine: MonoBehaviour {
                     {
                         neighbors.Add(q3 + dir.q);
                         neighbors.Add(r3 + dir.r);
-                        neighbors.Add(Mathf.RoundToInt(transform.GetComponentInChildren<Fire>().leyLineMapObj.GetComponent<LeyLineGen>().GetLeyLine(initHex, neighborHex).weight));
+                        //Debug.Log(transform);
+                        //Debug.Log(transform.GetComponentInChildren<Fire>());
+                        //Debug.Log(transform.GetComponentInChildren<Fire>().leyLineMapObj);
+                        //Debug.Log(transform.GetComponentInChildren<Fire>().leyLineMapObj.GetComponent<LeyLineGen>());
+                        //Debug.Log(transform.GetComponentInChildren<Fire>().leyLineMapObj.GetComponent<LeyLineGen>().GetLeyLine(initHex, neighborHex));
+                        neighbors.Add(Mathf.RoundToInt(leyLineMap.GetLeyLine(initHex, neighborHex).weight));
                     }
                 }
 
