@@ -16,12 +16,12 @@ peg::parser! {
         rule integer() -> i32
             = "0x" v:$(['0'..='9' | 'a'..='f' | 'A'..='F']+) {? i32::from_str_radix(v, 16).or(Err("invalid hexadecimal int")) } /
               "0b" v:$(['0'..='1']+) {? i32::from_str_radix(v, 2).or(Err("invalid binary int")) } /
-              v:$("-"? ['0'..='9']+) {? v.parse().or(Err("invalid int")) }
+              v:$(['0'..='9']+) {? v.parse().or(Err("invalid int")) }
         rule double() -> f64
-            = v:$("-"? ['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? ['0'..='9']+ "." ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
-              v:$("-"? ['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
+            = v:$(['0'..='9']+ "." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$("." ['0'..='9']+ ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$(['0'..='9']+ "." ("e" ['0'..='9']+)?) {? v.parse().or(Err("invalid float")) } /
+              v:$(['0'..='9']+ "e" ['0'..='9']+) {? v.parse().or(Err("invalid float")) }
         rule bool() -> bool
             = "true" { true } / "false" { false }
 
@@ -51,7 +51,9 @@ peg::parser! {
               "'" v:escape_sequence() "'" { v }
 
         rule literal_no_tag() -> Literal
-            = v:double() { Literal::DoubleL(v) } /
+            = "-" v:double() { Literal::DoubleL(-v) } /
+              v:double() { Literal::DoubleL(v) } /
+              "-" v:integer() { Literal::IntL(-v) } /
               v:integer() { Literal::IntL(v) } /
               v:bool() { Literal::BoolL(v) } /
               v:string() { Literal::StringL(v) } /
@@ -91,9 +93,9 @@ peg::parser! {
             x:(@) _ op:t_v(<"/">, Op::Divide) _ y:@ { math_tag(x, op, y) }
             x:(@) _ op:t_v(<"%">, Op::Mod) _ y:@ { math_tag(x, op, y) }
             --
-            v:t(<operation:t_v(<"!">, UnaryOp::BooleanNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
-            v:t(<operation:t_v(<"~">, UnaryOp::BitwiseNot) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
-            v:t(<operation:t_v(<"-">, UnaryOp::UnaryMinus) _ value:expression() { Expression::UnaryOperation(operation, Box::new(value)) }>) { v }
+            operation:t_v(<"!">, UnaryOp::BooleanNot) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
+            operation:t_v(<"~">, UnaryOp::BitwiseNot) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
+            //operation:t_v(<"-">, UnaryOp::UnaryMinus) _ value:@ { let loc = operation.loc.start..value.loc.end; Tag::new(Expression::UnaryOperation(operation, Box::new(value)), loc) }
             --
             v:t(<"(" _ v:expression() _ ")" { v }>) { Tag { item: v.item.item, loc: v.loc } }
             --
