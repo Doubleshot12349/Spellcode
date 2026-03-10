@@ -9,40 +9,36 @@ use crate::{compiler::Compiler, stack_machine::VM};
 #[allow(unused)]
 fn main() {
     let inp = r#"
-        println("Hello, world!")
-
-fun bubble_sort(array: int[]) {
-    var swapped = true
-
-    while (true) {
-        swapped = false
-        for (var i = 1; i < array.size; i = i + 1) {
-            if array[i - 1] > array[i] {
-                var temp = array[i]
-                array[i] = array[i - 1]
-                array[i - 1] = temp
-                swapped = true
+    fun neighbors2(q: int, r: int) -> int[][] {
+        var n = new int[18]
+        n[0] = 5;
+        n[1] = 6;
+        n[2] = 7;
+        var count = 0
+        for (var i = 0; i < 6; i = i + 1) {
+            if n[i * 3] != 1234 {
+                count = count + 1;
             }
         }
-        if !swapped {
-            return
+        var out = new int[][count]
+        for (var i = 0; i < count; i = i + 1) {
+            out[i] = new int[3]
+            out[i][0] = n[i * 3]
+            out[i][1] = n[i * 3 + 1]
+            out[i][2] = n[i * 3 + 2]
         }
+        return out
     }
-}
 
-var inp = new int[5];
-inp[0] = 38;
-inp[1] = 8;
-inp[2] = 3;
-inp[3] = 23;
-inp[4] = 9;
-bubble_sort(inp)
-
-    for item in inp {
-    print(item)
-    print(", ")
+    var out = neighbors2(1, 2)
+    for item in out {
+        print(item[0])
+        print(", ")
+        print(item[1])
+        print(", ")
+        print(item[2])
+        println()
     }
-    println()
     "#;
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
