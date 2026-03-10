@@ -5,13 +5,16 @@ public class MainMenuUI : MonoBehaviour
 
     public GameObject mainPanel;
     public GameObject levelSelectPanel;
+    public GameObject spellSelectPanel;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (mainPanel != null) mainPanel.SetActive(true);
         if (levelSelectPanel != null) levelSelectPanel.SetActive(false);
+        if (spellSelectPanel != null) spellSelectPanel.SetActive(false);
     }
+
 
     public void OpenLevelSelect()
     {
@@ -19,15 +22,15 @@ public class MainMenuUI : MonoBehaviour
         if (levelSelectPanel != null) levelSelectPanel.SetActive(true);
     }
 
+    public void OpenSpellSelect()
+    {
+        if (levelSelectPanel != null) levelSelectPanel.SetActive(false);
+        if (spellSelectPanel != null) spellSelectPanel.SetActive(true);
+    }
+
     public void BackToMain()
     {
         if (mainPanel != null) mainPanel.SetActive(true);
         if (levelSelectPanel != null) levelSelectPanel.SetActive(false);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
