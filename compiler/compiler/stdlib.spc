@@ -9,6 +9,10 @@ fun print(inp: string) {
 }
 
 fun print(inp: int) {
+    if inp == 0 {
+        putc('0')
+        return
+    }
     var out = new char[16];
     var v = inp;
     if inp < 0 {
