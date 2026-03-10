@@ -63,7 +63,6 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    private void OnTeleport(GameObject target)
     public void OnTeleport(GameObject target)
     {
         //handle teleport
