@@ -156,8 +156,12 @@ public class SysCallManager : MonoBehaviour
     public void Print(char c)
     {
         message += c;
-        if(c=='\n')
+        if (c == '\n')
+        {
             Debug.Log(message);
+            message = "";
+        }
+            
         return;
     }
     
