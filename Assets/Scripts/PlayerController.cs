@@ -1,11 +1,13 @@
 using System.Runtime.Serialization;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;// IMPORTANT (new input system)
 using static LevelSelectionData;
 using static SpellSelectScript;
 using UnityEditor.PackageManager;
 using System;
+using SpeechBubble;
 
 public class PlayerController : MonoBehaviour
 {
@@ -21,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public GameObject selectedSpell;
     public TurnManager turnManager;
     public HexTile selectedHex;
+    public GameObject speechBubble;
     public bool hasCastSpell = false;
     public bool hasMoved;
     public TurnState myTurn;
@@ -32,6 +35,7 @@ public class PlayerController : MonoBehaviour
     {
         health = maxHealth;
         mana = maxMana;
+        speechBubble.SetActive(false);
         var mySpells = TurnState.Player1Turn == myTurn ? player1Spells : player2Spells;
         try
         {
@@ -152,6 +156,14 @@ public class PlayerController : MonoBehaviour
             turnManager.EndTurn();
         }
 
+    }
+
+    public IEnumerator OnSpellMessage(string message)
+    {
+        speechBubble.SetActive(true);
+        speechBubble.GetComponent<SpeechBubble_TMP>().setDialogueText(message);
+        yield return new WaitForSecondsRealtime(30);
+        speechBubble.SetActive(false);
     }
         
     
