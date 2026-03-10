@@ -5,10 +5,14 @@ using UnityEngine.SceneManagement;
 public class SpellSelectScript : MonoBehaviour
 {
     public static Dictionary<string, string> spells;
-    private string fireBallProgram;
-    private string lightningProgram;
-    private string iceSpikeProgram;
-    private string portalsProgram;
+    private string fireBallProgram =
+        "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
+    private string lightningProgram =
+        "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(1);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
+    private string iceSpikeProgram =
+        "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
+    private string portalsProgram =
+        "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(3);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()

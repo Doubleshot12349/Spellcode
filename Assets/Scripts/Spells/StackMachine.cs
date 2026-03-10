@@ -101,9 +101,9 @@ public class StackMachine: MonoBehaviour {
                 return SyscallResult.SleepTurn;
             case 7:
                 //print ascii character
-                //manager.Print(Convert.ToString(VM.Pop()));
-                Compiler.pop_int(id, out int r1);
-                Debug.Log($"printed char {(char) r1}");
+                
+                Compiler.pop_int(id, out int c1);
+                manager.Print((char)c1);
                 return SyscallResult.Nothing;
             case 8:
                 // halt
