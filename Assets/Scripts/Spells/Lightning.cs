@@ -65,10 +65,17 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 lightning.transform.position -= new Vector3(0.5f, 0, 0);
                 lightning.GetComponent<Animator>().speed = .25f;
                 lightning.GetComponent<ISpell>().EnableCollider();
-                
-                ApplyLeyLineEffect(prev,target.GetComponent<HexTile>());
-                GetVectorAngle(initial, final, lightning.transform);
-                Destroy(lightning, .52f);
+
+                try
+                {
+                    ApplyLeyLineEffect(prev, target.GetComponent<HexTile>());
+                }
+                catch
+                {
+                    Debug.Log("Error caught in lightning Chain routine");
+                }
+                    GetVectorAngle(initial, final, lightning.transform);
+                    Destroy(lightning, .52f);
 
 
                 yield return new WaitForSeconds(delayBetweenJumps);

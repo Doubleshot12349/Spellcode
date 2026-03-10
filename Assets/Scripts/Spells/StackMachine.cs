@@ -20,6 +20,10 @@ public class StackMachine: MonoBehaviour {
 
     public void Awake()
     {
+        Recompile();
+    }
+    public void Recompile()
+    {
         Compiler.compile(program, out CompileResult res);
         id = res.id;
         Debug.Log(res.error);

@@ -2849,7 +2849,6 @@ GameObject:
   - component: {fileID: 741308785}
   - component: {fileID: 741308787}
   - component: {fileID: 741308786}
-  - component: {fileID: 741308788}
   m_Layer: 5
   m_Name: MainPanel
   m_TagString: Untagged
@@ -2869,12 +2868,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1950472134}
   - {fileID: 1215804195}
   - {fileID: 1461973368}
   - {fileID: 627987853}
   - {fileID: 1501778251}
   - {fileID: 490002249}
+  - {fileID: 282342401}
   m_Father: {fileID: 1334142759}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5658,6 +5657,7 @@ RectTransform:
   m_Children:
   - {fileID: 534855658}
   - {fileID: 18089952}
+  - {fileID: 741308785}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

@@ -362,6 +362,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -20}
   m_SizeDelta: {x: 300, y: 60}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!1 &325903575 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7691847877710592199, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+  m_PrefabInstance: {fileID: 876377096}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &336334925
 GameObject:
   m_ObjectHideFlags: 0
@@ -1863,6 +1868,14 @@ PrefabInstance:
         = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1],
         effect);    } }
       objectReference: {fileID: 0}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: spell3
+      value: 
+      objectReference: {fileID: 325903575}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
@@ -1965,6 +1978,10 @@ PrefabInstance:
         = spawn_effect(1);     if effect != -1 {         move_effect(pos[0], pos[1],
         effect);    } }
       objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 6296382788895776571, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -2019,6 +2036,10 @@ PrefabInstance:
         = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1],
         effect);    } }
       objectReference: {fileID: 0}
+    - target: {fileID: 8055094156429561027, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 8130260817162401725, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -2054,6 +2075,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 3819756855849620775, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+    - {fileID: 8924585275697266464, guid: a2479e5932210884db23043d7e9698bc, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 38912410800217675, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       insertIndex: -1
@@ -13492,6 +13514,10 @@ PrefabInstance:
         = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1],
         effect);    } }
       objectReference: {fileID: 0}
+    - target: {fileID: 1361971493540928133, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: myTurn
       value: 0
@@ -13606,6 +13632,10 @@ PrefabInstance:
         = spawn_effect(1);     if effect != -1 {         move_effect(pos[0], pos[1],
         effect);    } }
       objectReference: {fileID: 0}
+    - target: {fileID: 6196671334872571067, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 6296382788895776571, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: m_Layer
       value: 2
@@ -13684,7 +13714,8 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8924585275697266464, guid: a2479e5932210884db23043d7e9698bc, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 38912410800217675, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       insertIndex: -1
