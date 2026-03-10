@@ -3,42 +3,42 @@ using UnityEngine.SceneManagement;
 
 public class LevelSelectMenu : MonoBehaviour
 {
-    public string gameplaySceneName = "HexSandbox";
+    
 
     public void LoadGrassLevel()
     {
         LevelSelectionData.selectedLevel = "Grass";
-        SceneManager.LoadScene(gameplaySceneName);
+        
     }
 
     public void LoadIceLevel()
     {
         LevelSelectionData.selectedLevel = "Ice";
-        SceneManager.LoadScene(gameplaySceneName);
+        
     }
 
     public void LoadRockLevel()
     {
         LevelSelectionData.selectedLevel = "Rock";
-        SceneManager.LoadScene(gameplaySceneName);
+        
     }
 
     public void LoadFireLevel()
     {
         LevelSelectionData.selectedLevel = "Fire";
-        SceneManager.LoadScene(gameplaySceneName);
+        
     }
 
     public void LoadWaterLevel()
     {
         LevelSelectionData.selectedLevel = "Water";
-        SceneManager.LoadScene(gameplaySceneName);
+
     }
 
     public void LoadSkyLevel()
     {
         LevelSelectionData.selectedLevel = "Sky";
-        SceneManager.LoadScene(gameplaySceneName);
+
     }
 
     public void BackToMainMenu()
