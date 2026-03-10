@@ -5,7 +5,6 @@ using static SpellSelectScript;
 public class SaveHandler : MonoBehaviour
 {
     public TMP_Text spellText;
-    public string compiledSpell;
     public TMP_Text spellName;
     public void Awake()
     {
@@ -16,17 +15,13 @@ public class SaveHandler : MonoBehaviour
     }
     public void OnSave()
     {
-        if (compiledSpell == null)
-        {
-            OnCompile();
-        }
         if (spells.ContainsKey(spellName.text))
         {
-            spells[spellName.text] = compiledSpell;
+            spells[spellName.text] = spellText.text;
         }
         else
         {
-            spells.Add(spellName.text, compiledSpell);
+            spells.Add(spellName.text, spellText.text);
         }
         
     }

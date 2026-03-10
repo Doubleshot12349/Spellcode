@@ -159,6 +159,7 @@ public class SysCallManager : MonoBehaviour
         if (c == '\n')
         {
             Debug.Log(message);
+            StartCoroutine(player.GetComponent<PlayerController>().OnSpellMessage(message));
             message = "";
         }
             
