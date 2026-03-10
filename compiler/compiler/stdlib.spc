@@ -47,7 +47,7 @@ fun println(inp: int) {
 }
 
 fun neighbors(q: int, r: int) -> int[][] {
-    var n = get_neighbors()
+    var n = get_neighbors(q, r)
     var count = 0
     for (var i = 0; i < 6; i = i + 1) {
         if n[i * 3] != 1234 {
@@ -61,5 +61,6 @@ fun neighbors(q: int, r: int) -> int[][] {
         out[i][1] = n[i * 3 + 1]
         out[i][2] = n[i * 3 + 2]
     }
+    return out
 }
 

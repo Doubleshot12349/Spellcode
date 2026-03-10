@@ -139,7 +139,7 @@ peg::parser! {
               "for" _ "(" _ init:statement()? _ ";" _ condition:expression() _ ";" _ increment:statement()? _ ")" _ block:block() { Statement::CFor { init: Box::new(init), condition, increment: Box::new(increment), block } } /
               "for" _ variable:ident() _ "in" _ array:expression() _ block:block() { Statement::ForEach { variable, array, block } } /
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
-              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** "," _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
+              "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
 
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
