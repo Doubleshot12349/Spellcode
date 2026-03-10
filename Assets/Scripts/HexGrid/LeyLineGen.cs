@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class LeyLineGen : MonoBehaviour
 {
     public GameObject hexGrid;
@@ -23,7 +24,8 @@ public class LeyLineGen : MonoBehaviour
 
     public bool LeyLineExists(HexTile tile1, HexTile tile2)
     {
-        if (leyLines.Count==0) {
+        if (leyLines.Count == 0)
+        {
             Debug.Log("LeyLines have not been generated yet");
             return false;
         }
