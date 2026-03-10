@@ -83,17 +83,17 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1795759623
   m_SortingLayer: 2
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2983090718515566234, guid: 9167a66c6942df446a55a5bda3fcfdb1, type: 3}
-  m_Color: {r: 0.9622642, g: 0.9273283, b: 0.08533281, a: 1}
+  m_Sprite: {fileID: -2983090718515566234, guid: b4b72ca9ac9b2e644ad619b0d092f630, type: 3}
+  m_Color: {r: 0.08627448, g: 0.92311347, b: 0.9607843, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.22, y: 0.17}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!61 &8323822587229226003
 BoxCollider2D:
@@ -134,7 +134,7 @@ BoxCollider2D:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 0.22, y: 0.17}
-    newSize: {x: 1, y: 1}
+    newSize: {x: 0.22, y: 0.17}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -156,6 +156,7 @@ MonoBehaviour:
   delayBetweenJumps: 0.15
   prefab: {fileID: 7511312124083700531}
   Player: {fileID: 0}
+  leyLineMap: {fileID: 0}
   moveSpeed: 8
   path: []
   currentDamage: 10
