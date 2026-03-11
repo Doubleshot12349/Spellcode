@@ -762,7 +762,9 @@ impl Compiler {
                     args: args.iter().map(|x| self.get_type(x)).collect::<Result<Vec<_>, _>>()?
                 };
                 let Some(found) = self.functions.iter().find(|x| FunctionSignature::from(*x) == signature)
-                    else { return Err(CompErr { error: CompilerError::FunctionNotFound, location: name.loc.clone() }) };
+                    else {
+                        println!("looking for signature {signature:?} {args:?}");
+                        return Err(CompErr { error: CompilerError::FunctionNotFound, location: name.loc.clone() }) };
                 let found = found.clone();
                 if found.args.len() != args.len() {
                     return Err(CompErr { error: CompilerError::WrongNumberOfArguments, location: name.loc.clone() })
