@@ -144,11 +144,15 @@ impl Compiler {
                     return_type: Some(CompType::Array(Box::new(CompType::Int)))
                 },
                 definition: vec![Instruction::Copy(3), Instruction::Copy(5), Instruction::Syscall(Syscall::GetNeighbors), Instruction::Set(2), Instruction::Return]
-            }
-        // q, r, return value, return address
-        // q, r, return value, return address, r
-        // q, r, return value, return address, r, q
-        // q, r, return value, return address, value
+            },
+            RawFunction {
+                func: DeclaredFunction {
+                    name: "get_player_location".to_owned(),
+                    args: vec![],
+                    return_type: Some(CompType::Array(Box::new(CompType::Int)))
+                },
+                definition: vec![Instruction::Syscall(Syscall::PlayerLocation), Instruction::Set(2), Instruction::Return]
+            },
         ];
         Compiler {
             stack: vec![],
