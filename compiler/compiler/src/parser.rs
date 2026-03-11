@@ -8,7 +8,7 @@ fn math_tag(left: Tag<Expression>, op: Tag<Op>, right: Tag<Expression>) -> Tag<E
 
 peg::parser! {
     pub grammar spellcode() for str {
-        rule _ = ([' ' | '\n'] / block_comment())*
+        rule _ = ([' ' | '\n' | '\r' | '\u{200b}'] / block_comment())*
 
         rule t<T>(x: rule<T>) -> Tag<T> = l:position!() v:x() r:position!() { Tag { item: v, loc: l..r } }
         rule t_v<T, V>(x: rule<T>, v: V) -> Tag<V> = l:position!() x() r:position!() { Tag { item: v, loc: l..r } }
