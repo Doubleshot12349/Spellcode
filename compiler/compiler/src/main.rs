@@ -10,112 +10,119 @@ use crate::{compiler::{CompErr, Compiler}, stack_machine::{ExecutionException, S
 
 #[allow(unused)]
 fn main() {
-    /*
     let inp = r#"
-println("a");
-var start = new int[3]
-start[0] = 1
-start[1] = 2
-start[2] = 1
-println("b");
-var end = new int[2];
-end[0] = 1
-end[1] = 4
-println("c");
-var path = djikstrasAlgo(start,end)
-var fireball = spawn_effect(0)
-for edge in path {
-    move_effect(edge[0], edge[1], fireball)
-}
-
-fun djikstrasAlgo(start: int[] ,end: int[]) -> int[][] {
-    println("in dijkstra's");
-    var heap = new int[][100]
-    println("heap created");
-    for (var i = 0; i < 100; i = i + 1) {
-        heap[i] = new int[3]
-    }
-    println("heap populated");
-
-    var result = new int[][100]
-    for (var i = 0; i < 100; i = i + 1) {
-        result[i] = new int[3]
-        result[i][2] = 10000
-    }
-    println("result populated");
-
-    println("inserting");
-    binHeapInsert(heap,start)
-    println("going into loop");
-    while heap.size > 0 {
-        println("calling binheapextract");
-        var e = binHeapExtract(heap)
-        print("getting neighbors, e[0] = ");
-        print(e[0]);
-        print(", e[1] = ");
-        println(e[1]);
-        var nArr = neighbors(e[0] , e[1])
-        var l = result.size
-        print("got ")
-        print(result.size)
-        println(" neighbors")
-        result[l - 1] = e
-        for n in nArr {
-            binHeapInsert(heap,n)
+        struct Node {
+            q: int,
+            r: int,
+            priority: int
         }
-    }
-    return result
-}
 
-fun binHeapExtract(heap: int[][]) -> int[] {
-    var res = heap[0]
-    binHeapBubbleUp(heap, 0)
-    return res
-}
-
-fun binHeapInsert(heap: int[][], element: int[]) {
-    var i = heap.size - 1
-    heap[i] = element
-    binHeapBubbleDown(heap, i)
-}
-
-fun binHeapBubbleDown(heap: int[][], i: int) {
-    var k = (i / 2) - 1
-    if k >= 0 {
-        if heap[i][2] < heap[k][2] {
-            var temp = heap[i]
-            heap[i] = heap[k]
-            heap[k] = temp
-            binHeapBubbleDown(heap, k)
+        struct MinHeap {
+            items: Node[],
+            size: int
         }
-    }
-}
 
-fun binHeapBubbleUp(heap: int[][] , i: int){
-    var k = i + 1
-    k = k * 2
-    if heap[k][2] < heap[i][2] {
-        var temp = heap[i]
-        heap[i] = heap[k]
-        heap[k] = temp
-        binHeapBubbleUp(heap, k)
-    }
-}
+        println("a");
+        var start = new Node
+        start.q = 1
+        start.r = 2
+        start.priority = 1
 
+        println("b");
+        var end = new Node;
+        end.q = 1
+        end.r = 4
+
+        println("c");
+        var path = djikstrasAlgo(start, end)
+        var fireball = spawn_effect(0)
+        for edge in path {
+            move_effect(edge.q, edge.r, fireball)
+        }
+
+        fun heapCreate(capacity: int) -> MinHeap {
+            var out = new MinHeap
+            out.items = new Node[capacity]
+            out.size = 0
+        }
+
+        fun djikstrasAlgo(start: Node, end: Node) -> Node[] {
+            println("in dijkstra's");
+            var heap = heapCreate(100)
+            println("heap created");
+
+            var result = new Node[100]
+            println("result created");
+
+            println("inserting");
+            binHeapInsert(heap, start)
+            println("going into loop");
+            while heap.size > 0 {
+                println("calling binheapextract");
+                var e = binHeapExtract(heap)
+                print("getting neighbors, eq = ");
+                print(e.q);
+                print(", er = ");
+                println(e.r);
+                var nArr = neighbors(e.q, e.r)
+                var l = result.size
+                print("got ")
+                print(result.size)
+                println(" neighbors")
+                result[l - 1] = e
+                for n in nArr {
+                    var value = new Node;
+                    value.q = n[0]
+                    value.r = n[1]
+                    value.priority = n[2]
+                    binHeapInsert(heap, value)
+                }
+            }
+            return result
+        }
+
+        fun binHeapExtract(heap: MinHeap) -> Node {
+            var res = heap.items[0]
+            binHeapBubbleUp(heap, 0)
+            return res
+        }
+
+        fun binHeapInsert(heap: MinHeap, element: Node) {
+            println("getting size");
+            var i = heap.size - 1
+            print("i = ");
+            println(i);
+            println("setting item");
+            heap.items[i] = element
+            println("done");
+            println("bubble down");
+            binHeapBubbleDown(heap, i)
+        }
+
+        fun binHeapBubbleDown(heap: MinHeap, i: int) {
+            var k = (i / 2) - 1
+            if k >= 0 {
+                if heap.items[i].priority < heap.items[k].priority {
+                    var temp = heap.items[i]
+                    heap.items[i] = heap.items[k]
+                    heap.items[k] = temp
+                    binHeapBubbleDown(heap, k)
+                }
+            }
+        }
+
+        fun binHeapBubbleUp(heap: MinHeap, i: int) {
+            var k = i + 1
+            k = k * 2
+            if heap.items[k].priority < heap.items[i].priority {
+                var temp = heap.items[i]
+                heap.items[i] = heap.items[k]
+                heap.items[k] = temp
+                binHeapBubbleUp(heap, k)
+            }
+        }
     "#;
-    */
-    let inp = r#"
-    struct List {
-        buffer: int[],
-        size: int
-    }
 
-    var l = new List;
-    println(l.size);
-    l.size = 10;
-    println(l.size);
-
-    "#;
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
     let v = match compiler.compile_program(&parsed) {
