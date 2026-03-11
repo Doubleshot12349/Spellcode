@@ -26,13 +26,13 @@ namespace Spellcode.UI
             new Regex("\"([^\"\\\\]|\\\\.)*\"", RegexOptions.Compiled);
 
         private static readonly Regex FunctionDeclaration =
-            new Regex(@"\bFUN\s+([A-Za-z_][A-Za-z0-9_]*)", RegexOptions.Compiled);
+            new Regex(@"\bfun\s+([A-Za-z_][A-Za-z0-9_]*)", RegexOptions.Compiled);
 
         private static readonly Regex Keywords =
-            new Regex(@"\b(VAR|IF|ELSE|FOR|IN|WHILE|RETURN|FUN|DEFINE)\b", RegexOptions.Compiled);
+            new Regex(@"\b(VAR|var|IF|if|ELSE|else|FOR|for|IN|in|WHILE|while|RETURN|return|fun|DEFINE|define)\b", RegexOptions.Compiled);
 
         private static readonly Regex Types =
-            new Regex(@"\b(INT|DOUBLE|BOOL|CHAR|STRING|VOID)\b", RegexOptions.Compiled);
+            new Regex(@"\b(INT|int|DOUBLE|double|BOOL|bool|CHAR|char|STRING|string|VOID|void)\b", RegexOptions.Compiled);
 
         private static readonly Regex Booleans =
             new Regex(@"\b(TRUE|FALSE|true|false)\b", RegexOptions.Compiled);
@@ -101,7 +101,7 @@ namespace Spellcode.UI
             // Protect things that would otherwise be recolored later.
             code = FunctionDeclaration.Replace(code, m =>
                 Store(localProtected,
-                    $"{Wrap("FUN", KeywordColor)} {Wrap(m.Groups[1].Value, FunctionColor)}",
+                    $"{Wrap("fun", KeywordColor)} {Wrap(m.Groups[1].Value, FunctionColor)}",
                     "L"));
 
             code = Members.Replace(code, m =>
