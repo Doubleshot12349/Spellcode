@@ -232,7 +232,7 @@ pub extern "C" fn compile(program: *const i8, output: *mut CompileResult) {
     let parsed = match parser::spellcode::program(&inp) {
         Ok(v) => v,
         Err(e) => {
-            let error = CString::new(format!("{e:?}")).unwrap();
+            let error = CString::new(format!("parser error = {e:?}, inp = \"{inp}\" = {:?} = {:?}", inp.chars().collect::<Vec<_>>(), inp.chars().map(|x| format!("{:02x}", u32::from(x))).collect::<Vec<_>>())).unwrap();
             res.error = error.into_raw();
             return;
         }
