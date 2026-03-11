@@ -10,6 +10,7 @@ use crate::{compiler::{CompErr, Compiler}, stack_machine::{ExecutionException, S
 
 #[allow(unused)]
 fn main() {
+    /*
     let inp = r#"
 println("a");
 var start = new int[3]
@@ -100,6 +101,19 @@ fun binHeapBubbleUp(heap: int[][] , i: int){
         binHeapBubbleUp(heap, k)
     }
 }
+
+    "#;
+    */
+    let inp = r#"
+    struct List {
+        buffer: int[],
+        size: int
+    }
+
+    var l = new List;
+    println(l.size);
+    l.size = 10;
+    println(l.size);
 
     "#;
     let parsed = parser::spellcode::program(inp).unwrap();

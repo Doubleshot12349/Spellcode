@@ -18,7 +18,7 @@ pub enum Syscall {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tpe {
-    Int, Double, Array(Box<Tpe>)
+    Int, Double, Array(Box<Tpe>), Struct(Vec<Tpe>)
 }
 
 #[derive(Debug, Clone)]
@@ -46,7 +46,10 @@ pub enum Instruction {
     Syscall(Syscall),
 
     AllocA(Tpe),
-    GetA, SetA, LenA
+    GetA, SetA, LenA,
+
+    AllocS(Tpe),
+    GetS(usize), SetS(usize)
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -274,17 +277,7 @@ impl VM {
                 self.next_heap_addr += 1;
                 let mut item = vec![];
                 for _ in 0..size {
-                    let it = match t {
-                        Tpe::Int => StackItem::Int(0),
-                        Tpe::Double => StackItem::Double(0.0),
-                        Tpe::Array(ref v) => {
-                            let h = self.next_heap_addr;
-                            self.next_heap_addr += 1;
-                            self.heap.insert(h, HeapItem { value: vec![], mark: false, tpe: *v.clone() });
-                            StackItem::Array(*v.clone(), h)
-                        }
-                    };
-                    item.push(it);
+                    item.push(self.alloc(&tpe));
                 }
                 self.heap.insert(id, HeapItem { value: item, mark: false, tpe: t.clone() });
                 self.stack.push(StackItem::Array(t, id))
@@ -326,10 +319,58 @@ impl VM {
                     _ => return Err(ExecutionException::WrongType)
                 }
             }
+            Instruction::AllocS(tpe) => {
+                let Tpe::Struct(_) = tpe else {
+                    return Err(ExecutionException::WrongType)
+                };
+                let item = self.alloc(&tpe);
+                self.stack.push(item);
+            }
+            Instruction::GetS(idx) => {
+                let StackItem::Array(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                    return Err(ExecutionException::WrongType)
+                };
+                let item = self.heap[&id].value[*idx].clone();
+                self.stack.push(item);
+            }
+            Instruction::SetS(idx) => {
+                let StackItem::Array(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                    return Err(ExecutionException::WrongType)
+                };
+                let value = self.pop().unwrap();
+                let item = self.heap.get_mut(&id).unwrap();
+                item.value[*idx] = value;
+            }
         }
 
         self.program_counter = next_addr;
         Ok(())
+    }
+
+    fn push_heap_item(&mut self, item: HeapItem) -> usize {
+        let id = self.next_heap_addr;
+        self.next_heap_addr += 1;
+        self.heap.insert(id, item);
+        id
+    }
+
+    fn alloc(&mut self, tpe: &Tpe) -> StackItem {
+        match tpe {
+            Tpe::Int => StackItem::Int(0),
+            Tpe::Double => StackItem::Double(0.0),
+            Tpe::Array(inner) => {
+                let id = self.push_heap_item(HeapItem { value: vec![], mark: false, tpe: *inner.clone() });
+                StackItem::Array(*inner.clone(), id)
+            }
+            Tpe::Struct(tpes) => {
+                let mut value = vec![];
+                for t in tpes {
+                    value.push(self.alloc(t))
+                }
+                let id = self.push_heap_item(HeapItem { value, mark: false, tpe: tpe.clone() });
+                StackItem::Array(tpe.clone(), id)
+            }
+        }
     }
 
     fn garbage_collect(&mut self) {

@@ -9,7 +9,14 @@ pub struct Compiler {
     function_calls: Vec<FunctionCallToFix>,
     current_function: Option<DeclaredFunction>,
     predefined: Vec<RawFunction>,
-    function_addresses: HashMap<FunctionSignature, usize>
+    function_addresses: HashMap<FunctionSignature, usize>,
+    structs: Vec<CompStruct>
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct CompStruct {
+    name: String,
+    fields: Vec<(String, CompType)>
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -20,7 +27,8 @@ pub enum CompType {
     Bool,
     String,
     Array(Box<CompType>),
-    Void
+    Void,
+    Struct(CompStruct)
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +49,8 @@ pub enum CompilerError {
     NotInFunction,
     FunctionNotFound,
     WrongNumberOfArguments,
-    PropertyNotFound
+    PropertyNotFound,
+    TypeNotFound
 }
 #[allow(unused)]
 #[derive(Debug)]
@@ -80,19 +89,20 @@ impl From<&DeclaredFunction> for FunctionSignature {
     }
 }
 
-impl From<&CompType> for Tpe {
-    fn from(value: &CompType) -> Self {
-        match value {
-            CompType::Int => Tpe::Int,
-            CompType::Double => Tpe::Double,
-            CompType::Char => Tpe::Int,
-            CompType::Bool => Tpe::Int,
-            CompType::String => Tpe::Array(Box::new(Tpe::Int)),
-            CompType::Array(box comp_type) => Tpe::Array(Box::new(comp_type.into())),
-            CompType::Void => Tpe::Int,
-        }
-    }
-}
+//impl From<&CompType> for Tpe {
+//    fn from(value: &CompType) -> Self {
+//        match value {
+//            CompType::Int => Tpe::Int,
+//            CompType::Double => Tpe::Double,
+//            CompType::Char => Tpe::Int,
+//            CompType::Bool => Tpe::Int,
+//            CompType::String => Tpe::Array(Box::new(Tpe::Int)),
+//            CompType::Array(box comp_type) => Tpe::Array(Box::new(comp_type.into())),
+//            CompType::Void => Tpe::Int,
+//            CompType::Struct(n) => Tpe::Struct(n.fields.iter().map(|(_, x)| x.into()).collect())
+//        }
+//    }
+//}
 
 struct OpEvaluation {
     pop: usize,
@@ -161,7 +171,8 @@ impl Compiler {
             function_calls: vec![],
             current_function: None,
             predefined,
-            function_addresses: HashMap::new()
+            function_addresses: HashMap::new(),
+            structs: vec![]
         }
     }
 
@@ -173,12 +184,38 @@ impl Compiler {
             TypeName::String => CompType::String,
             TypeName::Bool => CompType::Bool,
             TypeName::Array(box Tag { item: v, .. }) => CompType::Array(Box::new(self.resolve_type(v)?)),
+            TypeName::Struct(name) => CompType::Struct(self.structs.iter().find(|x| &x.name == &**name)
+                .ok_or(CompErr { error: CompilerError::TypeNotFound, location: name.loc.clone() })?
+                .clone())
         })
+    }
+
+    fn runtime_type(&self, value: &CompType) -> Tpe {
+        match value {
+            CompType::Int => Tpe::Int,
+            CompType::Double => Tpe::Double,
+            CompType::Char => Tpe::Int,
+            CompType::Bool => Tpe::Int,
+            CompType::String => Tpe::Array(Box::new(Tpe::Int)),
+            CompType::Array(box comp_type) => Tpe::Array(Box::new(self.runtime_type(comp_type))),
+            CompType::Void => Tpe::Int,
+            CompType::Struct(n) => Tpe::Struct(n.fields.iter().map(|(_, x)| self.runtime_type(x)).collect())
+        }
+
     }
 
     pub fn compile_program(&mut self, inp: &[Statement]) -> Result<(), CompErr> {
         let mut program = inp.to_vec();
         program.extend(crate::parser::spellcode::program(include_str!("../stdlib.spc")).unwrap());
+        for st in &program {
+            let Statement::StructDef { name: Tag { item: name, .. }, fields } = st else { continue };
+            let mut f = vec![];
+            for (name, tpe) in fields {
+                f.push((name.item.clone(), self.resolve_type(tpe)?));
+            }
+            self.structs.push(CompStruct { name: name.clone(), fields: f });
+        }
+
         for st in &program {
             let Statement::FunctionDef { name: Tag { item: name, loc: name_l }, arguments, return_type, block: _ } = st else { continue };
 
@@ -203,6 +240,7 @@ impl Compiler {
 
         for st in &program {
             if let Statement::FunctionDef { .. } = st { continue };
+            if let Statement::StructDef { .. } = st { continue };
             self.compile_statement(st)?;
         }
 
@@ -264,9 +302,9 @@ impl Compiler {
                 self.compile_expression(expression, CompStackI::Variable(name.clone()))?;
             }
             Statement::Assignment { left: Tag { item: left, loc: left_loc }, value } => {
-                let tpe = self.compile_expression(value, CompStackI::Temp)?;
                 match left {
                     Expression::VarAccess(Tag { item: name, loc }) => {
+                        let tpe = self.compile_expression(value, CompStackI::Temp)?;
                         let Some((idx, value_tpe)) = self.find_variable(name)
                             else {
                                 return Err(CompErr { error: CompilerError::VariableNotFound, location: loc.clone() })
@@ -278,6 +316,7 @@ impl Compiler {
                         self.stack.pop();
                     }
                     Expression::ArrayAccess { box array, box index } => {
+                        let tpe = self.compile_expression(value, CompStackI::Temp)?;
                         let value_index = self.stack.len() - 1;
                         let inner = match self.compile_expression(array, CompStackI::Temp)? {
                             CompType::Array(box v) => v,
@@ -305,6 +344,27 @@ impl Compiler {
 
                         self.program.push(Instruction::SetA);
                         self.stack.pop();
+                        self.stack.pop();
+                        self.stack.pop();
+                    }
+                    Expression::PropertyAccess(box inner, name) => {
+                        let CompType::Struct(v) = self.compile_expression(inner, CompStackI::Temp)? else {
+                            return Err(CompErr { error: CompilerError::PropertyNotFound, location: left_loc.clone() })
+                        };
+                        let struct_idx = self.stack.len() - 1;
+
+                        let (idx, (_, struct_tpe)) = v.fields.iter().enumerate().find(|(_, x)| x.0 == **name)
+                            .ok_or(CompErr { error: CompilerError::PropertyNotFound, location: name.loc.clone() })?
+                            .clone();
+
+                        let tpe = self.compile_expression(value, CompStackI::Temp)?;
+                        if &tpe != struct_tpe {
+                            return Err(CompErr { error: CompilerError::TypeMismatch, location: name.loc.clone() })
+                        }
+                        self.program.push(Instruction::Copy(self.stack.len() - struct_idx));
+                        self.stack.push((CompStackI::Temp, CompType::Struct(v.clone())));
+
+                        self.program.push(Instruction::SetS(idx));
                         self.stack.pop();
                         self.stack.pop();
                     }
@@ -525,7 +585,9 @@ impl Compiler {
                 self.program.push(Instruction::Return);
                 //self.stack.pop();
             }
-            Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.clone() })
+            Statement::FunctionDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.clone() }),
+            // TODO: rename error?
+            Statement::StructDef { name: Tag { loc, .. }, .. } => return Err(CompErr { error: CompilerError::FunctionsMustBeTopLevel, location: loc.clone() })
         }
 
         Ok(())
@@ -664,6 +726,10 @@ impl Compiler {
             Expression::PropertyAccess(box expression, Tag { item: name, loc }) => {
                 if matches!(self.get_type(expression)?, CompType::Array(_) | CompType::String) && name == "size" {
                     CompType::Int
+                } else if let CompType::Struct(CompStruct { fields, .. }) = self.get_type(expression)? {
+                    fields.iter().find(|x| &x.0 == name)
+                        .ok_or(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })?
+                        .1.clone()
                 } else {
                     return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })
                 }
@@ -680,7 +746,12 @@ impl Compiler {
             Expression::VarAccess(tag) => if let Some((_, t)) = self.find_variable(&tag.item) { t } else {
                 return Err(CompErr { error: CompilerError::VariableNotFound, location: tag.loc.clone() })
             }
-            Expression::NewArray(tag, _) => CompType::Array(Box::new(self.resolve_type(&tag.item)?))
+            Expression::NewArray(tag, _) => CompType::Array(Box::new(self.resolve_type(&tag.item)?)),
+            Expression::NewStruct(name) => {
+                CompType::Struct(self.structs.iter().find(|x| x.name == **name)
+                    .ok_or(CompErr { error: CompilerError::TypeNotFound, location: name.loc.clone() })?
+                    .clone())
+            }
         })
     }
 
@@ -810,6 +881,15 @@ impl Compiler {
                         self.stack.push((out, CompType::Int));
                         return Ok(CompType::Int)
                     }
+                    (CompType::Struct(CompStruct { fields, .. }), _) => {
+                        let (idx, (_, tpe)) = fields.iter().enumerate().find(|x| &x.1.0 == name)
+                            .ok_or(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })?;
+                        self.program.push(Instruction::GetS(idx));
+                        self.stack.pop();
+                        self.stack.push((out, tpe.clone()));
+                        return Ok(tpe.clone())
+                    }
+
                     _ => return Err(CompErr { error: CompilerError::PropertyNotFound, location: loc.clone() })
                 }
             }
@@ -892,10 +972,18 @@ impl Compiler {
                 if self.compile_expression(length, CompStackI::Temp)? != CompType::Int {
                     return Err(CompErr { error: CompilerError::TypeMismatch, location: tpe.loc.clone() })
                 }
-                self.program.push(Instruction::AllocA((&inner_type).into()));
+                self.program.push(Instruction::AllocA(self.runtime_type(&inner_type)));
                 self.stack.pop();
                 self.stack.push((out, CompType::Array(Box::new(inner_type.clone()))));
                 Ok(CompType::Array(Box::new(inner_type)))
+            }
+            Expression::NewStruct(tpe) => {
+                let CompType::Struct(v) = self.resolve_type(&TypeName::Struct(tpe.to_owned()))? else {
+                    return Err(CompErr { error: CompilerError::TypeMismatch, location: tpe.loc.clone() })
+                };
+                self.program.push(Instruction::AllocS(Tpe::Struct(v.fields.iter().map(|x| self.runtime_type(&x.1)).collect())));
+                self.stack.push((out, CompType::Struct(v.clone())));
+                Ok(CompType::Struct(v.clone()))
             }
         }
     }
