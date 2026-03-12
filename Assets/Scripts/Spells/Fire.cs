@@ -33,6 +33,11 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         get => prefab; 
         set => prefab = value; 
     }
+
+
+    private Animator fireAnimator;
+    private bool hasExploded = false;
+    [SerializeField] private float explodeLifetime = 0.4f;
     
     public void Awake()
     {
@@ -41,6 +46,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         Damage = startDamage;
         path = new List<GameObject>();
         leyLineMap = leyLineMapObj.GetComponent<LeyLineGen>();
+        fireAnimator = GetComponentInChildren<Animator>();
         
         // Disable collider initially to prevent collisions during instantiation/setup
         Collider2D col = GetComponent<Collider2D>();
@@ -70,7 +76,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     private IEnumerator ChainRoutine()
     {
         HexTile prev = this.CurrentTile.GetComponent<HexTile>();
-        for (int i = 0; i < path.Count; i++)
+        for (int i = 0; i < path.Count && !hasExploded; i++)
         {
             
             GameObject target = path[i];
@@ -187,6 +193,10 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 
     private void OnTriggerEnter2D(Collider2D col)
     {
+
+        if (hasExploded)
+            return;
+
         if (col.gameObject.CompareTag("Tile"))
             return;
         
@@ -197,7 +207,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         if (ice != null)
         {
             ice.TakeDamage(Damage, "Fire");
-            Destroy(gameObject);
+            StartCoroutine(ExplodeAndDestroy());
             return;
         }
         
@@ -206,11 +216,11 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         if (player != null)
         {
             player.health -= Damage;
-            Destroy(gameObject);
+            StartCoroutine(ExplodeAndDestroy());
             return;
         }
         
-        Destroy(gameObject);
+        StartCoroutine(ExplodeAndDestroy());
     }
 
     public void OnTeleport(GameObject target)
@@ -223,5 +233,28 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
             this.LastPortal = target;
         }
         Debug.Log($"{gameObject} was teleported to {target}");
+    }
+
+    private IEnumerator ExplodeAndDestroy()
+    {
+        if (hasExploded)
+            yield break;
+
+        hasExploded = true;
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        if (fireAnimator != null)
+        {
+            fireAnimator.SetTrigger("Explode");
+        }
+
+        yield return new WaitForSeconds(explodeLifetime);
+
+        Destroy(gameObject);
     }
 }
