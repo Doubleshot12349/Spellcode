@@ -26,6 +26,11 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject leyLineMapObj;
     LeyLineGen leyLineMap;
     [SerializeField] private float delayBetweenHexes =.2f;
+
+
+    private Animator fireAnimator;
+    private bool hasExploded = false;
+    [SerializeField] private float explodeLifetime = 1.0f;
     
     public void Awake()
     {
@@ -35,6 +40,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         Damage = startDamage;
         path = new List<GameObject>();
         leyLineMap = leyLineMapObj.GetComponent<LeyLineGen>();
+        fireAnimator = GetComponentInChildren<Animator>();
         
         // Disable collider initially to prevent collisions during instantiation/setup
         Collider2D col = GetComponent<Collider2D>();
@@ -64,10 +70,15 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     private IEnumerator ChainRoutine()
     {
         HexTile prev = this.CurrentTile.GetComponent<HexTile>();
-        for (int i = 0; i < path.Count; i++)
+        for (int i = 0; i < path.Count && !hasExploded; i++)
         {
             
             GameObject target = path[i];
+            // store the target HexTile
+            HexTile targetHex = target.GetComponent<HexTile>();
+            // Rotate fireball to face direction of next move
+            GetVectorAngle(prev.coords, targetHex.coords, transform);
+
             // Move fire to hex
             transform.position = target.transform.position;
             CurrentTile = target;
@@ -111,6 +122,55 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         }
     }
 
+    public void GetVectorAngle(HexCoords initial, HexCoords final, Transform fireballTrans)
+    {
+        int dq = final.q - initial.q;
+        int dr = final.r - initial.r;
+        // each s coord = s = -q - r
+        int ds = (-1 * final.q - final.r) - (-1 * initial.q - initial.r);
+
+        if (fireballTrans == null)
+            return;
+
+        switch (dq, dr, ds)
+        {
+            case var _ when dq > 0 && true && ds < 0:
+                //(1,0,-1)
+                // 0 degree rotation
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            case var _ when dq > 0 && dr < 0 && true:
+                //(1,-1,0)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 120f);
+                break;
+
+            case var _ when true && dr < 0 && ds > 0:
+                //(0,-1,1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 240f);
+                break;
+
+            case var _ when dq < 0 && true && ds > 0:
+                //(-1,0,1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 180f);
+                break;
+
+            case var _ when dq < 0 && dr > 0 && true:
+                //(-1,1,0)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 300f);
+                break;
+
+            case var _ when true && dr > 0 && ds < 0:
+                //(0,1,-1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 60f);
+                break;
+
+            default:
+                Debug.Log("Something went wrong in fireball switch statement");
+                break;
+        }
+    }
+
     public bool OverrideMoveSpell(GameObject target)
     {
         // Generate hex-by-hex path from Fire's current position to target
@@ -127,6 +187,10 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 
     private void OnTriggerEnter2D(Collider2D col)
     {
+
+        if (hasExploded)
+            return;
+
         if (col.gameObject.CompareTag("Tile"))
             return;
         
@@ -137,7 +201,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         if (ice != null)
         {
             ice.TakeDamage(Damage, "Fire");
-            Destroy(gameObject);
+            StartCoroutine(ExplodeAndDestroy());
             return;
         }
         
@@ -146,11 +210,11 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         if (player != null)
         {
             player.health -= Damage;
-            Destroy(gameObject);
+            StartCoroutine(ExplodeAndDestroy());
             return;
         }
         
-        Destroy(gameObject);
+        StartCoroutine(ExplodeAndDestroy());
     }
 
     public void OnTeleport(GameObject target)
@@ -163,5 +227,40 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
             this.LastPortal = target;
         }
         Debug.Log($"{gameObject} was teleported to {target}");
+    }
+
+    private IEnumerator ExplodeAndDestroy()
+    {
+        if (hasExploded)
+            yield break;
+
+        hasExploded = true;
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        if (fireAnimator != null)
+        {
+            fireAnimator.SetTrigger("Explode");
+            yield return null;
+            while (!fireAnimator.GetCurrentAnimatorStateInfo(0).IsName("Explode"))
+            {
+                yield return null;
+            }
+            while (fireAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            {
+                yield return null;
+            }
+        } else
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        //yield return new WaitForSeconds(explodeLifetime);
+
+        Destroy(gameObject);
     }
 }
