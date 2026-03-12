@@ -17,8 +17,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
         get => prefab; 
         set => prefab = value; 
     }
-    public GameObject Player;
-    public LeyLineGen leyLineMap;
+    
     
     public float moveSpeed;
     public float MoveSpeed { get; set; }
@@ -26,6 +25,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     public float Damage { get; set; }
     public float currentDamage;
     public string type = "Lightning";
+    public string myPlayer;
     public string Type
     {
         get
@@ -51,7 +51,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
             HexTile prev;
             if (i == 0)
             {
-                prev = Player.GetComponent<PlayerMover>().currentTile;
+                prev = HexGridManager.GetHex(0, 0).GetComponent<HexTile>();//GameObject.Find(myPlayer).GetComponent<PlayerMover>().currentTile;
             }
             else
             {
@@ -158,7 +158,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     }
     
     private void ApplyLeyLineEffect(HexTile hexA,HexTile hexB){
-        LeyLineGen.LeyLine l = leyLineMap.GetLeyLine(hexA, hexB);
+        LeyLineGen.LeyLine l = GameObject.Find("LeyLineMap").GetComponent<LeyLineGen>().GetLeyLine(hexA, hexB);
         if (l == null) return;
         float mod = l.weight;
         Debug.Log($"The weight of the leyline {hexA},{hexB} is: {mod}");

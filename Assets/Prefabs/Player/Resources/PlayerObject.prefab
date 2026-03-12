@@ -130,8 +130,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   health: 50
   mana: 20
-  maxHealth: 100
-  maxMana: 50
+  maxHealth: 50
+  maxMana: 25
   spell1: {fileID: 1698189430288821889}
   spell2: {fileID: 3289493050850803449}
   spell3: {fileID: 7691847877710592199}

@@ -2113,7 +2113,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 320
+      value: 525
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_SizeDelta.y
@@ -2121,7 +2121,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.0289452
+      value: 1.0660236
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_LocalScale.y
@@ -11345,7 +11345,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 320
+      value: 525
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_SizeDelta.y
@@ -11353,7 +11353,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.0289452
+      value: 1.0660237
       objectReference: {fileID: 0}
     - target: {fileID: 5481042961404074322, guid: 1fd47c914f6a03e4a8f866a2b12f9f1e, type: 3}
       propertyPath: m_LocalScale.y
@@ -13404,14 +13404,6 @@ PrefabInstance:
       propertyPath: leyLineMap
       value: 
       objectReference: {fileID: 736569454}
-    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
-      propertyPath: maxMana
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
-      propertyPath: maxHealth
-      value: 50
-      objectReference: {fileID: 0}
     - target: {fileID: 1455012002946631082, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: turnManager
       value: 
