@@ -160,7 +160,7 @@ pub extern "C" fn push_int_array(id: i64, data: *mut i32, length: u64) -> bool {
     let n = found.1.next_heap_addr;
     found.1.next_heap_addr += 1;
     found.1.heap.insert(n, stack_machine::HeapItem { value: value.iter().map(|x| StackItem::Int(*x)).collect(), mark: false, tpe: stack_machine::Tpe::Int });
-    found.1.stack.push(StackItem::Array(stack_machine::Tpe::Int, n));
+    found.1.stack.push(StackItem::HeapAddr(stack_machine::Tpe::Int, n));
     return true;
 }
 
@@ -194,7 +194,7 @@ pub extern "C" fn pop_int_array(id: i64, data: *mut *mut i32, length: *mut u64) 
         }
         return false;
     };
-    if let StackItem::Array(stack_machine::Tpe::Int, ptr) = popped {
+    if let StackItem::HeapAddr(stack_machine::Tpe::Int, ptr) = popped {
         let items = found.1.heap[&ptr].value.iter().map(|x| if let StackItem::Int(v) = x { *v } else { panic!() }).collect::<Vec<_>>();
         unsafe { 
             *length = items.len() as u64;

@@ -103,9 +103,10 @@ peg::parser! {
             --
             x:(@) "." name:ident() r:position!() { let loc = x.loc.start..r; Tag { item: Expression::PropertyAccess(Box::new(x), name), loc } }
             --
-            v:t(<"new" _ tpe:tpe() _ "[" _ length:expression() _ "]" { Expression::NewArray(tpe, Box::new(length)) }>) { v }
-            --
             x:(@) "[" _ index:expression() _ "]" r:position!() { let loc = x.loc.start..r; Tag { item: Expression::ArrayAccess { array: Box::new(x), index: Box::new(index) }, loc } }
+            --
+            v:t(<"new" _ tpe:tpe() _ "[" _ length:expression() _ "]" { Expression::NewArray(tpe, Box::new(length)) }>) { v }
+            v:t(<"new" _ name:ident() { Expression::NewStruct(name) }>) { v }
             --
             v:t(<"if" _ condition:expression() _ "{" _ if_true:expression() _ "}" _ "else" _ "{" _ if_false:expression() _ "}" { Expression::Ternary { condition: Box::new(condition), if_true: Box::new(if_true), if_false: Box::new(if_false) } }>) { v }
             --
@@ -121,7 +122,8 @@ peg::parser! {
               l:position!() "char" r:position!() { Tag::new(TypeName::Char, l..r) } /
               l:position!() "string" r:position!() { Tag::new(TypeName::String, l..r) } /
               l:position!() "bool" r:position!() { Tag::new(TypeName::Bool, l..r) } /
-              l:position!() "double" r:position!() { Tag::new(TypeName::Double, l..r) }
+              l:position!() "double" r:position!() { Tag::new(TypeName::Double, l..r) } /
+              t(<name:ident() { TypeName::Struct(name.to_owned()) }>)
 
         rule tpe() -> Tag<TypeName> = precedence! {
             x:(@) _ "[" _ "]" r:position!() { let range = x.loc.start..r; Tag::new(TypeName::Array(Box::new(x)), range) }
@@ -141,9 +143,9 @@ peg::parser! {
               left:expression() _ "=" _ value:expression() { Statement::Assignment { left, value } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")" _ "->" _ return_type:tpe() _ block:block() { Statement::FunctionDef { name, arguments, return_type: Some(return_type), block } } /
               "fun" _ name:ident() _ "(" _ arguments:func_arg() ** (_ "," _) _ ")"  _ block:block() { Statement::FunctionDef { name, arguments, return_type: None, block } } /
-
               "while" _ condition:expression() _ block:block() { Statement::While { condition, block } } /
               keyword:t(<"return" { () }>) _ expr:expression()? { Statement::Return { keyword, expr  } } /
+              "struct" _ name:ident() _ "{" _ fields:func_arg() ** (_ "," _) _ "}" { Statement::StructDef { name, fields } } /
               v:expression() { Statement::ExprS(v) }
 
         pub rule program() -> Vec<Statement> = _ v:statement() ** (_ ";"? _) _ ";"? _ { v }
@@ -183,12 +185,13 @@ pub enum Expression {
     ArrayAccess { array: BTag<Expression>, index: BTag<Expression> },
     VarAccess(Tag<String>),
     NewArray(Tag<TypeName>, BTag<Expression>),
-    UnaryOperation(Tag<UnaryOp>, BTag<Expression>)
+    UnaryOperation(Tag<UnaryOp>, BTag<Expression>),
+    NewStruct(Tag<String>)
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TypeName {
-    Int, Double, Char, String, Bool, Array(BTag<TypeName>)
+    Int, Double, Char, String, Bool, Array(BTag<TypeName>), Struct(Tag<String>)
 }
 
 #[derive(Debug, Clone)]
@@ -201,7 +204,8 @@ pub enum Statement {
     ForEach { variable: Tag<String>, array: Tag<Expression>, block: Vec<Statement> },
     While { condition: Tag<Expression>, block: Vec<Statement> },
     Return { keyword: Tag<()>, expr: Option<Tag<Expression>> },
-    FunctionDef { name: Tag<String>, arguments: Vec<(Tag<String>, Tag<TypeName>)>, return_type: Option<Tag<TypeName>>, block: Vec<Statement> }
+    FunctionDef { name: Tag<String>, arguments: Vec<(Tag<String>, Tag<TypeName>)>, return_type: Option<Tag<TypeName>>, block: Vec<Statement> },
+    StructDef { name: Tag<String>, fields: Vec<(Tag<String>, Tag<TypeName>)> }
 }
 
 // Tag class and methods from https://github.com/blahblahbloopster/calculator-3
