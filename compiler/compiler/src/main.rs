@@ -11,157 +11,173 @@ use crate::{compiler::{CompErr, Compiler}, stack_machine::{ExecutionException, S
 #[allow(unused)]
 fn main() {
     let inp = r#"
+        var start = new Node;
+        start.q = 1;
+        start.r = 2;
+
+
+        var end = new Node;
+        end.q = 1;
+        end.r = 4;
+
+        var path = dijkstra_search(start, end);
+
+
         struct Node {
             q: int,
-            r: int,
-            priority: int
+            r: int
         }
 
-        struct MinHeap {
-            items: Node[],
+        struct NodeP {
+            node_id: int,
+            cost: int
+        }
+
+        struct PQueue {
+            items: NodeP[],
             size: int
         }
 
-        println("a");
-        var start = new Node
-        start.q = 1
-        start.r = 2
-        start.priority = 1
+        fun dijkstra_search(start: Node, end: Node) -> Node[] {
+            var node_db = get_all_nodes(start);
 
-        println("b");
-        var end = new Node;
-        end.q = 1
-        end.r = 4
+            var frontier = pqueue_new();
+            pqueue_push(frontier, nodep_new(find_id(node_db, start), 0));
+            var came_from = new int[node_db.size];
+            for (var i = 0; i < came_from.size; i = i + 1) {
+                came_from[i] = -1;
+            }
 
-        println("c");
-        var path = djikstras_algo(start, end)
-        var fireball = spawn_effect(0)
-        for edge in path {
-            move_effect(edge.q, edge.r, fireball)
-        }
+            var placeholder = 100000000;
+            var cost_so_far = new int[node_db.size];
+            for (var i = 0; i < cost_so_far.size; i = i + 1) {
+                cost_so_far[i] = placeholder;
+            }
 
-        fun heap_create(capacity: int) -> MinHeap {
-            var out = new MinHeap
-            out.items = new Node[capacity]
-            out.size = 0
-            return out
-        }
+            cost_so_far[find_id(node_db, start)] = 0;
 
-        fun get_nodes(heap: MinHeap, node: Node) {
-            for n in neighbors(node.q, node.r) {
-                var found = false
+            while frontier.size > 0 {
+                var current_id = pqueue_pop(frontier).node_id;
+                var current = node_get(node_db, current_id);
+                if current.q == start.q && current.r == start.r {
+                    var len = 0;
+                    var curr = current_id;
+                    while curr != 0 {
+                        curr = came_from[curr];
+                        len = len + 1;
+                    }
+                    var out = new Node[len];
+                    len = 0;
+                    curr = current_id;
+                    while curr != 0 {
+                        out[len] = node_get(node_db, curr);
+                        curr = came_from[curr];
+                        len = len + 1;
+                    }
 
-                for v in heap.items {
-                    if v.q == n.q && v.r == q.r {
-                        found = true
+                    return out;
+                }
+
+                for neighbor in neighbors(current.q, current.r) {
+                    var neighbor_id = find_id(node_db, neighbor[0], neighbor[1]);
+                    var new_cost = cost_so_far[current_id] + neighbor[2];
+                    if new_cost < cost_so_far[neighbor_id] {
+                        cost_so_far[neighbor_id] = new_cost;
+                        pqueue_push(frontier, nodep_new(neighbor_id, new_cost));
+                        came_from[neighbor_id] = current_id;
                     }
                 }
+            }
+        }
 
-                if !found {
-                    var value = new Node
-                    value.q = n[0]
-                    value.r = n[1]
-                    value.priority = 10000
-                    heap_push(heap, value)
+        fun nodep_new(id: int, cost: int) -> NodeP {
+            var out = new NodeP;
+            out.node_id = id;
+            out.cost = cost;
+        }
 
-                    get_nodes(heap, value)
+        fun pqueue_new() -> PQueue {
+            var out = new PQueue;
+            out.items = new NodeP[100];
+            for it in out.items {
+                it.cost = 12345678;
+            }
+            out.size = 0;
+            return out;
+        }
+
+        fun pqueue_push(queue: PQueue, value: NodeP) {
+            for it in queue.items {
+                if it.cost == 12345678 {
+                    it.node_id = value.node_id;
+                    it.cost = value.cost;
+                    queue.size = queue.size + 1;
+                    return;
                 }
             }
         }
 
-        fun djikstras_algo(start: Node, end: Node) -> Node[] {
-
-            var heap = heap_create(100)
-
-            var result = new Node[100]
-
-            heap_push(heap, start)
-
-            while heap.size > 0 {
-                var e = heap_pop(heap)
-                print("getting neighbors, e.q = ");
-                print(e.q);
-                print(", e.r = ");
-                println(e.r);
-
-                var nArr = neighbors(e.q, e.r)
-
-                var l = result.size
-                print("got ")
-                print(result.size)
-                println(" neighbors")
-                result[l - 1] = e
-                for n in nArr {
-                    var value = new Node;
-                    value.q = n[0]
-                    value.r = n[1]
-                    value.priority = n[2]
-                    heap_push(heap, value)
+        fun pqueue_pop(queue: PQueue) -> NodeP {
+            var best_idx = -1;
+            var best_value = 12345678;
+            var out = new NodeP;
+            for (var i = 0; i < queue.items.size; i = i + 1) {
+                var it = queue.items[i];
+                if it.cost < best_value {
+                    out = it;
+                    best_idx = i;
+                    best_value = it.cost;
                 }
             }
-            return result
+            queue.size = queue.size - 1;
+            queue.items[best_idx].cost = 12345678;
+            return out;
         }
 
-        fun parent(idx: int) -> int {
-            return (idx - 1) / 2
+        struct NodeDB {
+            nodes: Node[],
+            size: int
         }
 
-        fun left(idx: int) -> int {
-            return 2 * idx + 1
+        fun get_all_nodes(start: Node) -> NodeDB {
+            var out = new NodeDB;
+            out.nodes = new Node[100];
+            out.nodes[0] = start;
+            out.size = 1;
+
+            populate_nodes(out, start.q, start.r);
+            return out;
         }
 
-        fun right(idx: int) -> int {
-            return 2 * idx + 2
+
+        fun find_id(db: NodeDB, node: Node) -> int {
+            return find_id(db, node.q, node.r);
         }
 
-        fun heap_push(heap: MinHeap, value: Node) {
-            var i = heap.size;
-            heap.items[i] = value;
-            heap.size = heap.size + 1;
+        fun find_id(db: NodeDB, q: int, r: int) -> int {
+            for (var i = 0; i < db.size; i = i + 1) {
+                var it = db.nodes[i];
+                if it.q == q && it.r == r {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
-            while i != 0 && heap.items[i].priority < heap.items[parent(i)].priority {
-                var temp = heap.items[i]
-                heap.items[i] = heap.items[parent(i)]
-                heap.items[parent(i)] = temp
+        fun node_get(db: NodeDB, id: int) -> Node {
+            return db.nodes[id];
+        }
 
-                i = parent(i)
+        fun populate_nodes(db: NodeDB, q: int, r: int) {
+            for n in neighbors(q, r) {
+                if find_id(db, n[0], n[1]) != -1 {
+                    db.nodes[db.size] = new Node;
+                    db.nodes[db.size].q = n[0];
+                    db.nodes[db.size].r = n[1];
+                    populate_nodes(db, n[0], n[1]);
+                }
             }
         }
-
-        fun heap_pop(heap: MinHeap) -> Node {
-            var v = heap.items[0]
-            if heap.size == 1 {
-                heap.size = 0;
-                return v
-            }
-
-            heap.items[0] = heap.items[heap.size - 1];
-            heap.size = heap.size - 1;
-            min_heapify(heap, 0)
-            return v
-        }
-
-        fun min_heapify(heap: MinHeap, key: int) {
-            var l = left(key)
-            var r = right(key)
-            var smallest = key
-            if l < heap.size && heap.items[l].priority < heap.items[smallest].priority {
-                smallest = l;
-            }
-
-            if r < heap.size && heap.items[r].priority < heap.items[smallest].priority {
-                smallest = r;
-            }
-
-            if smallest != key {
-                var temp = heap.items[key]
-                heap.items[key] = heap.items[smallest]
-                heap.items[smallest] = temp
-
-                min_heapify(heap, smallest)
-            }
-        }
-
     "#;
 
     /*
@@ -217,7 +233,7 @@ fn main() {
     ]);
     let mut vm = VM::new(compiler.program);
     loop {
-        //println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
+        println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
         let res = vm.tick();
         match res {
             Ok(_) => {}
