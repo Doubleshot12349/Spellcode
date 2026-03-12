@@ -35,7 +35,8 @@ public class PlayerController : MonoBehaviour
     {
         health = maxHealth;
         mana = maxMana;
-        speechBubble.SetActive(false);
+        speechBubble.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled = false;
+        speechBubble.transform.GetChild(0).GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled=false;
         var mySpells = TurnState.Player1Turn == myTurn ? player1Spells : player2Spells;
         try
         {
@@ -149,7 +150,7 @@ public class PlayerController : MonoBehaviour
             GameMessageUI.Instance.ShowMessage("Player " + playerNumber + " cast a spell");
         }
 
-        if ((hasMoved && hasCastSpell) || Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (hasMoved && hasCastSpell && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             turnStarted = false;
             gameObject.GetComponent<Collider2D>().enabled = true;
@@ -160,10 +161,13 @@ public class PlayerController : MonoBehaviour
 
     public IEnumerator OnSpellMessage(string message)
     {
-        speechBubble.SetActive(true);
+        speechBubble.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled = true;
+        speechBubble.transform.GetChild(0).GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled=true;
         speechBubble.GetComponent<SpeechBubble_TMP>().setDialogueText(message);
-        yield return new WaitForSecondsRealtime(30);
-        speechBubble.SetActive(false);
+        yield return new WaitForSecondsRealtime(5);
+        speechBubble.GetComponent<SpeechBubble_TMP>().setDialogueText("");
+        speechBubble.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled = false;
+        speechBubble.transform.GetChild(0).GetChild(0).GetComponent<UnityEngine.UI.Image>().enabled=false;
     }
         
     

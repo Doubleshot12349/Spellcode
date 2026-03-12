@@ -62,7 +62,7 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
         {
             health += otherIce.health;
             this.blockDestroy = true;
-            Destroy(otherIce.gameObject);
+            Destroy(otherIce.gameObject,5);
             return;
         }
         
