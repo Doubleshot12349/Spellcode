@@ -21,6 +21,11 @@ public class TurnManager : MonoBehaviour
     public void Start()
     {
         hgm.GenerateGrid();
+        HexTileOutlineDrawer outlineDrawer = FindFirstObjectByType<HexTileOutlineDrawer>();
+        if (outlineDrawer != null)
+        {
+            outlineDrawer.Redraw();
+        }
         player1.MoveToStartPos();
         player2.MoveToStartPos();
         llg.GenerateLeyLines();
