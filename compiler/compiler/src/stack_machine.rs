@@ -54,7 +54,7 @@ pub enum Instruction {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum StackItem {
-    Int(i32), Double(f64), Array(Tpe, usize), ReturnAddr(usize)
+    Int(i32), Double(f64), HeapAddr(Tpe, usize), ReturnAddr(usize)
 }
 
 impl StackItem {
@@ -62,7 +62,8 @@ impl StackItem {
         match self {
             StackItem::Int(_) => Tpe::Int,
             StackItem::Double(_) => Tpe::Double,
-            StackItem::Array(tpe, _) => Tpe::Array(Box::new(tpe.clone())),
+            //StackItem::HeapAddr(tpe, _) => Tpe::Array(Box::new(tpe.clone())),
+            StackItem::HeapAddr(tpe, _) => tpe.clone(),
             StackItem::ReturnAddr(_) => Tpe::Int,  // close enough
         }
     }
@@ -279,14 +280,14 @@ impl VM {
                 for _ in 0..size {
                     item.push(self.alloc(&tpe));
                 }
-                self.heap.insert(id, HeapItem { value: item, mark: false, tpe: t.clone() });
-                self.stack.push(StackItem::Array(t, id))
+                self.heap.insert(id, HeapItem { value: item, mark: false, tpe: Tpe::Array(Box::new(t.clone())) });
+                self.stack.push(StackItem::HeapAddr(Tpe::Array(Box::new(t)), id))
             }
             Instruction::GetA => {
                 let arr = self.pop()?;
                 let idx: i32 = self.pop()?.try_into()?;
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(Tpe::Array(_), id) => {
                         let v = &self.heap[&id];
                         self.stack.push(v.value.get(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?.clone())
                     }
@@ -297,11 +298,15 @@ impl VM {
                 let arr = self.pop()?;
                 let idx: i32 = self.pop()?.try_into()?;
                 let item = self.pop()?;
+                //println!("item.tpe() = {:?}", item.tpe());
+                //dbg!(arr.tpe(), idx, item.tpe());
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(Tpe::Array(box tpe), id) => {
+                        //println!("inner tpe = {tpe:?}");
                         // there's no way for an illegal heap address to get on the stack
                         let v = self.heap.get_mut(&id).unwrap();
-                        if item.tpe() != v.tpe {
+                        if tpe != item.tpe() {
+                            println!("expected {:?}, found {:?}", tpe, item.tpe());
                             return Err(ExecutionException::WrongType)
                         }
                         *(v.value.get_mut(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?) = item;
@@ -312,7 +317,7 @@ impl VM {
             Instruction::LenA => {
                 let arr = self.pop()?;
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(_, id) => {
                         let v = &self.heap[&id];
                         self.stack.push((v.value.len() as i32).into())
                     }
@@ -327,14 +332,15 @@ impl VM {
                 self.stack.push(item);
             }
             Instruction::GetS(idx) => {
-                let StackItem::Array(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                let StackItem::HeapAddr(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                    println!("");
                     return Err(ExecutionException::WrongType)
                 };
                 let item = self.heap[&id].value[*idx].clone();
                 self.stack.push(item);
             }
             Instruction::SetS(idx) => {
-                let StackItem::Array(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                let StackItem::HeapAddr(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
                     return Err(ExecutionException::WrongType)
                 };
                 let value = self.pop().unwrap();
@@ -360,7 +366,7 @@ impl VM {
             Tpe::Double => StackItem::Double(0.0),
             Tpe::Array(inner) => {
                 let id = self.push_heap_item(HeapItem { value: vec![], mark: false, tpe: *inner.clone() });
-                StackItem::Array(*inner.clone(), id)
+                StackItem::HeapAddr(*inner.clone(), id)
             }
             Tpe::Struct(tpes) => {
                 let mut value = vec![];
@@ -368,7 +374,7 @@ impl VM {
                     value.push(self.alloc(t))
                 }
                 let id = self.push_heap_item(HeapItem { value, mark: false, tpe: tpe.clone() });
-                StackItem::Array(tpe.clone(), id)
+                StackItem::HeapAddr(tpe.clone(), id)
             }
         }
     }
@@ -383,7 +389,7 @@ impl VM {
             let old = items_to_mark.clone();
             items_to_mark.clear();
             for item in old {
-                if let StackItem::Array(_, id) = &item {
+                if let StackItem::HeapAddr(_, id) = &item {
                     let heap_item = self.heap.get_mut(id).unwrap();
                     heap_item.mark = true;
                     for it in &heap_item.value {
@@ -755,7 +761,7 @@ mod tests {
     }
 
     test! { test_array:
-        ImmediateInt(5), AllocA(Tpe::Int) => Array(Tpe::Int, 0);
+        ImmediateInt(5), AllocA(Tpe::Int) => HeapAddr(Tpe::Int, 0);
         // TODO: test actual operations
     }
 }

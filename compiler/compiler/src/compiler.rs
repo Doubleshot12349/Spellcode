@@ -205,8 +205,11 @@ impl Compiler {
     }
 
     pub fn compile_program(&mut self, inp: &[Statement]) -> Result<(), CompErr> {
+        let stdlib = true;
         let mut program = inp.to_vec();
-        program.extend(crate::parser::spellcode::program(include_str!("../stdlib.spc")).unwrap());
+        if stdlib {
+            program.extend(crate::parser::spellcode::program(include_str!("../stdlib.spc")).unwrap());
+        }
         for st in &program {
             let Statement::StructDef { name: Tag { item: name, .. }, fields } = st else { continue };
             let mut f = vec![];
@@ -246,9 +249,11 @@ impl Compiler {
 
         self.program.push(Instruction::Syscall(Syscall::Halt));
 
-        for func in &self.predefined {
-            self.function_addresses.insert((&func.func).into(), self.program.len());
-            self.program.extend(func.definition.iter().cloned());
+        if stdlib {
+            for func in &self.predefined {
+                self.function_addresses.insert((&func.func).into(), self.program.len());
+                self.program.extend(func.definition.iter().cloned());
+            }
         }
 
         for st in &program {

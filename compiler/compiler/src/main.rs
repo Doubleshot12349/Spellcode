@@ -34,37 +34,58 @@ fn main() {
         end.r = 4
 
         println("c");
-        var path = djikstrasAlgo(start, end)
+        var path = djikstras_algo(start, end)
         var fireball = spawn_effect(0)
         for edge in path {
             move_effect(edge.q, edge.r, fireball)
         }
 
-        fun heapCreate(capacity: int) -> MinHeap {
+        fun heap_create(capacity: int) -> MinHeap {
             var out = new MinHeap
             out.items = new Node[capacity]
             out.size = 0
+            return out
         }
 
-        fun djikstrasAlgo(start: Node, end: Node) -> Node[] {
-            println("in dijkstra's");
-            var heap = heapCreate(100)
-            println("heap created");
+        fun get_nodes(heap: MinHeap, node: Node) {
+            for n in neighbors(node.q, node.r) {
+                var found = false
+
+                for v in heap.items {
+                    if v.q == n.q && v.r == q.r {
+                        found = true
+                    }
+                }
+
+                if !found {
+                    var value = new Node
+                    value.q = n[0]
+                    value.r = n[1]
+                    value.priority = 10000
+                    heap_push(heap, value)
+
+                    get_nodes(heap, value)
+                }
+            }
+        }
+
+        fun djikstras_algo(start: Node, end: Node) -> Node[] {
+
+            var heap = heap_create(100)
 
             var result = new Node[100]
-            println("result created");
 
-            println("inserting");
-            binHeapInsert(heap, start)
-            println("going into loop");
+            heap_push(heap, start)
+
             while heap.size > 0 {
-                println("calling binheapextract");
-                var e = binHeapExtract(heap)
-                print("getting neighbors, eq = ");
+                var e = heap_pop(heap)
+                print("getting neighbors, e.q = ");
                 print(e.q);
-                print(", er = ");
+                print(", e.r = ");
                 println(e.r);
+
                 var nArr = neighbors(e.q, e.r)
+
                 var l = result.size
                 print("got ")
                 print(result.size)
@@ -75,53 +96,112 @@ fn main() {
                     value.q = n[0]
                     value.r = n[1]
                     value.priority = n[2]
-                    binHeapInsert(heap, value)
+                    heap_push(heap, value)
                 }
             }
             return result
         }
 
-        fun binHeapExtract(heap: MinHeap) -> Node {
-            var res = heap.items[0]
-            binHeapBubbleUp(heap, 0)
-            return res
+        fun parent(idx: int) -> int {
+            return (idx - 1) / 2
         }
 
-        fun binHeapInsert(heap: MinHeap, element: Node) {
-            println("getting size");
-            var i = heap.size - 1
-            print("i = ");
-            println(i);
-            println("setting item");
-            heap.items[i] = element
-            println("done");
-            println("bubble down");
-            binHeapBubbleDown(heap, i)
+        fun left(idx: int) -> int {
+            return 2 * idx + 1
         }
 
-        fun binHeapBubbleDown(heap: MinHeap, i: int) {
-            var k = (i / 2) - 1
-            if k >= 0 {
-                if heap.items[i].priority < heap.items[k].priority {
-                    var temp = heap.items[i]
-                    heap.items[i] = heap.items[k]
-                    heap.items[k] = temp
-                    binHeapBubbleDown(heap, k)
-                }
-            }
+        fun right(idx: int) -> int {
+            return 2 * idx + 2
         }
 
-        fun binHeapBubbleUp(heap: MinHeap, i: int) {
-            var k = i + 1
-            k = k * 2
-            if heap.items[k].priority < heap.items[i].priority {
+        fun heap_push(heap: MinHeap, value: Node) {
+            var i = heap.size;
+            heap.items[i] = value;
+            heap.size = heap.size + 1;
+
+            while i != 0 && heap.items[i].priority < heap.items[parent(i)].priority {
                 var temp = heap.items[i]
-                heap.items[i] = heap.items[k]
-                heap.items[k] = temp
-                binHeapBubbleUp(heap, k)
+                heap.items[i] = heap.items[parent(i)]
+                heap.items[parent(i)] = temp
+
+                i = parent(i)
             }
         }
+
+        fun heap_pop(heap: MinHeap) -> Node {
+            var v = heap.items[0]
+            if heap.size == 1 {
+                heap.size = 0;
+                return v
+            }
+
+            heap.items[0] = heap.items[heap.size - 1];
+            heap.size = heap.size - 1;
+            min_heapify(heap, 0)
+            return v
+        }
+
+        fun min_heapify(heap: MinHeap, key: int) {
+            var l = left(key)
+            var r = right(key)
+            var smallest = key
+            if l < heap.size && heap.items[l].priority < heap.items[smallest].priority {
+                smallest = l;
+            }
+
+            if r < heap.size && heap.items[r].priority < heap.items[smallest].priority {
+                smallest = r;
+            }
+
+            if smallest != key {
+                var temp = heap.items[key]
+                heap.items[key] = heap.items[smallest]
+                heap.items[smallest] = temp
+
+                min_heapify(heap, smallest)
+            }
+        }
+
     "#;
+
+    /*
+    
+    let inp = r#"
+        struct Node {
+            q: int,
+            r: int,
+            priority: int
+        }
+
+        var items = new Node[100]
+
+        items[0] = new Node
+    "#;
+        */
+
+    /*
+    let inp = r#"
+        struct Node {
+            q: int,
+            r: int,
+            priority: int
+        }
+
+        struct MinHeap {
+            items: Node[],
+            size: int
+        }
+
+        fun heapCreate(capacity: int) -> MinHeap {
+            var out = new MinHeap
+            out.items = new Node[capacity]
+            return out;
+        }
+
+        var heap = heapCreate(100)
+        var i = heap.size - 1
+        "#;
+        */
 
     let parsed = parser::spellcode::program(inp).unwrap();
     let mut compiler = Compiler::new();
@@ -158,13 +238,13 @@ fn main() {
                 let id = vm.next_heap_addr;
                 vm.next_heap_addr += 1;
                 vm.heap.insert(id, stack_machine::HeapItem { value: vec![StackItem::Int(3), StackItem::Int(4)], mark: false, tpe: Tpe::Int });
-                vm.stack.push(StackItem::Array(Tpe::Int, id));
+                vm.stack.push(StackItem::HeapAddr(Tpe::Array(Box::new(Tpe::Int)), id));
             }
             Err(ExecutionException::SyscallException(Syscall::ClickLocation)) => {
                 let id = vm.next_heap_addr;
                 vm.next_heap_addr += 1;
                 vm.heap.insert(id, stack_machine::HeapItem { value: vec![StackItem::Int(2), StackItem::Int(4)], mark: false, tpe: Tpe::Int });
-                vm.stack.push(StackItem::Array(Tpe::Int, id));
+                vm.stack.push(StackItem::HeapAddr(Tpe::Array(Box::new(Tpe::Int)), id));
             }
             Err(ExecutionException::SyscallException(Syscall::GetNeighbors)) => {
                 let StackItem::Int(q) = vm.stack.pop().unwrap() else { panic!() };
@@ -183,7 +263,7 @@ fn main() {
                     }
                 }
                 vm.heap.insert(id, stack_machine::HeapItem { value, mark: false, tpe: Tpe::Int });
-                vm.stack.push(StackItem::Array(Tpe::Int, id));
+                vm.stack.push(StackItem::HeapAddr(Tpe::Array(Box::new(Tpe::Int)), id));
             }
 
             Err(e) => {
