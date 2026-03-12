@@ -22,6 +22,22 @@ fn main() {
 
         var path = dijkstra_search(start, end);
 
+        println("path:");
+        for p in path {
+            println(p);
+        }
+
+        fun print(v: Node) {
+            print(v.q);
+            print(", ");
+            print(v.r);
+        }
+
+        fun println(v: Node) {
+            print(v);
+            println();
+        }
+
 
         struct Node {
             q: int,
@@ -59,21 +75,21 @@ fn main() {
             while frontier.size > 0 {
                 var current_id = pqueue_pop(frontier).node_id;
                 var current = node_get(node_db, current_id);
-                if current.q == start.q && current.r == start.r {
+                if current.q == end.q && current.r == end.r {
                     var len = 0;
                     var curr = current_id;
                     while curr != 0 {
                         curr = came_from[curr];
                         len = len + 1;
                     }
-                    var out = new Node[len];
-                    len = 0;
+                    var out = new Node[len + 1];
                     curr = current_id;
-                    while curr != 0 {
+                    while len > 0 {
                         out[len] = node_get(node_db, curr);
                         curr = came_from[curr];
-                        len = len + 1;
+                        len = len - 1;
                     }
+                    out[0] = start;
 
                     return out;
                 }
@@ -94,6 +110,7 @@ fn main() {
             var out = new NodeP;
             out.node_id = id;
             out.cost = cost;
+            return out;
         }
 
         fun pqueue_new() -> PQueue {
@@ -170,10 +187,11 @@ fn main() {
 
         fun populate_nodes(db: NodeDB, q: int, r: int) {
             for n in neighbors(q, r) {
-                if find_id(db, n[0], n[1]) != -1 {
+                if find_id(db, n[0], n[1]) == -1 {
                     db.nodes[db.size] = new Node;
                     db.nodes[db.size].q = n[0];
                     db.nodes[db.size].r = n[1];
+                    db.size = db.size + 1;
                     populate_nodes(db, n[0], n[1]);
                 }
             }
@@ -233,7 +251,7 @@ fn main() {
     ]);
     let mut vm = VM::new(compiler.program);
     loop {
-        println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
+        //println!("stack = {:?}, ins = {:?}", vm.stack, vm.program[vm.program_counter]);
         let res = vm.tick();
         match res {
             Ok(_) => {}
