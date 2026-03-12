@@ -77,8 +77,8 @@ Most programming games nowadays are targeted towards simple, beginner coding, wh
   - Battlefield grid with enemies, allies, and obstacles
   - Both enemies and allies can cast spells to move/damage each other
   - Players can write their own spells
-  - 4 offensive and 2 defensive "Base spells"
-  - 3 Tutorial levels to teach the magic system
+  - 2 offensive and 2 defensive "Base spells"
+  - Indepth player instruction manual
 ## Stretch Goals:
   - Online multiplayer
   - Single-player Challenge levels
@@ -434,7 +434,7 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
      - Mitigation: Cut advanced features (e.g., recursion depth, complex effects) and rely on base spell templates
      - Change Since Requirements: Risk increased in scope awareness; mitigation strengthened via staged compiler milestones (Weeks 6-8)
 
-    2. Integration Failures Between Spell Execution, Turn System, and Effects
+   2. Integration Failures Between Spell Execution, Turn System, and Effects
        - Likelihood: Medium
        - Impact: High
        - Evidence: FR-01 through FR-04 introduce tight coupling between turns, spell collisions, effects, and environments. These systems are owned by different team members
@@ -442,7 +442,8 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
        - Detection: A full local match cannot be completed without manual intervention
        - Mitigation: Freeze new features and refactor interfaces between systems
        - Change Since Requirements: Integration risk increased due to FR-03 and FR-04 being added
-    3. Environmental and Effect Logic Causes Unpredictable Gameplay Bugs
+
+  3. Environmental and Effect Logic Causes Unpredictable Gameplay Bugs
        - Likelihood: Medium
        - Impact: Medium-High
        - Evidence: FR-03 and FR-04 include long-lasting effects, collisions, environment modifiers, and random steering, which are common sources of edge-case bugs
@@ -451,7 +452,7 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
        - Mitigation: Disable multi-tirn effects or environment modifiers if unstable
        - Change Since Requirements: New risk introduced due to expanding environment mechanics
 
-    4. Spell Editor UX is Too Confusing for Players
+   4. Spell Editor UX is Too Confusing for Players
        - Likelihood: Medium
        - Impact: High
        - Evidence: Players must write valid code to progress; syntax errors or unclear feedback could block gameplay entierly
@@ -459,8 +460,8 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
        - Detection: Playtesters cannot create a usable spell without assistance
        - Mitigation: Simplify syntax rules and expand tutorial guidance
        - Change Since Requirements: Risk reduced due to explicit UX features added to FR-02
-      
-    5. Multiplayer Scope Pulls Time from Core Systems
+
+   5. Multiplayer Scope Pulls Time from Core Systems
        - Likelihood: Medium
        - Impact: Medium
        - Evidence: Networking support is listed in roles and requirements but not scheduled until after PvP stabilization
@@ -470,7 +471,7 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
        - Change Since Requirements: Risk clarified and better controlled via scheduling changes
 
   ## External Feedback Elicitation
-    External feedback is most valuble one a complete local PvP match can be played (Week 4 of development). At this stage, core systems exist, but design decisions are still flexible. We will:
+  External feedback is most valuble one a complete local PvP match can be played (Week 4 of development). At this stage, core systems exist, but design decisions are still flexible. We will:
 
    - Distribute a playable build to classmates and friends
    -  Observe first-time users writing and casting spells
@@ -479,7 +480,8 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
        -  Ease of learning
        -  Perceived fun and fairness
   
-    This feedback will directly inform revisions to the spell language, tutorials, and UI before final polish
+  This feedback will directly inform revisions to the spell language, tutorials, and UI before final polish
+
 
 
 

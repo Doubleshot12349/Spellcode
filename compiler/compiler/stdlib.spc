@@ -59,11 +59,15 @@ fun neighbors(q: int, r: int) -> int[][] {
         }
     }
     var out = new int[][count]
-    for (var i = 0; i < count; i = i + 1) {
-        out[i] = new int[3]
-        out[i][0] = n[i * 3]
-        out[i][1] = n[i * 3 + 1]
-        out[i][2] = n[i * 3 + 2]
+    var j = 0;
+    for (var i = 0; i < 6; i = i + 1) {
+        if n[i * 3] != 1234 {
+            out[j] = new int[3]
+            out[j][0] = n[i * 3]
+            out[j][1] = n[i * 3 + 1]
+            out[j][2] = n[i * 3 + 2]
+            j = j + 1;
+        }
     }
     return out
 }

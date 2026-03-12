@@ -35,7 +35,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 
     private Animator fireAnimator;
     private bool hasExploded = false;
-    [SerializeField] private float explodeLifetime = 0.4f;
+    [SerializeField] private float explodeLifetime = 1.0f;
     
     public void Awake()
     {
@@ -249,9 +249,21 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         if (fireAnimator != null)
         {
             fireAnimator.SetTrigger("Explode");
+            yield return null;
+            while (!fireAnimator.GetCurrentAnimatorStateInfo(0).IsName("Explode"))
+            {
+                yield return null;
+            }
+            while (fireAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            {
+                yield return null;
+            }
+        } else
+        {
+            yield return new WaitForSeconds(0.5f);
         }
 
-        yield return new WaitForSeconds(explodeLifetime);
+        //yield return new WaitForSeconds(explodeLifetime);
 
         Destroy(gameObject);
     }

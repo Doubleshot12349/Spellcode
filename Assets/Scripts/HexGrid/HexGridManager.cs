@@ -191,6 +191,9 @@ public class HexGridManager : MonoBehaviour
 
     public static GameObject GetHex(HexCoords h)
     {
+        if (!tiles.ContainsKey(h)) {
+            return null;
+        }
         return tiles[h].gameObject;
     }
     public static GameObject GetHex(int q, int r)
