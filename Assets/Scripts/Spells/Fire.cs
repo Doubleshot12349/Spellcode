@@ -68,6 +68,11 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         {
             
             GameObject target = path[i];
+            // store the target HexTile
+            HexTile targetHex = target.GetComponent<HexTile>();
+            // Rotate fireball to face direction of next move
+            GetVectorAngle(prev.coords, targetHex.coords, transform);
+
             // Move fire to hex
             transform.position = target.transform.position;
             CurrentTile = target;
@@ -108,6 +113,55 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         catch
         {
             Debug.Log("Unable to add to path");
+        }
+    }
+
+    public void GetVectorAngle(HexCoords initial, HexCoords final, Transform fireballTrans)
+    {
+        int dq = final.q - initial.q;
+        int dr = final.r - initial.r;
+        // each s coord = s = -q - r
+        int ds = (-1 * final.q - final.r) - (-1 * initial.q - initial.r);
+
+        if (fireballTrans == null)
+            return;
+
+        switch (dq, dr, ds)
+        {
+            case var _ when dq > 0 && true && ds < 0:
+                //(1,0,-1)
+                // 0 degree rotation
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            case var _ when dq > 0 && dr < 0 && true:
+                //(1,-1,0)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 120f);
+                break;
+
+            case var _ when true && dr < 0 && ds > 0:
+                //(0,-1,1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 240f);
+                break;
+
+            case var _ when dq < 0 && true && ds > 0:
+                //(-1,0,1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 180f);
+                break;
+
+            case var _ when dq < 0 && dr > 0 && true:
+                //(-1,1,0)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 300f);
+                break;
+
+            case var _ when true && dr > 0 && ds < 0:
+                //(0,1,-1)
+                fireballTrans.rotation = Quaternion.Euler(0f, 0f, 60f);
+                break;
+
+            default:
+                Debug.Log("Something went wrong in fireball switch statement");
+                break;
         }
     }
 
