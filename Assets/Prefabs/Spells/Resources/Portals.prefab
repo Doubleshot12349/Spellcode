@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6496378611596738589
 Transform:
   m_ObjectHideFlags: 0
@@ -51,7 +51,6 @@ MonoBehaviour:
   portal2: {fileID: 1173555271145997625}
   moveSpeed: 6
   type: PortalHandler
-  template: 0
 --- !u!1001 &2729666088209783818
 PrefabInstance:
   m_ObjectHideFlags: 0

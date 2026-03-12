@@ -13,7 +13,7 @@ public class SpellSelectScript : MonoBehaviour
         "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(2);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
     private readonly static string portalsProgram =
         "while true {     var pos = get_click();     print('A');     var effect = spawn_effect(3);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } }";
-
+    private readonly static string tauntFireballProgram = "     var pos = get_click();     println(\"Eat my fireball nerd\");     var effect = spawn_effect(0);     if effect != -1 {         move_effect(pos[0], pos[1], effect);    } ​​";
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
@@ -25,7 +25,8 @@ public class SpellSelectScript : MonoBehaviour
                 { "Fireball", fireBallProgram },
                 { "Lightning", lightningProgram },
                 { "IceSpike", iceSpikeProgram },
-                { "Portals", portalsProgram }
+                { "Portals", portalsProgram },
+                { "Fireball Taunt", tauntFireballProgram}
             };
             
         }

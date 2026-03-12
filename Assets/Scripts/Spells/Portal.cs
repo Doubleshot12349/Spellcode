@@ -4,8 +4,14 @@ using System;
 public class Portal : MonoBehaviour,ISpell,IGameObjectSource
 {
     public GameObject CurrentTile { get; set; }
-     public GameObject Prefab { get; set; }
-    public GameObject prefab;
+    [SerializeField] private GameObject prefab; 
+
+
+    public GameObject Prefab 
+    { 
+        get => prefab; 
+        set => prefab = value; 
+    }
     public GameObject portal1;
     public GameObject portal2;
     public float Damage { get; set; }
@@ -25,7 +31,6 @@ public class Portal : MonoBehaviour,ISpell,IGameObjectSource
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
-        Prefab = prefab;
         Damage = 0;
         portal1.GetComponent<SubPortal>().linkedPortal = portal2;
         portal2.GetComponent<SubPortal>().linkedPortal = portal1;

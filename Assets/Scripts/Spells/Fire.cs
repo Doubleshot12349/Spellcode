@@ -6,8 +6,6 @@ using System.Collections.Generic;
 public class Fire : MonoBehaviour,ISpell,IGameObjectSource
 {
     public GameObject CurrentTile { get; set; }
-     public GameObject Prefab { get; set; }
-     public GameObject prefab;
     public float moveSpeed;
     public float MoveSpeed { get; set; }
     public float Damage { get; set; }
@@ -25,13 +23,21 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     public List<GameObject> path;
     public GameObject leyLineMapObj;
     LeyLineGen leyLineMap;
-    [SerializeField] private float delayBetweenHexes =.2f;
+    [SerializeField] private float delayBetweenHexes = .2f;
+    
+    [SerializeField] private GameObject prefab; 
+
+
+    public GameObject Prefab 
+    { 
+        get => prefab; 
+        set => prefab = value; 
+    }
     
     public void Awake()
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
-        Prefab = prefab;
         Damage = startDamage;
         path = new List<GameObject>();
         leyLineMap = leyLineMapObj.GetComponent<LeyLineGen>();

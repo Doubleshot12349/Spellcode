@@ -59,6 +59,9 @@ public interface ISpell : IGameObjectSource
 
     public GameObject Conjure(GameObject target)
     {
+        if (Prefab == null) {
+            Debug.LogError($"Spell '{target.name}' is trying to instantiate a NULL prefab! Check the Inspector for this specific Spell asset.", target);
+        }
         GameObject newSpell = GameObject.Instantiate(Prefab);
         newSpell.transform.position = target.transform.position;
         newSpell.transform.SetParent(target.transform);

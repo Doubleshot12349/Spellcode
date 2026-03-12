@@ -9,8 +9,14 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     [SerializeField] private float delayBetweenJumps = 13f;
 
     public GameObject CurrentTile { get; set; }
-    public GameObject Prefab { get; set; }
-    public GameObject prefab;
+    [SerializeField] private GameObject prefab; 
+
+
+    public GameObject Prefab 
+    { 
+        get => prefab; 
+        set => prefab = value; 
+    }
     public GameObject Player;
     public LeyLineGen leyLineMap;
     
@@ -64,7 +70,7 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
                 lightning.transform.SetParent(target.transform);
                 lightning.transform.position -= new Vector3(0.5f, 0, 0);
                 lightning.GetComponent<Animator>().speed = .25f;
-                lightning.GetComponent<ISpell>().EnableCollider();
+                lightning.GetComponent<Lightning>().EnableCollider();
 
                 try
                 {
@@ -163,7 +169,6 @@ public class Lightning : MonoBehaviour,ISpell,IGameObjectSource
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
-        Prefab = prefab;
         Damage = currentDamage;
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
         

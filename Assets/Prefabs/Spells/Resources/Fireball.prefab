@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8159092350359952410
 Transform:
   m_ObjectHideFlags: 0
@@ -143,13 +143,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e89c46b9c88e6144eb86ec946c1ebf0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  prefab: {fileID: 584292902040909048}
   moveSpeed: 6
   startDamage: 25
   type: Fire
   path: []
   leyLineMapObj: {fileID: 0}
   delayBetweenHexes: 0.2
+  prefab: {fileID: 584292902040909048}
 --- !u!50 &1751964949960148366
 Rigidbody2D:
   serializedVersion: 5

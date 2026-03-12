@@ -8,8 +8,14 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
     public GameObject CurrentTile { get; set; }
     public float moveSpeed;
     public float MoveSpeed { get; set; }
-     public GameObject Prefab { get; set; }
-    public GameObject prefab;
+    [SerializeField] private GameObject prefab; 
+
+
+    public GameObject Prefab 
+    { 
+        get => prefab; 
+        set => prefab = value; 
+    }
     public float Damage { get; set; }
     private float currentDamage = 5;
     public float health = 25;
@@ -28,7 +34,6 @@ public class Ice : MonoBehaviour, ISpell, IGameObjectSource
     {
         //read fields from inspector
         MoveSpeed = moveSpeed;
-        Prefab = prefab;
         Damage = currentDamage;
         Signals.Get<TeleportSignal>().AddListener(OnTeleport);
         
