@@ -196,7 +196,7 @@ Useful Pattern
 
         // Example Spell
         @"Fireblast
-    IF (targetDistance <= 3) {
+    if (targetDistance <= 3) {
         damage = 10;
     }
 

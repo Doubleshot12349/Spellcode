@@ -18,7 +18,7 @@ pub enum Syscall {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tpe {
-    Int, Double, Array(Box<Tpe>)
+    Int, Double, Array(Box<Tpe>), Struct(Vec<Tpe>)
 }
 
 #[derive(Debug, Clone)]
@@ -46,12 +46,15 @@ pub enum Instruction {
     Syscall(Syscall),
 
     AllocA(Tpe),
-    GetA, SetA, LenA
+    GetA, SetA, LenA,
+
+    AllocS(Tpe),
+    GetS(usize), SetS(usize)
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum StackItem {
-    Int(i32), Double(f64), Array(Tpe, usize), ReturnAddr(usize)
+    Int(i32), Double(f64), HeapAddr(Tpe, usize), ReturnAddr(usize)
 }
 
 impl StackItem {
@@ -59,7 +62,8 @@ impl StackItem {
         match self {
             StackItem::Int(_) => Tpe::Int,
             StackItem::Double(_) => Tpe::Double,
-            StackItem::Array(tpe, _) => Tpe::Array(Box::new(tpe.clone())),
+            //StackItem::HeapAddr(tpe, _) => Tpe::Array(Box::new(tpe.clone())),
+            StackItem::HeapAddr(tpe, _) => tpe.clone(),
             StackItem::ReturnAddr(_) => Tpe::Int,  // close enough
         }
     }
@@ -274,26 +278,16 @@ impl VM {
                 self.next_heap_addr += 1;
                 let mut item = vec![];
                 for _ in 0..size {
-                    let it = match t {
-                        Tpe::Int => StackItem::Int(0),
-                        Tpe::Double => StackItem::Double(0.0),
-                        Tpe::Array(ref v) => {
-                            let h = self.next_heap_addr;
-                            self.next_heap_addr += 1;
-                            self.heap.insert(h, HeapItem { value: vec![], mark: false, tpe: *v.clone() });
-                            StackItem::Array(*v.clone(), h)
-                        }
-                    };
-                    item.push(it);
+                    item.push(self.alloc(&tpe));
                 }
-                self.heap.insert(id, HeapItem { value: item, mark: false, tpe: t.clone() });
-                self.stack.push(StackItem::Array(t, id))
+                self.heap.insert(id, HeapItem { value: item, mark: false, tpe: Tpe::Array(Box::new(t.clone())) });
+                self.stack.push(StackItem::HeapAddr(Tpe::Array(Box::new(t)), id))
             }
             Instruction::GetA => {
                 let arr = self.pop()?;
                 let idx: i32 = self.pop()?.try_into()?;
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(Tpe::Array(_), id) => {
                         let v = &self.heap[&id];
                         self.stack.push(v.value.get(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?.clone())
                     }
@@ -304,11 +298,15 @@ impl VM {
                 let arr = self.pop()?;
                 let idx: i32 = self.pop()?.try_into()?;
                 let item = self.pop()?;
+                //println!("item.tpe() = {:?}", item.tpe());
+                //dbg!(arr.tpe(), idx, item.tpe());
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(Tpe::Array(box tpe), id) => {
+                        //println!("inner tpe = {tpe:?}");
                         // there's no way for an illegal heap address to get on the stack
                         let v = self.heap.get_mut(&id).unwrap();
-                        if item.tpe() != v.tpe {
+                        if tpe != item.tpe() {
+                            println!("expected {:?}, found {:?}", tpe, item.tpe());
                             return Err(ExecutionException::WrongType)
                         }
                         *(v.value.get_mut(idx as usize).ok_or(ExecutionException::ArrayIndexOutOfBounds)?) = item;
@@ -319,17 +317,66 @@ impl VM {
             Instruction::LenA => {
                 let arr = self.pop()?;
                 match arr {
-                    StackItem::Array(_, id) => {
+                    StackItem::HeapAddr(_, id) => {
                         let v = &self.heap[&id];
                         self.stack.push((v.value.len() as i32).into())
                     }
                     _ => return Err(ExecutionException::WrongType)
                 }
             }
+            Instruction::AllocS(tpe) => {
+                let Tpe::Struct(_) = tpe else {
+                    return Err(ExecutionException::WrongType)
+                };
+                let item = self.alloc(&tpe);
+                self.stack.push(item);
+            }
+            Instruction::GetS(idx) => {
+                let StackItem::HeapAddr(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                    println!("");
+                    return Err(ExecutionException::WrongType)
+                };
+                let item = self.heap[&id].value[*idx].clone();
+                self.stack.push(item);
+            }
+            Instruction::SetS(idx) => {
+                let StackItem::HeapAddr(Tpe::Struct(inner), id) = self.stack.pop().unwrap() else {
+                    return Err(ExecutionException::WrongType)
+                };
+                let value = self.pop().unwrap();
+                let item = self.heap.get_mut(&id).unwrap();
+                item.value[*idx] = value;
+            }
         }
 
         self.program_counter = next_addr;
         Ok(())
+    }
+
+    fn push_heap_item(&mut self, item: HeapItem) -> usize {
+        let id = self.next_heap_addr;
+        self.next_heap_addr += 1;
+        self.heap.insert(id, item);
+        id
+    }
+
+    fn alloc(&mut self, tpe: &Tpe) -> StackItem {
+        match tpe {
+            Tpe::Int => StackItem::Int(0),
+            Tpe::Double => StackItem::Double(0.0),
+            Tpe::Array(inner) => {
+                let id = self.push_heap_item(HeapItem { value: vec![], mark: false, tpe: *inner.clone() });
+                StackItem::HeapAddr(*inner.clone(), id)
+            }
+            Tpe::Struct(tpes) => {
+                let mut value = vec![];
+                for t in tpes {
+                    value.push(self.alloc(t))
+                }
+                let id = self.push_heap_item(HeapItem { value, mark: false, tpe: tpe.clone() });
+                StackItem::HeapAddr(tpe.clone(), id)
+            }
+        }
     }
 
     fn garbage_collect(&mut self) {
@@ -342,7 +389,7 @@ impl VM {
             let old = items_to_mark.clone();
             items_to_mark.clear();
             for item in old {
-                if let StackItem::Array(_, id) = &item {
+                if let StackItem::HeapAddr(_, id) = &item {
                     let heap_item = self.heap.get_mut(id).unwrap();
                     heap_item.mark = true;
                     for it in &heap_item.value {
@@ -714,7 +761,7 @@ mod tests {
     }
 
     test! { test_array:
-        ImmediateInt(5), AllocA(Tpe::Int) => Array(Tpe::Int, 0);
+        ImmediateInt(5), AllocA(Tpe::Int) => HeapAddr(Tpe::Int, 0);
         // TODO: test actual operations
     }
 }
