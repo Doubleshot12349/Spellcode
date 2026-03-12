@@ -1503,6 +1503,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: leyLineMapObj
       value: 
       objectReference: {fileID: 736569453}
@@ -1582,6 +1586,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5830819836327635194, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 5830819836327635194, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: leyLineMapObj
       value: 
@@ -13413,6 +13421,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1896708676}
     - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 1725852668217781956, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: leyLineMapObj
       value: 
       objectReference: {fileID: 736569453}
@@ -13425,6 +13437,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 359587104}
     - target: {fileID: 3748886857142859605, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
+    - target: {fileID: 5830819836327635194, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: leyLineMap
       value: 
       objectReference: {fileID: 736569454}
@@ -13444,6 +13460,10 @@ PrefabInstance:
       propertyPath: activeSpells
       value: 
       objectReference: {fileID: 359587104}
+    - target: {fileID: 7700228980489582722, guid: a2479e5932210884db23043d7e9698bc, type: 3}
+      propertyPath: leyLineMap
+      value: 
+      objectReference: {fileID: 736569454}
     - target: {fileID: 7700228980489582722, guid: a2479e5932210884db23043d7e9698bc, type: 3}
       propertyPath: leyLineMapObj
       value: 

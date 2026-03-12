@@ -9,11 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/HexSandbox.unity
-    guid: 7ae586a77a75f4749aa4b653b742c410
-  - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: 6cfebd74bc462b040b5db81d7f1efa3b
+  - enabled: 1
+    path: Assets/Scenes/HexSandbox.unity
+    guid: 7ae586a77a75f4749aa4b653b742c410
   - enabled: 1
     path: Assets/Scenes/CodeEditor.unity
     guid: d70a681915451394081b9b6ced22453c

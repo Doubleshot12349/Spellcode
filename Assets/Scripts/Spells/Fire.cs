@@ -21,18 +21,16 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
     public GameObject LastPortal { get; set; }
 
     public List<GameObject> path;
-    public GameObject leyLineMapObj;
-    LeyLineGen leyLineMap;
     [SerializeField] private float delayBetweenHexes = .2f;
     
     [SerializeField] private GameObject prefab; 
-
-
-    public GameObject Prefab 
-    { 
-        get => prefab; 
-        set => prefab = value; 
+    public GameObject Prefab
+    {
+        get => prefab;
+        set => prefab = value;
     }
+    
+    [SerializeField] private LeyLineGen leyLineMap; 
 
 
     private Animator fireAnimator;
@@ -45,7 +43,7 @@ public class Fire : MonoBehaviour,ISpell,IGameObjectSource
         MoveSpeed = moveSpeed;
         Damage = startDamage;
         path = new List<GameObject>();
-        leyLineMap = leyLineMapObj.GetComponent<LeyLineGen>();
+
         fireAnimator = GetComponentInChildren<Animator>();
         
         // Disable collider initially to prevent collisions during instantiation/setup
