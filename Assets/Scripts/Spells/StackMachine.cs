@@ -34,13 +34,13 @@ public class StackMachine: MonoBehaviour {
         Debug.Log("Running turn");
         if (halted) return;
 
-        int total_allowance = 10000;
+        int total_allowance = 10000000;
         int num_executed = 0;
         bool running = true;
         while (running)
         {
             int syscall = Compiler.run_to_syscall_or_n(id, total_allowance - num_executed, ref num_executed);
-            Debug.Log($"syscall = {syscall}");
+            if (syscall != 7) Debug.Log($"syscall = {syscall}");
             if (syscall < 0) return;
 
             SyscallResult res = await SyscallHandler(syscall);
@@ -91,8 +91,7 @@ public class StackMachine: MonoBehaviour {
                 //get player location (q,r)
                 int q, r;
                 (q, r) = manager.GetPlayerLocation();
-                Compiler.push_int(id, r);
-                Compiler.push_int(id, q);
+                Compiler.PushIntArray(id, new int[] { q, r });
                 return SyscallResult.Nothing;
             case 5:
                 //get clicked location
@@ -131,10 +130,10 @@ public class StackMachine: MonoBehaviour {
                 var neighbors = new List<int>();
                 Compiler.pop_int(id, out int q3);
                 Compiler.pop_int(id, out int r3);
-                HexTile initHex = HexGridManager.GetHex(q3, r3).GetComponent<HexTile>();
+                HexTile initHex = HexGridManager.GetHex(q3, r3)?.GetComponent<HexTile>();
                 foreach (var dir in HexGridManager.NeighborDirs)
                 {
-                    HexTile neighborHex = HexGridManager.GetHex(q3 + dir.q, r3 + dir.r).GetComponent<HexTile>();
+                    HexTile neighborHex = HexGridManager.GetHex(q3 + dir.q, r3 + dir.r)?.GetComponent<HexTile>();
                     
                     if (neighborHex == null)
                     {
