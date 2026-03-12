@@ -57,7 +57,6 @@ public class SysCallManager : MonoBehaviour
 
     public int Effect(int type)
     {
-        //TODO: need to define syscall to pull q,r,s coord to place in right spot
 
         GameObject target = HexGridManager.GetHex(player.GetComponent<PlayerMover>().currentTile.coords.q,player.GetComponent<PlayerMover>().currentTile.coords.r);
 
@@ -133,11 +132,18 @@ public class SysCallManager : MonoBehaviour
 
     public (int, int) GetPlayerLocation()
     {
-        return (0, 0);
+        var tile = player.GetComponent<PlayerMover>().currentTile;
+        return (tile.coords.q, tile.coords.r);
     }
 
     public async Task<(int,int)> GetClickedLocation()
     {
+        if (playerStats.mana < 5)
+        {
+            Debug.Log("Insufficient mana");
+            return (1234, 1234);
+        }
+        playerStats.mana -= 5;
         var controller = gameObject.transform.parent.GetComponent<PlayerController>();
         while (controller.selectedHex==null)
         {

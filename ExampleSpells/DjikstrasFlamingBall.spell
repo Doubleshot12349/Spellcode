@@ -1,0 +1,67 @@
+var start = get_player_location()
+var end = get_click()
+var path = djikstrasAlgo(start,end)
+var fireball = spawn_effect(0)
+for edge in path {
+    move_effect(edge[0], edge[1], fireball)
+}
+
+fun djikstrasAlgo(start: int[] ,end: int[]) -> int[][] {
+     var heap = new int[][3]
+     for (var i = 0; i < 3; i = i + 1) {
+         heap[i] = new int[100]
+     }
+
+     var result = new int[][3]
+     for (var i = 0; i < 3; i = i + 1) {
+         result[i] = new int[100]
+     }
+
+    binHeapInsert(heap,start)
+    while heap.size > 0 {
+        var e = binHeapExtract(heap)
+        var nArr = neighbors(e[0] , e[1])
+        var l = result.size
+        result[l] = e
+        for n in nArr {
+            binHeapInsert(heap,n)
+        }
+    }
+    return result
+}
+
+fun binHeapExtract(heap: int[][] ) -> int[] {
+    var res = heap[0]
+    binHeapBubbleUp(heap, 0)
+    return res
+}
+
+fun binHeapInsert(element: int[][] , new: int[]){
+    var i = element.size
+    element[i-1] = new
+    binHeapBubbleDown(element, i)
+}
+
+fun binHeapBubbleDown(heap: int[][] , i: int){
+    var k = i / 2
+    k = k -1
+    if k >=0 {
+        if heap[i][2] < heap[k][2] {
+            var temp = heap[i]
+            heap[i] = heap[k]
+            heap[k] = temp
+            binHeapBubbleDown(heap , k)
+        }else{}
+    } else{}
+}
+
+fun binHeapBubbleUp(heap: int[][] , i: int){
+    var k = i + 1
+    k = k * 2
+    if heap[k][2] < heap[i][2] {
+        var temp = heap[i]
+        heap[i] = heap[k]
+        heap[k] = temp
+        binHeapBubbleUp(heap , k)
+    } else {}
+}
