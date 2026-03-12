@@ -159,8 +159,8 @@ pub extern "C" fn push_int_array(id: i64, data: *mut i32, length: u64) -> bool {
     //let value = vec![unsafe { length as i32 }, 0];
     let n = found.1.next_heap_addr;
     found.1.next_heap_addr += 1;
-    found.1.heap.insert(n, stack_machine::HeapItem { value: value.iter().map(|x| StackItem::Int(*x)).collect(), mark: false, tpe: stack_machine::Tpe::Int });
-    found.1.stack.push(StackItem::HeapAddr(stack_machine::Tpe::Int, n));
+    found.1.heap.insert(n, stack_machine::HeapItem { value: value.iter().map(|x| StackItem::Int(*x)).collect(), mark: false, tpe: stack_machine::Tpe::Array(Box::new(stack_machine::Tpe::Int)) });
+    found.1.stack.push(StackItem::HeapAddr(stack_machine::Tpe::Array(Box::new(stack_machine::Tpe::Int)), n));
     return true;
 }
 
