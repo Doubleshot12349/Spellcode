@@ -493,13 +493,8 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
 - Using GitHub as a repository and as version control was not the most optimized option for working with Unity. Any time I had a merge conflict, it was almost always in computer jargon that made determining what the actual conflict was, and what the correct action to take was, a confusing process that ended up being guesswork more often than not.
 - Learning the ins and outs of how to properly implement different aspects of a top down game was challenging but also rather fun. Things like creating a hexagon grid that stored 3 dimensions of values while exisinting in a 2D space was facinationg to learn about, while other aspects like making and using tile pallets and maps to make levels were critical parts of the visual development and will likely be skills I'll use again in the future.
 
-
-
-
-
-
-
-
-
-
+### Max Leibowitz
+- I kind of already knew this but integrate early and integrate often.  I joined together the rust code and the C# code at kind of the last minute and it led to a lot of pain (especially around getting web builds to work).
+- CI with Unity is hard, I don't think it's well suited for this class because it's very GUI based and stuff like testing and automated builds are really hard to do.
+- Setting good milestones is important, I ended up waiting until pretty late in the term to get started on the compiler so I had to do a lot of things last minute.  If I had to do it again I'd have some better deadlines for stuff like expression support.
 
