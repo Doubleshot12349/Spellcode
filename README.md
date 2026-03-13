@@ -482,6 +482,13 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
   
   This feedback will directly inform revisions to the spell language, tutorials, and UI before final polish
 
+  ## Final Reflection
+  ### Brett Thompson
+  - I got a lot of experience with testing in Unity, and it was hard with all of the components tightly coupled. If possible I would like to make each component more self-reliant so its easier to test, and less things break.
+  - I had some trouble with time management, all the easy tasks were assigned at the start, leaving all the difficult timely tasks at the end, which made it hard to complete on time.
+  - Git was not designed to work with Unity, there were a number of auto-generated files that needed to be included in the repo, but they were not human readable, so I had to make some guesswork when it came to resolving merge conflicts. I think Unity Verion Control system is better optimized for it, and might use that next time.
+
+
 
 
 
