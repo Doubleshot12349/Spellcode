@@ -497,4 +497,10 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
 - I kind of already knew this but integrate early and integrate often.  I joined together the rust code and the C# code at kind of the last minute and it led to a lot of pain (especially around getting web builds to work).
 - CI with Unity is hard, I don't think it's well suited for this class because it's very GUI based and stuff like testing and automated builds are really hard to do.
 - Setting good milestones is important, I ended up waiting until pretty late in the term to get started on the compiler so I had to do a lot of things last minute.  If I had to do it again I'd have some better deadlines for stuff like expression support.
+  
+### Aman Nurmukhanbetov
+-	This was my first time working with Unity Hub and using Unity in general. It was a great learning experience, but also challenging at times because there were many new tools and concepts to understand. Learning how to navigate the Unity interface and connect scripts to objects helped me better understand how game development works.
+-	Working in a team on a shared GitHub repository was both interesting and difficult. Coordinating changes with multiple people, making sure everything worked together, and avoiding conflicts required good communication. It helped me understand the importance of teamwork in software development.
+-	If I were to improve something next time, I would try to become more familiar with Unity and the project structure earlier in the process. That would help me contribute faster and feel more confident when working on different parts of the game.
+
 
