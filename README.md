@@ -489,9 +489,10 @@ Workflow: discover → create issue → assign → fix in branch → PR → veri
   - Git was not designed to work with Unity, there were a number of auto-generated files that needed to be included in the repo, but they were not human readable, so I had to make some guesswork when it came to resolving merge conflicts. I think Unity Verion Control system is better optimized for it, and might use that next time.
 
 ### Kaitlyn McLaughlin
-- I haven't worked with Unity since high school, and it was a learning curve remembering all of the different aspects of the software and discovering all of the things that had been updated in the last 4 years.
+- Learning how to best communicate and divide labor between different people was a very important skill to work on for this project. The majority of the time we were all seperately working on different aspects of the project. The ability to make sure I was aware of what parts of the project were my job, being able to communicate when I had completed a major step, and making sure everything I was working on aligned with what everyone else was definitely things I was able to work on and get better at over the course of the term.
 - Using GitHub as a repository and as version control was not the most optimized option for working with Unity. Any time I had a merge conflict, it was almost always in computer jargon that made determining what the actual conflict was, and what the correct action to take was, a confusing process that ended up being guesswork more often than not.
 - Learning the ins and outs of how to properly implement different aspects of a top down game was challenging but also rather fun. Things like creating a hexagon grid that stored 3 dimensions of values while exisinting in a 2D space was facinationg to learn about, while other aspects like making and using tile pallets and maps to make levels were critical parts of the visual development and will likely be skills I'll use again in the future.
+
 
 
 
